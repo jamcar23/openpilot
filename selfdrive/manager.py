@@ -596,10 +596,24 @@ if __name__ == "__main__":
     # Show last 3 lines of traceback
     error = traceback.format_exc(3)
 
-    error = "Manager failed to start\n \n" + error
+    error = "Manager failed to start. Press Reset to pull and reset to origin!\n \n" + error
     with TextWindow(error) as t:
-      t.wait_for_exit()
+      exit_status = t.wait_for_exit()
+    if exit_status == 'reset':
+      for _ in range(2):
+        try:
+          subprocess.check_output(["git", "pull"], cwd=BASEDIR)
+          subprocess.check_output(["git", "reset", "--hard", "@{u}"], cwd=BASEDIR)
+          print('git reset successful!')
+          break
+        except subprocess.CalledProcessError as e:
+          # print(e.output)
+          if _ != 1:
+            print('git reset failed, trying again')
+            time.sleep(5)  # wait 5 seconds and try again
 
+    time.sleep(1)
+    subprocess.check_output(["am", "start", "-a", "android.intent.action.REBOOT"])
     raise
 
   # manual exit because we are forked
