@@ -35,22 +35,17 @@ jobs:
         id: mr
         with:
           script: |
-            const result = await github.pulls.merge({
+            return await github.pulls.merge({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: ${{ steps.cpr.outputs.pull-request-number }}
             })
-            console.log(JSON.stringify(result))
-            return result
 
       - name: Merge PR
         uses: actions/github-script@v3
         id: mp
-        if: ${{ steps.mr.outputs.result.merged }}
+        if: ${{ fromJson(steps.mr.outputs.result).data.merged }}
         with:
           script: |
-            github.pulls.merge({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.client_payload.pull_request.number
-            })
+            console.log(${{ toJson(steps.mr.outputs.result).data }})
+            
