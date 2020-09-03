@@ -30,6 +30,25 @@ jobs:
           branch: r2-release-${{ github.event.client_payload.pull_request.number }}
           title: Release -- ${{ github.event.client_payload.pull_request.title }}
           body: Applying commits from \#${{ github.event.client_payload.pull_request.number }}
-
-
-
+      - name: Merge Release
+        uses: actions/github-script@v3
+        id: mr
+        with:
+          script: |
+            return github.pulls.merge({
+              owner: ${{ github.event.client_payload.pull_request.repo.owner.login }},
+              repo: ${{ github.event.client_payload.pull_request.repo.name }},
+              pull_number: ${{ steps.cpr.outputs.pull-request-number }}
+            })
+      - name: Merge PR
+        uses: actions/github-script@v3
+        id: mp
+        if: ${{ steps.mr.outputs.merged }}
+        with:
+          script: |
+            return github.pulls.merge({
+              owner: ${{ github.event.client_payload.pull_request.repo.owner.login }},
+              repo: ${{ github.event.client_payload.pull_request.repo.name }},
+              pull_number: ${{ github.event.client_payload.pull_request.number }}
+            })
+            
