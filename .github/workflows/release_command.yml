@@ -34,6 +34,7 @@ jobs:
         uses: actions/github-script@v3
         id: mr
         with:
+          debug: true
           script: |
             github.pulls.merge({
               owner: context.repo.owner,
