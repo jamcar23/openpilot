@@ -598,8 +598,24 @@ if __name__ == "__main__":
 
     error = "Manager failed to start\n \n" + error
     with TextWindow(error) as t:
-      t.wait_for_exit()
+      exit_status = t.wait_for_exit()
+    if exit_status == 'reset':
+      for _ in range(2):
+        try:
+          subprocess.check_output(["git", "add", "-A", "&&", "git", "stash"], cwd=BASEDIR)
+          subprocess.check_output(["git", "fetch"], cwd=BASEDIR)
+          subprocess.check_output(["git", "reset", "--hard", "@{u}"], cwd=BASEDIR)
+          subprocess.check_output(["git", "checkout", "r2+"], cwd=BASEDIR)
+          print('git reset successful!')
+          break
+        except subprocess.CalledProcessError as e:
+          print(e.output)
+          if _ != 1:
+            print('git reset failed, trying again')
+            time.sleep(5)  # wait 5 seconds and try again
 
+    time.sleep(1)
+    subprocess.check_output(["am", "start", "-a", "android.intent.action.REBOOT"])
     raise
 
   # manual exit because we are forked
