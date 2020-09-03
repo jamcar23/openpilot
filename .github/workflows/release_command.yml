@@ -18,7 +18,7 @@ jobs:
           git log ${{ github.event.client_payload.pull_request.base.ref }}..${{ github.event.client_payload.pull_request.head.ref }} | git cherry-pick --stdin
       - name: Create PR
         id: cpr
-        uses: peter-evans/create-pull-request
+        uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.REPO_PAT }}
           commit-message: release(#${{ github.event.client_payload.pull_request.number }}):${{ github.event.client_payload.pull_request.title }}
