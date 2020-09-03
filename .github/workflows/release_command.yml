@@ -27,7 +27,7 @@ jobs:
         with:
           token: ${{ secrets.REPO_PAT }}
           commit-message: 'release(#"$PR_NUMBER"): "$PR_TITLE"'
-          branch: r2-release-"$PR_NUMBER"
+          branch: r2-release-${{ github.event.client_payload.pull_request.number }}
           title: Release -- "$PR_TITLE"
           body: Applying commits from PR#"$PR_NUMBER"
 
