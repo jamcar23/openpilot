@@ -20,7 +20,7 @@ jobs:
         run: |
           git config --global user.email "$GITBOT_EMAIL"
           git config --global user.name "$GITHUB_ACTOR"
-          git log --cherry --format="%h" "$PR_BASE".."$PR_HEAD" | git cherry-pick --stdin -X ours --allow-empty --keep-redundant-commits
+          git log --cherry --format="%h" "$PR_BASE".."$PR_HEAD" | git cherry-pick --stdin -X theirs --allow-empty --keep-redundant-commits
       - name: Create PR
         id: cpr
         uses: peter-evans/create-pull-request@v3
@@ -28,8 +28,8 @@ jobs:
           token: ${{ secrets.REPO_PAT }}
           commit-message: 'release(#"$PR_NUMBER"): "$PR_TITLE"'
           branch: r2-release-${{ github.event.client_payload.pull_request.number }}
-          title: Release -- "$PR_TITLE"
-          body: Applying commits from PR#"$PR_NUMBER"
+          title: Release -- ${{ github.event.client_payload.pull_request.title }}
+          body: Applying commits from PR#{{ PR_NUMBER }}
 
 
 
