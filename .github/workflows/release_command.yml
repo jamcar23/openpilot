@@ -1,0 +1,32 @@
+name: Release Command
+on:
+  repository_dispatch:
+    types: [release-command]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      PR: ${{ github.event.client_payload.pull_request }}
+    if: ${{ PR.mergeble }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: r2++
+      - name: Cherry pick commits
+        run: |
+          git config --global user.email "$GITBOT_EMAIL"
+          git config --global user.name "$GITHUB_ACTOR"
+          git fetch
+          git log ${{ PR.base.ref }}..${{ PR.head.ref }} | git cherry-pick --stdin
+      - name: Create PR
+        id: cpr
+        uses: peter-evans/create-pull-request
+        with:
+          token: ${{ secrets.REPO_PAT }}
+          commit-message: "release(#${{ PR.number }}):${{ PR.title }}"
+          branch: release-${{ PR.number }}
+          title: Relase -- ${{ PR.title }}
+          body: Applying commits from PR#${{ PR.number }}
+
+
+

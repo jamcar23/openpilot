@@ -9,6 +9,6 @@ jobs:
       - name: Slash Command Dispatch
         uses: peter-evans/slash-command-dispatch@v2
         with:
-          token: ${{ secrets.repo_pat }}
+          token: ${{ secrets.REPO_PAT }}
           issue-type: pull-request
           commands: release
