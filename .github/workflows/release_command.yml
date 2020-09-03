@@ -15,12 +15,11 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-          ref: r2++
+          fetch-depth: 0
       - name: Cherry pick commits
         run: |
           git config --global user.email "$GITBOT_EMAIL"
           git config --global user.name "$GITHUB_ACTOR"
-          git fetch
           git log origin/"$PR_BASE"..origin/"$PR_HEAD" | git cherry-pick --stdin
       - name: Create PR
         id: cpr
