@@ -20,7 +20,7 @@ jobs:
         run: |
           git config --global user.email "$GITBOT_EMAIL"
           git config --global user.name "$GITHUB_ACTOR"
-          git cherry-pick "$PR_BASE".."$PR_HEAD"
+          git log --cherry --format="%h" "$PR_BASE".."$PR_HEAD" | git cherry-pick --stdin
       - name: Create PR
         id: cpr
         uses: peter-evans/create-pull-request@v3
