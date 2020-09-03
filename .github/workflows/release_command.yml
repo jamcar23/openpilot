@@ -26,10 +26,10 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.REPO_PAT }}
-          commit-message: 'release(#"$PR_NUMBER"): "$PR_TITLE"'
+          #commit-message: 'release(#"$PR_NUMBER"): "$PR_TITLE"'
           branch: r2-release-${{ github.event.client_payload.pull_request.number }}
           title: Release -- ${{ github.event.client_payload.pull_request.title }}
-          body: Applying commits from PR#{{ PR_NUMBER }}
+          body: Applying commits from \#${{ github.event.client_payload.pull_request.number }}
 
 
 
