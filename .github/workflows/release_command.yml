@@ -35,9 +35,10 @@ jobs:
         id: mr
         with:
           script: |
+            console.log(JSON.stringify(context));
             return github.pulls.merge({
-              owner: ${{ github.event.client_payload.pull_request.repo.owner.login }},
-              repo: ${{ github.event.client_payload.pull_request.repo.name }},
+              owner: context.repo.owner,
+              repo: content.repo.repo,
               pull_number: ${{ steps.cpr.outputs.pull-request-number }}
             })
       - name: Merge PR
@@ -51,4 +52,3 @@ jobs:
               repo: ${{ github.event.client_payload.pull_request.repo.name }},
               pull_number: ${{ github.event.client_payload.pull_request.number }}
             })
-            
