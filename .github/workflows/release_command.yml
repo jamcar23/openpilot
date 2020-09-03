@@ -34,13 +34,14 @@ jobs:
         uses: actions/github-script@v3
         id: mr
         with:
-          debug: true
           script: |
-            github.pulls.merge({
+            const result = await github.pulls.merge({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: ${{ steps.cpr.outputs.pull-request-number }}
             })
+            console.log(JSON.stringify(result))
+            return result
 
       - name: Merge PR
         uses: actions/github-script@v3
