@@ -7,8 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     #if: ${{ PR.mergeble }}
     env:
-      PR_BASE_SHA: ${{ github.event.client_payload.pull_request.base.sha }}
-      PR_HEAD_SHA: ${{ github.event.client_payload.pull_request.head.sha }}
+      PR_BASE: ${{ github.event.client_payload.pull_request.base.sha }}
+      PR_HEAD: ${{ github.event.client_payload.pull_request.head.sha }}
       PR_NUMBER: ${{ github.event.client_payload.pull_request.number }}
       PR_TITLE: ${{ github.event.client_payload.pull_request.title }}
     steps:
@@ -20,7 +20,7 @@ jobs:
           git config --global user.email "$GITBOT_EMAIL"
           git config --global user.name "$GITHUB_ACTOR"
           git fetch
-          git log "$PR_BASE_SHA".."$PR_HEAD_SHA" | git cherry-pick --stdin
+          git log origin/"$PR_BASE"..origin/"$PR_HEAD" | git cherry-pick --stdin
       - name: Create PR
         id: cpr
         uses: peter-evans/create-pull-request@v3
@@ -28,7 +28,7 @@ jobs:
           token: ${{ secrets.REPO_PAT }}
           commit-message: 'release(#"$PR_NUMBER"): "$PR_TITLE"'
           branch: release-"$PR_NUMBER"
-          title: Relase -- "$PR_TITLE"
+          title: Release -- "$PR_TITLE"
           body: Applying commits from PR#"$PR_NUMBER"
 
 
