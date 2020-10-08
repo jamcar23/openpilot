@@ -39,10 +39,6 @@ class Param:
     self.is_list = list in self.allowed_types
     if self.has_allowed_types:
       assert type(self.default) in self.allowed_types, 'Default value type must be in specified allowed_types!'
-
-      if self.is_list:
-        for v in self.default:
-          assert type(v) in self.allowed_types, 'Default value type must be in specified allowed_types!'
     # if self.is_list:
     #   self.allowed_types.remove(list)
 
@@ -65,32 +61,22 @@ class opParams:
 
     VT = ValueTypes()
     self.fork_params = {'camera_offset': Param(0.06, VT.number, 'Your camera offset to use in lane_planner.py', live=True),
-                        'indi_inner_gain': Param(6.0, VT.number, live=True),
-                        'indi_outer_gain': Param(15.0, VT.number, live=True),
-                        'indi_time_constant': Param(5.5, VT.number, live=True),
-                        'indi_actuator_effectiveness': Param(6.0, VT.number, live=True),
-                        'steer_actuator_delay': Param(0.57, VT.number, live=True),
+                        'indi_inner_gain': Param(6.0, float, live=True),
+                        'indi_outer_gain': Param(15.0, float, live=True),
+                        'indi_time_constant': Param(5.5, float, live=True),
+                        'indi_actuator_effectiveness': Param(6.0, float, live=True),
+                        'steer_actuator_delay': Param(0.57, float, live=True),
                         'alca_nudge_required': Param(False, bool, 'Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
                                                                  'If False, lane change will occur IMMEDIATELY after signaling'),
                         'alca_min_speed': Param(20.0, VT.number, 'The minimum speed allowed for an automatic lane change (in MPH)'),
                         'enable_coasting': Param(False, bool, 'When true the car will try to coast down hills instead of braking.'),
-                        'coast_speed': Param(10.0, VT.number, 'The amount of speed to coast by before applying the brakes. Unit: MPH'), 
+                        'coast_speed': Param(10.0, float, 'The amount of speed to coast by before applying the brakes. Unit: MPH'), 
                         'setpoint_offset': Param(0, int, 'The difference between the car\'s set cruise speed and OP\'s. Useful for toyotas when coasting. Unit: MPH'),
                         'corolla_use_indi': Param(False, bool),
-                        'accel_hyst_gap': Param(0.02, VT.number, live=True),
+                        'accel_hyst_gap': Param(0.02, float, live=True),
                         'always_eval_coast_plan': Param(False, bool),
-                        'gas_max_bp': Param([0., 20, 33], [list, float, int]),
-                        'gas_max_v': Param([0.3, 0.2, 0.075], [list, float]),
-                        'indi_use_vego_breakpoints': Param(False, bool, live=True),
-                        'indi_use_steer_angle_breakpoints': Param(False, bool, live=True),
-                        'indi_inner_gain_bp': Param([0, 255, 255], [list, float, int], live=True),
-                        'indi_inner_gain_v': Param([6.0, 6.0, 6.0], [list, float, int], live=True),
-                        'indi_outer_gain_bp': Param([0, 255, 255], [list, float, int], live=True),
-                        'indi_outer_grain_v': Param([15, 15, 15], [list, float, int], live=True),
-                        'indi_time_constant_bp': Param([0, 255, 255], [list, float, int], live=True),
-                        'indi_time_constant_v': Param([5.5, 5.5, 5.5], [list, float, int], live=True),
-                        'indi_actuator_effectiveness_bp': Param([0, 255, 255], [list, float, int], live=True),
-                        'indi_actuator_effectiveness_v': Param([6, 6, 6], [list, float, int], live=True)}
+                        'gas_max_bp': Param([0., 20, 33], [list, float]),
+                        'gas_max_v': Param([0.3, 0.2, 0.075], [list, float])}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'

@@ -3,7 +3,7 @@ import numpy as np
 
 from cereal import log
 from common.realtime import DT_CTRL
-from common.numpy_fast import clip, interp
+from common.numpy_fast import clip
 from common.op_params import opParams
 from selfdrive.car.toyota.values import SteerLimitParams
 from selfdrive.car import apply_toyota_steer_torque_limits
@@ -60,21 +60,10 @@ class LatControlINDI():
     return self.sat_count > self.sat_limit
 
   def update(self, active, CS, CP, path_plan):
-    use_ego_bp = self.op_params.get('indi_use_vego_breakpoints')
-    use_steer_bp = self.op_params.get('indi_use_steer_angle_breakpoints')
-
-    if use_ego_bp or use_steer_bp:
-      i = CS.vEgo if use_ego_bp else path_plan.angleSteers
-      self.G = interp(i, self.op_params.get('indi_actuator_effectiveness_bp'), self.op_params.get('indi_actuator_effectiveness_v'))
-      self.outer_loop_gain = interp(i, self.op_params.get('indi_outer_gain_bp'), self.op_params.get('indi_outer_gain_v'))
-      self.inner_loop_gain = interp(i, self.op_params.get('indi_inner_gain_bp'), self.op_params.get('indi_inner_gain_v'))
-      self.RC = interp(i, self.op_params.get('indi_time_constant_bp'), self.op_params.get('indi_time_constant_v'))
-    else:
-      self.G = self.op_params.get('indi_actuator_effectiveness')
-      self.outer_loop_gain = self.op_params.get('indi_outer_gain')
-      self.inner_loop_gain = self.op_params.get('indi_inner_gain')
-      self.RC = self.op_params.get('indi_time_constant')
-    
+    self.G = self.op_params.get('indi_actuator_effectiveness')
+    self.outer_loop_gain = self.op_params.get('indi_outer_gain')
+    self.inner_loop_gain = self.op_params.get('indi_inner_gain')
+    self.RC = self.op_params.get('indi_time_constant')
     self.alpha = 1. - DT_CTRL / (self.RC + DT_CTRL)
 
     # Update Kalman filter
