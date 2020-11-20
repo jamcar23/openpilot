@@ -203,13 +203,17 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 3060. * CV.LB_TO_KG + STD_CARGO_KG
 
       if op_params.get('corolla_use_indi'):
+        ret.safetyParam = 53
+        ret.steerActuatorDelay = 0.60
+        ret.steerRatio = 15.33
+        ret.steerLimitTimer = 5.0
+        tire_stiffness_factor = 0.996  # not optimized yet
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGain = 6.0
-        ret.lateralTuning.indi.outerLoopGain = 15.0
+        ret.lateralTuning.indi.innerLoopGain = 9.0
+        ret.lateralTuning.indi.outerLoopGainBP = [20, 21, 25 ,26]
+        ret.lateralTuning.indi.outerLoopGainV = [5.0, 9.0, 9.0, 15.0]
         ret.lateralTuning.indi.timeConstant = 5.5
-        ret.lateralTuning.indi.actuatorEffectiveness = 6.0
-        ret.steerActuatorDelay = 0.6
-        tire_stiffness_factor = 0.996
+        ret.lateralTuning.indi.actuatorEffectiveness = 9.0
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
         ret.lateralTuning.pid.kf = 0.00007818594
