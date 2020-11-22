@@ -204,12 +204,15 @@ class CarInterface(CarInterfaceBase):
 
       if op_params.get('corolla_use_indi'):
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGain = 6.0
-        ret.lateralTuning.indi.outerLoopGain = 15.0
+        ret.lateralTuning.indi.innerLoopGain = 15.0
+        ret.lateralTuning.indi.outerLoopGainBP = [20, 21, 25 ,26]
+        ret.lateralTuning.indi.outerLoopGainV = [5.0, 9.0, 9.0, 14.99]
         ret.lateralTuning.indi.timeConstant = 5.5
-        ret.lateralTuning.indi.actuatorEffectiveness = 6.0
-        ret.steerActuatorDelay = 0.6
-        tire_stiffness_factor = 0.996
+        ret.lateralTuning.indi.actuatorEffectiveness = 15.0
+        ret.safetyParam = 53 #needs seperate DBC to be complete, please help, but 50 should still work
+        ret.steerActuatorDelay = 0.60
+        ret.steerRatio = 15.33
+        tire_stiffness_factor = 0.996  # not optimized yet
       else:
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.6], [0.1]]
         ret.lateralTuning.pid.kf = 0.00007818594
