@@ -114,8 +114,10 @@ class opParams:
                         LONG_DEADZONE_BP: Param([0., 9.], [list, float, int], live=True, depends_on=ENABLE_LONG_DEADZONE_PARAMS),
                         LONG_DEADZONE_V: Param([0., .15], [list, float, int], live=True, depends_on=ENABLE_LONG_DEADZONE_PARAMS),
                         ENABLE_START_STOP_PARAMS: Param(False, bool, live=True, depends_on=ENABLE_LONG_PARAMS),
-                        STOP_BRAKE_RATE: Param(0.2, VT.number, live=True, depends_on=ENABLE_START_STOP_PARAMS),
-                        START_BRAKE_RATE: Param(0.8, VT.number, live=True, depends_on=ENABLE_START_STOP_PARAMS),
+                        STOP_BRAKE_RATE_BP: Param([0], [list, float, int], live=True, depends_on=ENABLE_START_STOP_PARAMS),
+                        STOP_BRAKE_RATE_V: Param([0.2], [list, float, int], live=True, depends_on=ENABLE_START_STOP_PARAMS),
+                        START_BRAKE_RATE_BP: Param([0], [list, float, int], live=True, depends_on=ENABLE_START_STOP_PARAMS),
+                        START_BRAKE_RATE_V: Param([0.8], [list, float, int], live=True, depends_on=ENABLE_START_STOP_PARAMS),
                         INDI_SHOW_BREAKPOINTS: Param(False, bool, live=True, depends_on=SHOW_INDI_PARAMS),
                         'indi_use_vego_breakpoints': Param(False, bool, live=True, depends_on=INDI_SHOW_BREAKPOINTS),
                         'indi_use_steer_angle_breakpoints': Param(False, bool, live=True, depends_on=INDI_SHOW_BREAKPOINTS),
@@ -334,8 +336,10 @@ ENABLE_LONG_DEADZONE_PARAMS = 'enable_long_deadzone_params'
 LONG_DEADZONE_BP = 'long_deadzone_bp'
 LONG_DEADZONE_V = 'long_deadzone_v'
 ENABLE_START_STOP_PARAMS = 'enable_start_stop_params'
-STOP_BRAKE_RATE = 'stopping_brake_rate'
-START_BRAKE_RATE = 'starting_brake_rate'
+STOP_BRAKE_RATE_BP = 'stopping_brake_rate_bp'
+STOP_BRAKE_RATE_V = 'stopping_brake_rate_v'
+START_BRAKE_RATE_BP = 'starting_brake_rate_bp'
+START_BRAKE_RATE_V = 'starting_brake_rate_v'
 
 ENABLE_LAT_PARAMS = 'enable_lat_params'
 WHICH_LAT_CTRL = 'which_lat_controller'
