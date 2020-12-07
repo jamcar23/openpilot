@@ -6,7 +6,7 @@ from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_comma
                                            create_fcw_command
 from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, SteerLimitParams
 from opendbc.can.packer import CANPacker
-from common.op_params import opParams
+from common.op_params import opParams, ENABLE_BRISKSPIRIT_BRAKING
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -32,7 +32,7 @@ def accel_hysteresis(accel, accel_steady, enabled, accel_gap):
 
 
 class CarController():
-  def __init__(self, dbc_name, CP, VM):
+  def __init__(self, dbc_name, CP, VM, OP=None):
     self.last_steer = 0
     self.accel_steady = 0.
     self.alert_active = False
@@ -49,7 +49,10 @@ class CarController():
       self.fake_ecus.add(Ecu.dsu)
 
     self.packer = CANPacker(dbc_name)
-    self.opParams = opParams()
+    
+    if not OP:
+      OP = opParams()
+    self.opParams = OP
 
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
              left_line, right_line, lead, left_lane_depart, right_lane_depart):
@@ -92,7 +95,7 @@ class CarController():
     # on entering standstill, send standstill request
     if CS.out.standstill and not self.last_standstill:
       self.standstill_req = True
-    if CS.pcm_acc_status not in [8, 11]:
+    if (self.opParams.get(ENABLE_BRISKSPIRIT_BRAKING) and CS.pcm_acc_status not in [8, 11]) or CS.pcm_acc_status != 8:
       # pcm entered standstill or it's disabled
       self.standstill_req = False
 
