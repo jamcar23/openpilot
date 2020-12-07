@@ -198,7 +198,7 @@ class CarInterface(CarInterfaceBase):
     elif candidate in [CAR.COROLLA_TSS2, CAR.COROLLAH_TSS2]:
       stop_and_go = True
       ret.safetyParam = 50
-      ret.wheelbase = 2.7 if op_params.get(COROLLA_BODY_TYPE) == 'sedan' else 2.64
+      ret.wheelbase = 2.7 if op_params.get(COROLLA_BODY_TYPE) == 'sedan' else 2.63906
       ret.steerRatio = 15.33
       ret.mass = 3060. * CV.LB_TO_KG + STD_CARGO_KG
 
