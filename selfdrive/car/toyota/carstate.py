@@ -115,7 +115,7 @@ class CarState(CarStateBase):
     else:
       ret.headLights.active = HeadLightType.unknown
 
-    ret.headLights.autoHighBeam = cp.vl["LIGHT_STALK"]['HIGH_BEAM_LEVER'] and cp.vl["LIGHT_STALK"]['AUTO_HIGH_BEAM']
+    ret.headLights.autoHighBeams = cp.vl["LIGHT_STALK"]['HIGH_BEAM_LEVER'] and cp.vl["LIGHT_STALK"]['AUTO_HIGH_BEAM']
     ret.headLights.transitioning = cp.vl["LIGHT_STALK"]['STATE_TRANSITION']
 
     return ret
