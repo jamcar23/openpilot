@@ -163,8 +163,7 @@ class opParams:
                         SHOW_EXPERIMENTAL_OPTS: Param(False, [bool], live=True, description='Shows options for experimental, unfinished, features. '
                                                       'Generally you should never use these.'),
                         SHOW_TOYOTA_OPTS: Param(False, [bool], live=True, description='Shows options toyota cars.'),
-                        COROLLA_BODY_TYPE: Param('hatchback', ['sedan', 'hatchback'], depends_on=SHOW_TOYOTA_OPTS),
-                        ENABLE_BRISKSPIRIT_BRAKING: Param(False, [bool], live=True, depends_on=SHOW_TOYOTA_OPTS)}
+                        COROLLA_BODY_TYPE: Param('hatchback', ['sedan', 'hatchback'], depends_on=SHOW_TOYOTA_OPTS)}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
