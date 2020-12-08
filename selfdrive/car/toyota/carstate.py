@@ -6,6 +6,7 @@ from opendbc.can.parser import CANParser
 from selfdrive.config import Conversions as CV
 from selfdrive.car.toyota.values import CAR, DBC, STEER_THRESHOLD, TSS2_CAR, NO_STOP_TIMER_CAR
 
+HeadLightType = car.CarState.HeadLightsState.Type
 
 class CarState(CarStateBase):
   def __init__(self, CP):
@@ -105,7 +106,17 @@ class CarState(CarStateBase):
 
     if self.CP.carFingerprint in TSS2_CAR:
       ret.leftBlindspot = (cp.vl["BSM"]['L_ADJACENT'] == 1) or (cp.vl["BSM"]['L_APPROACHING'] == 1)
-      ret.rightBlindspot = (cp.vl["BSM"]['R_ADJACENT'] == 1) or (cp.vl["BSM"]['R_APPROACHING'] == 1)
+      ret.rightBlindspot = (cp.vl["BSM"]['R_ADJACENT'] == 1) or (cp.vl["BSM"]['R_APPROACHING'] == 1) 
+
+    if cp.vl["LIGHT_STALK"]['HIGH_BEAM_ON']:
+      ret.headLights.active = HeadLightType.highBeams
+    elif cp.vl["LIGHT_STALK"]['SET_ME_X03'] and cp.vl["LIGHT_STALK"]['SET_ME_X08']:
+      ret.headLights.active = HeadLightType.nightTime
+    else:
+      ret.headLights.active = HeadLightType.unknown
+
+    ret.headLights.autoHighBeam = cp.vl["LIGHT_STALK"]['HIGH_BEAM_LEVER'] and cp.vl["LIGHT_STALK"]['AUTO_HIGH_BEAM']
+    ret.headLights.transitioning = cp.vl["LIGHT_STALK"]['STATE_TRANSITION']
 
     return ret
 
@@ -140,6 +151,11 @@ class CarState(CarStateBase):
       ("LKA_STATE", "EPS_STATUS", 0),
       ("BRAKE_LIGHTS_ACC", "ESP_CONTROL", 0),
       ("AUTO_HIGH_BEAM", "LIGHT_STALK", 0),
+      ("HIGH_BEAM_ON", "LIGHT_STALK", 0),
+      ("HIGH_BEAM_LEVER", "LIGHT_STALK", 0),
+      ("SET_ME_X03", "LIGHT_STALK", 0),
+      ("SET_ME_X08", "LIGHT_STALK", 0),
+      ("STATE_TRANSITION", "LIGHT_STALK", 0),
     ]
 
     checks = [
