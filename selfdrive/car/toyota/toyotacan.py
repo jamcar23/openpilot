@@ -81,3 +81,15 @@ def create_ui_command(packer, steer, chime, left_line, right_line, left_lane_dep
     "LDA_ALERT": steer,
   }
   return packer.make_can_msg("LKAS_HUD", 0, values)
+
+def create_high_beam_command(packer, high_beam):
+  values = {
+    "SET_ME_X12": 0x12,
+    "SET_ME_X08": 0x08,
+    "SET_ME_X03": 0x03,
+    "HIGH_BEAM_ON": 1 if high_beam else 0,
+    "AUTO_HIGH_BEAM": 1,
+    "HIGH_BEAM_LEVER": 1,
+    "STATE_TRANSITION": 1,
+  }
+  return packer.make_can_msg("LIGHT_STALK", 0, values)
