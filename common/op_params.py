@@ -372,4 +372,3 @@ SHOW_EXPERIMENTAL_OPTS = 'show_experimental_options'
 
 SHOW_TOYOTA_OPTS = 'show_toyota_options'
 COROLLA_BODY_TYPE = 'corolla_body_type'
-ENABLE_BRISKSPIRIT_BRAKING = 'enable_briskspirit_braking'
