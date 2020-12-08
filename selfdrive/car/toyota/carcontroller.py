@@ -4,7 +4,7 @@ from selfdrive.car import apply_toyota_steer_torque_limits, create_gas_command, 
 from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_command, \
                                            create_accel_command, create_acc_cancel_command, \
                                            create_fcw_command
-from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, SteerLimitParams
+from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, SteerLimitParams, TSS2_CAR
 from opendbc.can.packer import CANPacker
 from common.op_params import opParams, ENABLE_BRISKSPIRIT_BRAKING
 
@@ -95,7 +95,7 @@ class CarController():
     # on entering standstill, send standstill request
     if CS.out.standstill and not self.last_standstill:
       self.standstill_req = True
-    if (self.opParams.get(ENABLE_BRISKSPIRIT_BRAKING) and CS.pcm_acc_status not in [8, 11]) or CS.pcm_acc_status != 8:
+    if CS.pcm_acc_status != 8 or (self.opParams.get(ENABLE_BRISKSPIRIT_BRAKING) and CS.CP.carFingerprint in TSS2_CAR):
       # pcm entered standstill or it's disabled
       self.standstill_req = False
 
