@@ -107,6 +107,8 @@ class CarState(CarStateBase):
       ret.leftBlindspot = (cp.vl["BSM"]['L_ADJACENT'] == 1) or (cp.vl["BSM"]['L_APPROACHING'] == 1)
       ret.rightBlindspot = (cp.vl["BSM"]['R_ADJACENT'] == 1) or (cp.vl["BSM"]['R_APPROACHING'] == 1)
 
+    ret.engineRPM = cp.vl["ENGINE_RPM"]['RPM']
+
     return ret
 
   @staticmethod
@@ -140,6 +142,7 @@ class CarState(CarStateBase):
       ("LKA_STATE", "EPS_STATUS", 0),
       ("BRAKE_LIGHTS_ACC", "ESP_CONTROL", 0),
       ("AUTO_HIGH_BEAM", "LIGHT_STALK", 0),
+      ("RPM", "ENGINE_RPM", 0)
     ]
 
     checks = [
