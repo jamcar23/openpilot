@@ -108,14 +108,17 @@ class CarState(CarStateBase):
       ret.leftBlindspot = (cp.vl["BSM"]['L_ADJACENT'] == 1) or (cp.vl["BSM"]['L_APPROACHING'] == 1)
       ret.rightBlindspot = (cp.vl["BSM"]['R_ADJACENT'] == 1) or (cp.vl["BSM"]['R_APPROACHING'] == 1) 
 
-    if cp.vl["LIGHT_STALK"]['HIGH_BEAM_ON']:
-      ret.headLights.active = HeadLightType.highBeams
-    elif cp.vl["LIGHT_STALK"]['SET_ME_X03'] and cp.vl["LIGHT_STALK"]['SET_ME_X08']:
-      ret.headLights.active = HeadLightType.nightTime
+    if cp.vl["LIGHT_STALK"]['DASH_ICON']:
+      if cp.vl["LIGHT_STALK"]['HIGH_BEAM_ON']:
+        ret.headLights.active = HeadLightType.highBeams
+      elif cp.vl["LIGHT_STALK"]['LOW_BEAM_ON']:
+        ret.headLights.active = HeadLightType.nightTime
+      else:
+        ret.headLights.active = HeadLightType.unknown
     else:
       ret.headLights.active = HeadLightType.unknown
 
-    ret.headLights.autoHighBeams = bool(cp.vl["LIGHT_STALK"]['HIGH_BEAM_LEVER'] and cp.vl["LIGHT_STALK"]['AUTO_HIGH_BEAM'])
+    ret.headLights.autoHighBeams = bool(cp.vl["LIGHT_STALK"]['AUTO_HIGH_BEAM'] and cp.vl["LIGHT_STALK"]['AUTO_HIGH_BEAM_ON'])
     ret.headLights.transitioning = bool(cp.vl["LIGHT_STALK"]['STATE_TRANSITION'])
 
     return ret
@@ -151,10 +154,11 @@ class CarState(CarStateBase):
       ("LKA_STATE", "EPS_STATUS", 0),
       ("BRAKE_LIGHTS_ACC", "ESP_CONTROL", 0),
       ("AUTO_HIGH_BEAM", "LIGHT_STALK", 0),
+      ("AUTO_HIGH_BEAM_ON", "LIGHT_STALK", 0),
       ("HIGH_BEAM_ON", "LIGHT_STALK", 0),
-      ("HIGH_BEAM_LEVER", "LIGHT_STALK", 0),
-      ("SET_ME_X03", "LIGHT_STALK", 0),
-      ("SET_ME_X08", "LIGHT_STALK", 0),
+      ("LOW_BEAM_ON", "LIGHT_STALK", 0),
+      ("AUTO_LIGHTS", "LIGHT_STALK", 0),
+      ("DASH_ICON", "LIGHT_STALK", 0),
       ("STATE_TRANSITION", "LIGHT_STALK", 0),
     ]
 
