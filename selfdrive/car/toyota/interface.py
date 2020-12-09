@@ -5,7 +5,7 @@ from selfdrive.car.toyota.values import Ecu, ECU_FINGERPRINT, CAR, TSS2_CAR, FIN
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, is_ecu_disconnected, gen_empty_fingerprint
 from selfdrive.swaglog import cloudlog
 from selfdrive.car.interfaces import CarInterfaceBase
-from common.op_params import opParams
+from common.op_params import opParams, COROLLA_BODY_TYPE
 
 EventName = car.CarEvent.EventName
 
@@ -198,7 +198,7 @@ class CarInterface(CarInterfaceBase):
     elif candidate in [CAR.COROLLA_TSS2, CAR.COROLLAH_TSS2]:
       stop_and_go = True
       ret.safetyParam = 50
-      ret.wheelbase = 2.63906
+      ret.wheelbase = 2.7 if op_params.get(COROLLA_BODY_TYPE) == 'sedan' else 2.63906
       ret.steerRatio = 15.33
       ret.mass = 3060. * CV.LB_TO_KG + STD_CARGO_KG
 

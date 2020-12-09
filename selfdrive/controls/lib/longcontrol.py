@@ -4,7 +4,8 @@ from selfdrive.controls.lib.pid import PIController
 from common.op_params import opParams, ENABLE_COASTING, EVAL_COAST_LONG, ENABLE_LONG_PARAMS, \
                               GAS_MAX_BP, GAS_MAX_V, ENABLE_BRAKE_PARAMS, ENABLE_GAS_PARAMS, BRAKE_MAX_BP, BRAKE_MAX_V, \
                               ENABLE_LONG_PID_PARAMS, LONG_PID_KP_BP, LONG_PID_KP_V, LONG_PID_KI_BP, LONG_PID_KI_V, \
-                              ENABLE_LONG_DEADZONE_PARAMS, LONG_DEADZONE_BP, LONG_DEADZONE_V, LONG_PID_KF, LONG_PID_SAT_LIMIT
+                              ENABLE_LONG_DEADZONE_PARAMS, LONG_DEADZONE_BP, LONG_DEADZONE_V, LONG_PID_KF, LONG_PID_SAT_LIMIT, \
+                              ENABLE_START_STOP_PARAMS, STOP_BRAKE_RATE_BP, STOP_BRAKE_RATE_V, START_BRAKE_RATE_BP, START_BRAKE_RATE_V
 
 LongCtrlState = log.ControlsState.LongControlState
 Source = log.Plan.LongitudinalPlanSource
@@ -94,6 +95,8 @@ class LongControl():
     bm_v = CP.brakeMaxV
     dz_bp = CP.longitudinalTuning.deadzoneBP
     dz_v = CP.longitudinalTuning.deadzoneV
+    stop_rate = STOPPING_BRAKE_RATE
+    start_rate = STARTING_BRAKE_RATE
 
     if self.op_params.get(ENABLE_LONG_PARAMS):
       if self.op_params.get(ENABLE_GAS_PARAMS):
@@ -105,6 +108,9 @@ class LongControl():
       if self.op_params.get(ENABLE_LONG_DEADZONE_PARAMS):
         dz_bp = self.op_params.get(LONG_DEADZONE_BP)
         dz_v = self.op_params.get(LONG_DEADZONE_V)
+      if self.op_params.get(ENABLE_START_STOP_PARAMS):
+        stop_rate = interp(CS.vEgo, self.op_params.get(STOP_BRAKE_RATE_BP), self.op_params.get(STOP_BRAKE_RATE_V))
+        start_rate = interp(CS.vEgo, self.op_params.get(START_BRAKE_RATE_BP), self.op_params.get(START_BRAKE_RATE_V))
 
     gas_max = interp(CS.vEgo, gm_bp, gm_v)
     brake_max = interp(CS.vEgo, bm_bp, bm_v)
@@ -154,7 +160,7 @@ class LongControl():
     elif self.long_control_state == LongCtrlState.stopping:
       # Keep applying brakes until the car is stopped
       if not CS.standstill or output_gb > -BRAKE_STOPPING_TARGET:
-        output_gb -= STOPPING_BRAKE_RATE / RATE
+        output_gb -= stop_rate / RATE
       output_gb = clip(output_gb, -brake_max, gas_max)
 
       self.reset(CS.vEgo)
@@ -162,7 +168,7 @@ class LongControl():
     # Intention is to move again, release brake fast before handing control to PID
     elif self.long_control_state == LongCtrlState.starting:
       if output_gb < -0.2:
-        output_gb += STARTING_BRAKE_RATE / RATE
+        output_gb += start_rate / RATE
       self.reset(CS.vEgo)
 
     self.last_output_gb = output_gb
