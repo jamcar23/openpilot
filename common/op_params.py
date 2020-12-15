@@ -156,7 +156,8 @@ class opParams:
                         SHOW_UNSAFE_OPTS: Param(False, [bool], live=True, description='Shows options for unsafe / dangerous features. '
                                                 'If any of these are enabled, prepare for the worst: no steering, no gas / brake, etc.'),
                         SHOW_EXPERIMENTAL_OPTS: Param(False, [bool], live=True, description='Shows options for experimental, unfinished, features. '
-                                                      'Generally you should never use these.')}
+                                                      'Generally you should never use these.'),
+                        ENABLE_AUTO_HIGH_BEAMS: Param(False, [bool], depends_on=SHOW_EXPERIMENTAL_OPTS)}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
@@ -357,3 +358,5 @@ LAT_PID_KF = 'lat_pid_kf'
 
 SHOW_UNSAFE_OPTS = 'show_unsafe_options'
 SHOW_EXPERIMENTAL_OPTS = 'show_experimental_options'
+
+ENABLE_AUTO_HIGH_BEAMS = 'enable_auto_high_beams'

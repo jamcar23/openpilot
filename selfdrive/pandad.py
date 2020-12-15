@@ -3,7 +3,7 @@
 import os
 import time
 
-from common.op_params import opParams, ENABLE_UNSAFE_STEERING_RATE
+from common.op_params import opParams, ENABLE_UNSAFE_STEERING_RATE, ENABLE_AUTO_HIGH_BEAMS
 from common.hardware import TICI
 from common.gpio import GPIO_HUB_RST_N, GPIO_STM_BOOT0, GPIO_STM_RST_N, gpio_init, gpio_set
 from panda import BASEDIR, Panda, PandaDFU, build_st
@@ -41,8 +41,11 @@ def get_firmware_fn():
     fn = "obj/panda.bin"
     mk = "Makefile"
 
+    # op param based panda changes 
     if OP_PARAMS.get(ENABLE_UNSAFE_STEERING_RATE):
       mk += " UNSAFE_TORQUE_RATE=1"
+    if OP_PARAMS.get(ENABLE_AUTO_HIGH_BEAMS):
+      mk += " ENABLE_AUTO_HIGH_BEAMS"
 
     if not os.path.exists(obj_path):
       os.makedirs(obj_path)
