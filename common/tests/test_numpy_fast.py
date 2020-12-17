@@ -22,8 +22,8 @@ class InterpTest(unittest.TestCase):
       np.testing.assert_equal(actual, expected)
   
   def test_short_bp_long_v(self):
-    bp_test_cases = ([0], [0, 5], [0., 5., 10.], [0., 5., 10., 20])
-    bp_expected_cases = ([0, 0, 0, 0, 0], [0, 5, 5, 5, 5], [0., 5., 10., 10., 10.], [0., 5., 10., 20., 20.])
+    bp_test_cases = ([0], [0, 5], [0., 5., 10.], [0., 5., 10., 20], [-1., 2., 13., 16])
+    bp_expected_cases = ([0, 0, 0, 0, 0], [0, 5, 5, 5, 5], [0., 5., 10., 10., 10.], [0., 5., 10., 20., 20.], [-1., 2., 13., 16, 16.])
     _A_CRUISE_MIN_V = np.asarray([-1.0, -.8, -.67, -.5, -.30])
     v_ego_arr = [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39,
                  39.999999, 40, 41]
