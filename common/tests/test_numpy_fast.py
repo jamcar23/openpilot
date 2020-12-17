@@ -13,7 +13,7 @@ class InterpTest(unittest.TestCase):
 
     expected = np.interp(v_ego_arr, _A_CRUISE_MIN_BP, _A_CRUISE_MIN_V)
     actual = interp(v_ego_arr, _A_CRUISE_MIN_BP, _A_CRUISE_MIN_V)
-
+    
     np.testing.assert_equal(actual, expected)
 
     for v_ego in v_ego_arr:
@@ -22,23 +22,23 @@ class InterpTest(unittest.TestCase):
       np.testing.assert_equal(actual, expected)
   
   def test_short_bp_long_v(self):
-    _A_CRUISE_MIN_BP = np.asarray([0., 5., 10.])
-    _A_CRUISE_MIN_BP_EXPECTED = np.asarray([0., 5., 10., 10., 10.])
+    bp_test_cases = ([0], [0, 5], [0., 5., 10.], [0., 5., 10., 20])
+    bp_expected_cases = ([0, 0, 0, 0, 0], [0, 5, 5, 5, 5], [0., 5., 10., 10., 10.], [0., 5., 10., 20., 20.])
     _A_CRUISE_MIN_V = np.asarray([-1.0, -.8, -.67, -.5, -.30])
     v_ego_arr = [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39,
                  39.999999, 40, 41]
 
-    expected = np.interp(v_ego_arr, _A_CRUISE_MIN_BP_EXPECTED, _A_CRUISE_MIN_V)
-    actual = interp(v_ego_arr, _A_CRUISE_MIN_BP, _A_CRUISE_MIN_V)
+    for bp_a, bp_e in zip(bp_test_cases, bp_expected_cases):
+      with self.subTest(msg='Checking if bp_a equals bp_e', bp_a=bp_a, bp_e=bp_e):
+        expected = np.interp(v_ego_arr, bp_e, _A_CRUISE_MIN_V)
+        actual = interp(v_ego_arr, bp_a, _A_CRUISE_MIN_V)
 
-    np.testing.assert_equal(actual, expected)
+        np.testing.assert_equal(actual, expected)
 
-    i = 0
-    for v_ego in v_ego_arr:
-      expected = np.interp(v_ego, _A_CRUISE_MIN_BP_EXPECTED, _A_CRUISE_MIN_V)
-      actual = interp(v_ego, _A_CRUISE_MIN_BP, _A_CRUISE_MIN_V)
-      np.testing.assert_equal(actual, expected)
-      i += 1
+        for v_ego in v_ego_arr:
+          expected = np.interp(v_ego, bp_e, _A_CRUISE_MIN_V)
+          actual = interp(v_ego, bp_a, _A_CRUISE_MIN_V)
+          np.testing.assert_equal(actual, expected)
   
   def test_long_bp_short_v(self):
     _A_CRUISE_MIN_BP = np.asarray([0., 5., 10., 20., 40.])
@@ -51,12 +51,10 @@ class InterpTest(unittest.TestCase):
     actual = interp(v_ego_arr, _A_CRUISE_MIN_BP, _A_CRUISE_MIN_V)
     np.testing.assert_equal(actual, expected)
 
-    i = 0
     for v_ego in v_ego_arr:
       expected = np.interp(v_ego, _A_CRUISE_MIN_BP, _A_CRUISE_MIN_V_EXPECTED)
       actual = interp(v_ego, _A_CRUISE_MIN_BP, _A_CRUISE_MIN_V)
       np.testing.assert_equal(actual, expected)
-      i += 1
 
 
 if __name__ == "__main__":
