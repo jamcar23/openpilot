@@ -16,7 +16,7 @@ def interp(x, xp, fp):
     while hi < N and xv > xp[hi]:
       hi += 1
     low = hi - 1
-    return fp[-1] if hi >= T or low >= T or (hi >= N and xv >= xp[low]) or (N < T and fp[N - 1] == calc_interp(N - 2, N - 1)) else (
+    return fp[-1] if hi >= T or low >= T or (hi >= N and xv >= xp[low]) or (N < T and xv == xp[-1]) else (
       fp[0] if hi == 0 else
       calc_interp(low, hi))
 
