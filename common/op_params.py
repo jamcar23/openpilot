@@ -4,7 +4,7 @@ import json
 import time
 from common.colors import opParams_error as error
 from common.colors import opParams_warning as warning
-from common.hardware import PC
+from selfdrive.hardware import PC
 try:
   from common.realtime import sec_since_boot
 except ImportError:
