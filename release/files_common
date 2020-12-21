@@ -1,3 +1,8 @@
+op_edit.py
+common/colors.py
+common/op_params.py
+selfdrive/controls/lib/latcontrol_live.py
+
 .gitignore
 LICENSE
 launch.sh
@@ -346,6 +351,7 @@ selfdrive/test/test_cpu_usage.py
 selfdrive/ui/SConscript
 selfdrive/ui/*.cc
 selfdrive/ui/*.hpp
+selfdrive/ui/*.h
 selfdrive/ui/ui
 selfdrive/ui/text
 selfdrive/ui/spinner
@@ -489,7 +495,6 @@ cereal/messaging/msgq.cc
 cereal/messaging/msgq.hpp
 cereal/messaging/socketmaster.cc
 
-panda/.gitignore
 panda/__init__.py
 panda/VERSION
 panda/board/**

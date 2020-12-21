@@ -244,7 +244,7 @@ CONFIGS = [
     proc_name="plannerd",
     pub_sub={
       "model": ["pathPlan"], "radarState": ["plan"],
-      "carState": [], "controlsState": [], "liveParameters": [],
+      "carState": [], "controlsState": [], "liveParameters": [], "carControl": [], "modelV2": [],
     },
     ignore=["logMonoTime", "valid", "plan.processingDelay"],
     init_callback=get_car_params,

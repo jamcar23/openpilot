@@ -1,0 +1,42 @@
+name: Update Refs Command
+on:
+  repository_dispatch:
+    types: [update-refs-command]
+jobs:
+  update_refs:
+    name: update_refs
+    runs-on: ubuntu-20.04
+    timeout-minutes: 50
+    env:
+      BRANCH: ${{ github.event.client_payload.pull_request.head.ref }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+          lfs: true
+          ref: ${{ env.BRANCH }}
+          token: ${{ secrets.REPO_PAT }}
+      - name: Remove old refs
+        run: |
+          rm selfdrive/test/process_replay/*.bz2
+      - name: Build Docker Image
+        run: |
+          docker build -t commaai/openpilot-base:latest -f Dockerfile.openpilot_base .
+          docker build -t tmppilot -f Dockerfile.openpilotci .
+      - name: Build OP and update refs
+        run: |
+          docker run -v $(pwd):/tmp/openpilot --shm-size 1G --rm tmppilot /bin/sh -c \
+          "cd /tmp/openpilot && \
+          scons -j$(nproc) && \
+          python selfdrive/test/process_replay/update_refs.py --no-upload"
+      - name: Commit New Refs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add selfdrive/test/process_replay/
+          git commit -m "tests(processes): update process replay refs for $BRANCH"
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.REPO_PAT }}
+          branch: ${{ env.BRANCH }}

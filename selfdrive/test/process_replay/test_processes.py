@@ -39,10 +39,13 @@ BASE_URL = "https://commadataci.blob.core.windows.net/openpilotci/"
 FULL_TEST = len(sys.argv) <= 1
 
 
-def get_segment(segment_name, original=True):
+def get_segment(segment_name, original=True, local=False):
   route_name, segment_num = segment_name.rsplit("--", 1)
   if original:
     rlog_url = BASE_URL + "%s/%s/rlog.bz2" % (route_name.replace("|", "/"), segment_num)
+  elif local:
+    process_replay_dir = os.path.dirname(os.path.abspath(__file__))
+    rlog_url = process_replay_dir + segment_name.replace("|", "!")
   else:
     process_replay_dir = os.path.dirname(os.path.abspath(__file__))
     model_ref_commit = open(os.path.join(process_replay_dir, "model_ref_commit")).read().strip()
@@ -51,12 +54,13 @@ def get_segment(segment_name, original=True):
   return rlog_url
 
 
-def test_process(cfg, lr, cmp_log_fn, ignore_fields=None, ignore_msgs=None):
+def test_process(cfg, lr, cmp_log_fn, ignore_fields=None, ignore_msgs=None, local=False):
   if ignore_fields is None:
     ignore_fields = []
   if ignore_msgs is None:
     ignore_msgs = []
-  url = BASE_URL + os.path.basename(cmp_log_fn)
+  url = BASE_URL if not local else os.path.dirname(os.path.abspath(__file__)) + "/"
+  url += os.path.basename(cmp_log_fn.replace("|", "!"))
   cmp_log_msgs = list(LogReader(url))
 
   log_msgs = replay_process(cfg, lr)
@@ -124,6 +128,8 @@ if __name__ == "__main__":
                         help="Extra fields or msgs to ignore (e.g. carState.events)")
   parser.add_argument("--ignore-msgs", type=str, nargs="*", default=[],
                         help="Msgs to ignore (e.g. carEvents)")
+  parser.add_argument("--local", action='store_true',
+                        help="Use local logs to replay processes.")
   args = parser.parse_args()
 
   cars_whitelisted = len(args.whitelist_cars) > 0
@@ -154,7 +160,7 @@ if __name__ == "__main__":
 
     results[segment] = {}
 
-    rlog_fn = get_segment(segment)
+    rlog_fn = get_segment(segment, local=args.local)
     lr = LogReader(rlog_fn)
 
     for cfg in CONFIGS:
@@ -163,7 +169,7 @@ if __name__ == "__main__":
         continue
 
       cmp_log_fn = os.path.join(process_replay_dir, "%s_%s_%s.bz2" % (segment, cfg.proc_name, ref_commit))
-      results[segment][cfg.proc_name] = test_process(cfg, lr, cmp_log_fn, args.ignore_fields, args.ignore_msgs)
+      results[segment][cfg.proc_name] = test_process(cfg, lr, cmp_log_fn, args.ignore_fields, args.ignore_msgs, args.local)
 
   diff1, diff2, failed = format_diff(results, ref_commit)
   with open(os.path.join(process_replay_dir, "diff.txt"), "w") as f:

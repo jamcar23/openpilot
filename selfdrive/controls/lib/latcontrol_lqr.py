@@ -2,28 +2,35 @@ import numpy as np
 from selfdrive.controls.lib.drive_helpers import get_steer_max
 from common.numpy_fast import clip
 from common.realtime import DT_CTRL
+from common.op_params import opParams, ENABLE_LAT_PARAMS, LQR_SCALE, LQR_KI, LQR_A, LQR_B, LQR_C, LQR_K, LQR_L, LQR_DC_GAIN, STEER_LIMIT_TIMER, WHICH_LAT_CTRL
 from cereal import log
 
 
 class LatControlLQR():
-  def __init__(self, CP):
-    self.scale = CP.lateralTuning.lqr.scale
-    self.ki = CP.lateralTuning.lqr.ki
-
-    self.A = np.array(CP.lateralTuning.lqr.a).reshape((2, 2))
-    self.B = np.array(CP.lateralTuning.lqr.b).reshape((2, 1))
-    self.C = np.array(CP.lateralTuning.lqr.c).reshape((1, 2))
-    self.K = np.array(CP.lateralTuning.lqr.k).reshape((1, 2))
-    self.L = np.array(CP.lateralTuning.lqr.l).reshape((2, 1))
-    self.dc_gain = CP.lateralTuning.lqr.dcGain
+  def __init__(self, CP, OP=None):
+    if CP.lateralTuning.which() == 'lqr':
+      self.scale = CP.lateralTuning.lqr.scale
+      self.ki = CP.lateralTuning.lqr.ki
+      self.A = np.array(CP.lateralTuning.lqr.a).reshape((2, 2))
+      self.B = np.array(CP.lateralTuning.lqr.b).reshape((2, 1))
+      self.C = np.array(CP.lateralTuning.lqr.c).reshape((1, 2))
+      self.K = np.array(CP.lateralTuning.lqr.k).reshape((1, 2))
+      self.L = np.array(CP.lateralTuning.lqr.l).reshape((2, 1))
+      self.dc_gain = CP.lateralTuning.lqr.dcGain
+      self.sat_limit = CP.steerLimitTimer
 
     self.x_hat = np.array([[0], [0]])
     self.i_unwind_rate = 0.3 * DT_CTRL
     self.i_rate = 1.0 * DT_CTRL
 
     self.sat_count_rate = 1.0 * DT_CTRL
-    self.sat_limit = CP.steerLimitTimer
 
+    if OP is None:
+      OP = opParams()
+
+    self.op_params = OP
+
+    self._update_params(CP)
     self.reset()
 
   def reset(self):
@@ -43,7 +50,31 @@ class LatControlLQR():
 
     return self.sat_count > self.sat_limit
 
+  def _update_params(self, CP):
+    if self.op_params.get(ENABLE_LAT_PARAMS) and self.op_params.get(WHICH_LAT_CTRL) == 'lqr':
+      self.scale = self.op_params.get(LQR_SCALE)
+      self.ki = self.op_params.get(LQR_KI)
+      self.A = np.array(self.op_params.get(LQR_A)).reshape((2, 2))
+      self.B = np.array(self.op_params.get(LQR_B)).reshape((2, 1))
+      self.C = np.array(self.op_params.get(LQR_C)).reshape((1, 2))
+      self.K = np.array(self.op_params.get(LQR_K)).reshape((1, 2))
+      self.L = np.array(self.op_params.get(LQR_L)).reshape((2, 1)) 
+      self.dc_gain = self.op_params.get(LQR_DC_GAIN)
+      self.sat_limit = self.op_params.get(STEER_LIMIT_TIMER)
+    elif CP.lateralTuning.which() == 'lqr':
+      self.scale = CP.lateralTuning.lqr.scale
+      self.ki = CP.lateralTuning.lqr.ki
+      self.A = np.array(CP.lateralTuning.lqr.a).reshape((2, 2))
+      self.B = np.array(CP.lateralTuning.lqr.b).reshape((2, 1))
+      self.C = np.array(CP.lateralTuning.lqr.c).reshape((1, 2))
+      self.K = np.array(CP.lateralTuning.lqr.k).reshape((1, 2))
+      self.L = np.array(CP.lateralTuning.lqr.l).reshape((2, 1))
+      self.dc_gain = CP.lateralTuning.lqr.dcGain
+      self.sat_limit = CP.steerLimitTimer
+
   def update(self, active, CS, CP, path_plan):
+    self._update_params(CP)
+
     lqr_log = log.ControlsState.LateralLQRState.new_message()
 
     steers_max = get_steer_max(CP, CS.vEgo)

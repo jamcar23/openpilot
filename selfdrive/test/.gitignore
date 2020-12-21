@@ -7,3 +7,5 @@ valgrind_logs.txt
 
 *.bz2
 *.hevc
+
+!process_replay/*.bz2

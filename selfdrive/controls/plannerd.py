@@ -2,6 +2,7 @@
 from cereal import car
 from common.params import Params
 from common.realtime import Priority, config_realtime_process
+from common.op_params import opParams, ENABLE_COASTING
 from selfdrive.swaglog import cloudlog
 from selfdrive.controls.lib.planner import Planner
 from selfdrive.controls.lib.vehicle_model import VehicleModel
@@ -17,13 +18,15 @@ def plannerd_thread(sm=None, pm=None):
   CP = car.CarParams.from_bytes(Params().get("CarParams", block=True))
   cloudlog.info("plannerd got CarParams: %s", CP.carName)
 
-  PL = Planner(CP)
+  OP = opParams()
+  PL = Planner(CP, OP=OP)
   PP = PathPlanner(CP)
 
   VM = VehicleModel(CP)
 
   if sm is None:
-    sm = messaging.SubMaster(['carState', 'controlsState', 'radarState', 'model', 'liveParameters'],
+    # TODO should modelV2 be polled?
+    sm = messaging.SubMaster(['carControl', 'carState', 'controlsState', 'radarState', 'model', 'liveParameters', 'modelV2'],
                              poll=['radarState', 'model'])
 
   if pm is None:
@@ -39,8 +42,8 @@ def plannerd_thread(sm=None, pm=None):
 
     if sm.updated['model']:
       PP.update(sm, pm, CP, VM)
-    if sm.updated['radarState']:
-      PL.update(sm, pm, CP, VM, PP)
+    if sm.updated['radarState'] or (OP.get(ENABLE_COASTING) and sm.updated['modelV2']):
+      PL.update(sm, pm, CP, VM, PP) # TODO look into whether this should run when the model updates too
 
 
 def main(sm=None, pm=None):

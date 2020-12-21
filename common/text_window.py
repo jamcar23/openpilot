@@ -30,11 +30,13 @@ class TextWindow:
       self.text_proc = None
 
   def wait_for_exit(self):
-    if self.text_proc is not None:
-      while True:
-        if self.get_status() == 1:
-          return
-        time.sleep(0.1)
+    while True:
+      status = self.get_status()
+      if status == 1:
+        return 'exit'
+      elif status == 0:  # git pull/reset button
+        return 'reset'
+      time.sleep(0.1)
 
   def __del__(self):
     self.close()

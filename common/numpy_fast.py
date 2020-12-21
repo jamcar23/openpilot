@@ -20,3 +20,6 @@ def interp(x, xp, fp):
 
 def mean(x):
   return sum(x) / len(x)
+
+def incremental_avg(cur_avg, new_val, new_size):
+  return cur_avg + ((new_val - cur_avg) / new_size)

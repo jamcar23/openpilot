@@ -7,6 +7,9 @@ from selfdrive.config import Conversions as CV
 from selfdrive.controls.lib.planner import calc_cruise_accel_limits
 from selfdrive.controls.lib.speed_smoother import speed_smoother
 from selfdrive.controls.lib.long_mpc import LongitudinalMpc
+from common.op_params import opParams
+
+OP = opParams()
 
 
 def RW(v_ego, v_l):
@@ -38,7 +41,7 @@ def run_following_distance_simulation(v_lead, t_end=200.0):
   first = True
   while t < t_end:
     # Run cruise control
-    accel_limits = [float(x) for x in calc_cruise_accel_limits(v_ego, False)]
+    accel_limits = [float(x) for x in calc_cruise_accel_limits(v_ego, False, OP)]
     jerk_limits = [min(-0.1, accel_limits[0]), max(0.1, accel_limits[1])]
     v_cruise, a_cruise = speed_smoother(v_ego, a_ego, v_cruise_setpoint,
                                         accel_limits[1], accel_limits[0],

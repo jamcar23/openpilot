@@ -1,8 +1,10 @@
 from common.numpy_fast import interp
+from common.op_params import opParams, CAM_OFFSET
 import numpy as np
 from cereal import log
 
-CAMERA_OFFSET = 0.06  # m from center car to camera
+STANDARD_CAMERA_OFFSET = 0.06  # m from center car to camera
+CAMERA_OFFSET = STANDARD_CAMERA_OFFSET
 
 
 def compute_path_pinv(length=50):
@@ -44,6 +46,8 @@ class LanePlanner:
     self._path_pinv = compute_path_pinv()
     self.x_points = np.arange(50)
 
+    self.op_params = opParams()
+
   def parse_model(self, md):
     if len(md.leftLane.poly):
       self.l_poly = np.array(md.leftLane.poly)
@@ -63,9 +67,12 @@ class LanePlanner:
       self.r_lane_change_prob = md.meta.desireState[log.PathPlan.Desire.laneChangeRight]
 
   def update_d_poly(self, v_ego):
+    CAMERA_OFFSET = self.op_params.get(CAM_OFFSET)
     # only offset left and right lane lines; offsetting p_poly does not make sense
     self.l_poly[3] += CAMERA_OFFSET
     self.r_poly[3] += CAMERA_OFFSET
+    if CAMERA_OFFSET != STANDARD_CAMERA_OFFSET:
+      self.p_poly[3] += CAMERA_OFFSET - STANDARD_CAMERA_OFFSET
 
     # Reduce reliance on lanelines that are too far apart or
     # will be in a few seconds
