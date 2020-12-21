@@ -6,7 +6,7 @@ import traceback
 
 from selfdrive.version import version, dirty
 from selfdrive.swaglog import cloudlog
-from common.hardware import PC
+from selfdrive.hardware import PC
 from datetime import datetime
 
 if os.getenv("NOLOG") or os.getenv("NOCRASH") or PC:
