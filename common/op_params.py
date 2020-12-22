@@ -50,7 +50,7 @@ class Param:
     if self.has_allowed_types:
       assert type(self.default) in self.allowed_types or self.default in self.allowed_types, 'Default value type must be in specified allowed_types!'
 
-      if self.is_list:
+      if self.is_list and self.default:
         for v in self.default:
           assert type(v) in self.allowed_types, 'Default value type must be in specified allowed_types!'
 
@@ -163,7 +163,9 @@ class opParams:
                         SHOW_EXPERIMENTAL_OPTS: Param(False, [bool], live=True, description='Shows options for experimental, unfinished, features. '
                                                       'Generally you should never use these.'),
                         SHOW_TOYOTA_OPTS: Param(False, [bool], live=True, description='Shows options toyota cars.'),
-                        COROLLA_BODY_TYPE: Param('hatchback', ['sedan', 'hatchback'], depends_on=SHOW_TOYOTA_OPTS)}
+                        COROLLA_BODY_TYPE: Param('hatchback', ['sedan', 'hatchback'], depends_on=SHOW_TOYOTA_OPTS),
+                        ENABLE_MANAGER_PARAMS: Param(False, [bool], depends_on=SHOW_UNSAFE_OPTS),
+                        DISABLED_PROCESSES: Param(None, [str, list, type(None)], description='You\'re on your own here', depends_on=ENABLE_MANAGER_PARAMS)}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
@@ -372,3 +374,6 @@ SHOW_EXPERIMENTAL_OPTS = 'show_experimental_options'
 
 SHOW_TOYOTA_OPTS = 'show_toyota_options'
 COROLLA_BODY_TYPE = 'corolla_body_type'
+
+ENABLE_MANAGER_PARAMS = 'enable_manager_params'
+DISABLED_PROCESSES = 'disabled_processes'
