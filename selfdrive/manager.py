@@ -151,6 +151,7 @@ if not prebuilt:
 import cereal
 import cereal.messaging as messaging
 
+from common.op_params import opParams, ENABLE_MANAGER_PARAMS, DISABLED_PROCESSES
 from common.params import Params
 import selfdrive.crash as crash
 from selfdrive.registration import register
@@ -450,7 +451,14 @@ def manager_thread():
   # save boot log
   subprocess.call(["./loggerd", "--bootlog"], cwd=os.path.join(BASEDIR, "selfdrive/loggerd"))
 
+  op_params = opParams()
   params = Params()
+
+  if op_params.get(ENABLE_MANAGER_PARAMS):
+    dis_proc = op_params.get(DISABLED_PROCESSES)
+    if dis_proc:
+      for n in dis_proc:
+        del managed_processes[n]
 
   # start daemon processes
   for p in daemon_processes:
