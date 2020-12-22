@@ -50,7 +50,7 @@ class Param:
     if self.has_allowed_types:
       assert type(self.default) in self.allowed_types or self.default in self.allowed_types, 'Default value type must be in specified allowed_types!'
 
-      if self.is_list:
+      if self.is_list and isinstance(self.default, list):
         for v in self.default:
           assert type(v) in self.allowed_types, 'Default value type must be in specified allowed_types!'
 
