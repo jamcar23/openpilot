@@ -204,10 +204,10 @@ class CarInterface(CarInterfaceBase):
 
       if op_params.get('corolla_use_indi'):
         ret.lateralTuning.init('indi')
-        ret.lateralTuning.indi.innerLoopGain = 6.0
+        ret.lateralTuning.indi.innerLoopGain = 9.0
         ret.lateralTuning.indi.outerLoopGain = 15.0
         ret.lateralTuning.indi.timeConstant = 5.5
-        ret.lateralTuning.indi.actuatorEffectiveness = 6.0
+        ret.lateralTuning.indi.actuatorEffectiveness = 9.0
         ret.steerActuatorDelay = 0.6
         tire_stiffness_factor = 0.996
       else:
