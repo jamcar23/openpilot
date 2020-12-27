@@ -230,7 +230,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def change_param_list(self, old_value, param_info, chosen_key):
     while True:
       self.info('Current value: {} (type: {})'.format(old_value, type(old_value).__name__), sleep_time=0)
-      self.prompt('\nEnter index to edit (0 to {}), or -i to remove index, or +value to append value:'.format(len(old_value) - 1))
+      self.prompt('\nEnter index to edit (0 to {}), or -i to remove index, or +value to append value:'.format(len(old_value) - 1 if old_value else 0))
 
       append_val = False
       remove_idx = False
