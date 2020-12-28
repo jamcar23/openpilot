@@ -7,7 +7,6 @@
 #define nvgCreate nvgCreateGL3
 #else
 #include <GLES3/gl3.h>
-#include <EGL/egl.h>
 #define NANOVG_GLES3_IMPLEMENTATION
 #define nvgCreate nvgCreateGLES3
 #endif
@@ -100,7 +99,6 @@ typedef struct UIScene {
   bool uilayout_sidebarcollapsed;
   // responsive layout
   Rect viz_rect;
-  int ui_viz_ro;
 
   int lead_status;
   float lead_d_rel, lead_v_rel;

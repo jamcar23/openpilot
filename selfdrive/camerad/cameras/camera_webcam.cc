@@ -8,6 +8,7 @@
 
 #include "common/util.h"
 #include "common/timing.h"
+#include "common/clutil.h"
 #include "common/swaglog.h"
 
 #pragma clang diagnostic push
@@ -101,15 +102,14 @@ static void* rear_thread(void *arg) {
     cl_command_queue q = s->buf.camera_bufs[buf_idx].copy_q;
     cl_mem yuv_cl = s->buf.camera_bufs[buf_idx].buf_cl;
     cl_event map_event;
-    void *yuv_buf = (void *)clEnqueueMapBuffer(q, yuv_cl, CL_TRUE,
+    void *yuv_buf = (void *)CL_CHECK_ERR(clEnqueueMapBuffer(q, yuv_cl, CL_TRUE,
                                                 CL_MAP_WRITE, 0, transformed_size,
-                                                0, NULL, &map_event, &err);
-    assert(err == 0);
+                                                0, NULL, &map_event, &err));
     clWaitForEvents(1, &map_event);
     clReleaseEvent(map_event);
     memcpy(yuv_buf, transformed_mat.data, transformed_size);
 
-    clEnqueueUnmapMemObject(q, yuv_cl, yuv_buf, 0, NULL, &map_event);
+    CL_CHECK(clEnqueueUnmapMemObject(q, yuv_cl, yuv_buf, 0, NULL, &map_event));
     clWaitForEvents(1, &map_event);
     clReleaseEvent(map_event);
     tbuffer_dispatch(tb, buf_idx);
@@ -175,15 +175,14 @@ void front_thread(CameraState *s) {
     cl_command_queue q = s->buf.camera_bufs[buf_idx].copy_q;
     cl_mem yuv_cl = s->buf.camera_bufs[buf_idx].buf_cl;
     cl_event map_event;
-    void *yuv_buf = (void *)clEnqueueMapBuffer(q, yuv_cl, CL_TRUE,
+    void *yuv_buf = (void *)CL_CHECK_ERR(clEnqueueMapBuffer(q, yuv_cl, CL_TRUE,
                                                 CL_MAP_WRITE, 0, transformed_size,
-                                                0, NULL, &map_event, &err);
-    assert(err == 0);
+                                                0, NULL, &map_event, &err));
     clWaitForEvents(1, &map_event);
     clReleaseEvent(map_event);
     memcpy(yuv_buf, transformed_mat.data, transformed_size);
 
-    clEnqueueUnmapMemObject(q, yuv_cl, yuv_buf, 0, NULL, &map_event);
+    CL_CHECK(clEnqueueUnmapMemObject(q, yuv_cl, yuv_buf, 0, NULL, &map_event));
     clWaitForEvents(1, &map_event);
     clReleaseEvent(map_event);
     tbuffer_dispatch(tb, buf_idx);
@@ -267,20 +266,20 @@ void camera_process_rear(MultiCameraState *s, CameraState *c, int cnt) {
   auto framed = msg.initEvent().initFrame();
   fill_frame_data(framed, b->cur_frame_data, cnt);
   framed.setImage(kj::arrayPtr((const uint8_t *)b->yuv_ion[b->cur_yuv_idx].addr, b->yuv_buf_size));
-  framed.setTransform(kj::ArrayPtr<const float>(&b->yuv_transform.v[0], 9));
+  framed.setTransform(b->yuv_transform.v);
   s->pm->send("frame", msg);
 }
 
 void cameras_run(MultiCameraState *s) {
   std::vector<std::thread> threads;
-  threads.push_back(start_process_thread(s, "processing", &s->rear, 51, camera_process_rear));
-  threads.push_back(start_process_thread(s, "frontview", &s->front, 51, camera_process_front));
-  
+  threads.push_back(start_process_thread(s, "processing", &s->rear, camera_process_rear));
+  threads.push_back(start_process_thread(s, "frontview", &s->front, camera_process_front));
+
   std::thread t_rear = std::thread(rear_thread, &s->rear);
   set_thread_name("webcam_thread");
   front_thread(&s->front);
   t_rear.join();
   cameras_close(s);
-  
+
   for (auto &t : threads) t.join();
 }

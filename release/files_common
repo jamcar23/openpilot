@@ -23,10 +23,6 @@ apk/ai.comma*.apk
 
 common/.gitignore
 common/__init__.py
-common/hardware.py
-common/hardware_android.py
-common/hardware_tici.py
-common/hardware_base.py
 common/gpio.py
 common/realtime.py
 common/clock.pyx
@@ -46,7 +42,6 @@ common/stat_live.py
 common/spinner.py
 common/text_window.py
 common/cython_hacks.py
-common/apk.py
 common/SConscript
 
 common/kalman/.gitignore
@@ -207,7 +202,8 @@ selfdrive/common/swaglog.cc
 selfdrive/common/util.[c,h]
 selfdrive/common/efd.[c,h]
 selfdrive/common/cqueue.[c,h]
-selfdrive/common/clutil.[c,h]
+selfdrive/common/clutil.cc
+selfdrive/common/clutil.h
 selfdrive/common/params.h
 selfdrive/common/params.cc
 selfdrive/common/mutex.h
@@ -277,6 +273,18 @@ selfdrive/controls/lib/longitudinal_mpc_model/__init__.py
 selfdrive/controls/lib/longitudinal_mpc_model/generator.cpp
 selfdrive/controls/lib/longitudinal_mpc_model/libmpc_py.py
 selfdrive/controls/lib/longitudinal_mpc_model/longitudinal_mpc.c
+
+selfdrive/hardware/__init__.py
+selfdrive/hardware/base.py
+selfdrive/hardware/eon/__init__.py
+selfdrive/hardware/eon/apk.py
+selfdrive/hardware/eon/hardware.py
+selfdrive/hardware/tici/__init__.py
+selfdrive/hardware/tici/hardware.py
+selfdrive/hardware/tici/pins.py
+selfdrive/hardware/tici/agnos.py
+selfdrive/hardware/pc/__init__.py
+selfdrive/hardware/pc/hardware.py
 
 selfdrive/locationd/__init__.py
 selfdrive/locationd/.gitignore
@@ -359,6 +367,8 @@ selfdrive/ui/qt/*.cc
 selfdrive/ui/qt/*.hpp
 selfdrive/ui/qt/offroad/*.cc
 selfdrive/ui/qt/offroad/*.hpp
+selfdrive/ui/qt/widgets/*.cc
+selfdrive/ui/qt/widgets/*.hpp
 
 selfdrive/ui/android/*.cc
 selfdrive/ui/android/*.hpp
@@ -377,7 +387,7 @@ selfdrive/camerad/cameras/camera_qcom.h
 selfdrive/camerad/cameras/debayer.cl
 selfdrive/camerad/cameras/sensor_i2c.h
 
-selfdrive/camerad/transforms/rgb_to_yuv.c
+selfdrive/camerad/transforms/rgb_to_yuv.cc
 selfdrive/camerad/transforms/rgb_to_yuv.h
 selfdrive/camerad/transforms/rgb_to_yuv.cl
 selfdrive/camerad/transforms/rgb_to_yuv_test.cc
@@ -401,7 +411,8 @@ selfdrive/modeld/models/driving.h
 selfdrive/modeld/models/dmonitoring.cc
 selfdrive/modeld/models/dmonitoring.h
 
-selfdrive/modeld/transforms/loadyuv.[c,h]
+selfdrive/modeld/transforms/loadyuv.cc
+selfdrive/modeld/transforms/loadyuv.h
 selfdrive/modeld/transforms/loadyuv.cl
 selfdrive/modeld/transforms/transform.cc
 selfdrive/modeld/transforms/transform.h
