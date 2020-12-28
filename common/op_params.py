@@ -165,7 +165,11 @@ class opParams:
                         SHOW_TOYOTA_OPTS: Param(False, [bool], live=True, description='Shows options toyota cars.'),
                         COROLLA_BODY_TYPE: Param('hatchback', ['sedan', 'hatchback'], depends_on=SHOW_TOYOTA_OPTS),
                         ENABLE_MANAGER_PARAMS: Param(False, [bool], depends_on=SHOW_UNSAFE_OPTS),
-                        DISABLED_PROCESSES: Param(None, [str, list, type(None)], description='You\'re on your own here', depends_on=ENABLE_MANAGER_PARAMS)}
+                        DISABLED_PROCESSES: Param(None, [str, list, type(None)], description='You\'re on your own here', depends_on=ENABLE_MANAGER_PARAMS),
+                        ENABLE_TOYOTA_CAN_PARAMS: Param(False, [bool], live=True, depends_on=SHOW_TOYOTA_OPTS),
+                        ENABLE_TOYOTA_ACCEL_PARAMS: Param(False, [bool], live=True, depends_on=ENABLE_TOYOTA_CAN_PARAMS),
+                        TOYOTA_ACC_TYPE: Param(1, [int], live=True, depends_on=ENABLE_TOYOTA_ACCEL_PARAMS),
+                        TOYOTA_PERMIT_BRAKING: Param(1, [1, 0, 'lead'], live=True, depends_on=ENABLE_TOYOTA_ACCEL_PARAMS)}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
@@ -377,3 +381,8 @@ COROLLA_BODY_TYPE = 'corolla_body_type'
 
 ENABLE_MANAGER_PARAMS = 'enable_manager_params'
 DISABLED_PROCESSES = 'disabled_processes'
+
+ENABLE_TOYOTA_CAN_PARAMS = 'enable_toyota_can_params'
+ENABLE_TOYOTA_ACCEL_PARAMS = 'enable_toyota_accel_params'
+TOYOTA_ACC_TYPE = 'toyota_acc_type'
+TOYOTA_PERMIT_BRAKING = 'toyota_permit_braking'
