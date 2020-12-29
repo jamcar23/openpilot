@@ -6,7 +6,7 @@ from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_comma
                                            create_fcw_command
 from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, NO_STOP_TIMER_CAR, SteerLimitParams
 from opendbc.can.packer import CANPacker
-from common.op_params import opParams
+from common.op_params import opParams, ENABLE_TOYOTA_CAN_PARAMS, ENABLE_TOYOTA_ACCEL_PARAMS, TOYOTA_ACC_TYPE, TOYOTA_PERMIT_BRAKING
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -122,7 +122,16 @@ class CarController():
       if pcm_cancel_cmd and CS.CP.carFingerprint == CAR.LEXUS_IS:
         can_sends.append(create_acc_cancel_command(self.packer))
       elif CS.CP.openpilotLongitudinalControl:
-        can_sends.append(create_accel_command(self.packer, apply_accel, pcm_cancel_cmd, self.standstill_req, lead))
+        acc_type = 1
+        permit_braking = 1
+
+        if self.opParams.get(ENABLE_TOYOTA_CAN_PARAMS) and self.opParams.get(ENABLE_TOYOTA_ACCEL_PARAMS):
+          acc_type = self.opParams.get(TOYOTA_ACC_TYPE) & 0xFF
+          permit_braking = self.opParams.get(TOYOTA_PERMIT_BRAKING)
+          if permit_braking == 'lead':
+            permit_braking = lead
+
+        can_sends.append(create_accel_command(self.packer, apply_accel, pcm_cancel_cmd, self.standstill_req, lead, acc_type=acc_type, permit_braking=permit_braking))
       else:
         can_sends.append(create_accel_command(self.packer, 0, pcm_cancel_cmd, False, lead))
 
