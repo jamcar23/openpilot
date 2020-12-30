@@ -12,19 +12,20 @@ on:
       - 'README*'
 
 env:
+  REPO: jamcar23/openpilot
+  REGISTRY_BASE: ghcr.io
+  CONTAINER_URI: $REGISTRY_BASE/$REPO/openpilot
+  MAIN_BRANCH: src
   RUN: docker run --shm-size 1G --rm tmppilot /bin/sh -c
   PERSIST_WITH_CACHE: docker run --shm-size 1G -v /tmp/comma_download_cache:/tmp/comma_download_cache  --name tmppilot tmppilot /bin/sh -c
   PERSIST: docker run --shm-size 1G --name tmppilot tmppilot /bin/sh -c
   CI_RUN: docker run -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID --rm tmppilotci /bin/bash -c
   UNIT_TEST: coverage run --append -m unittest discover
-  REPO: jamcar23/openpilot
-  REGISTRY_BASE: ghcr.io
-  MAIN_BRANCH: src
   BUILD: |
       # build the openpilot docker base image
       # docker pull $(grep -ioP '(?<=^from)\s+\S+' Dockerfile.openpilot_base) || true
       # docker pull docker.io/commaai/openpilot-base:latest || true
-      docker build -t commaai/openpilot-base:latest -f Dockerfile.openpilot_base .
+      docker build -t $REPO-base:latest -f Dockerfile.openpilot_base .
 
       # build the final CI image
       # docker pull docker.io/commaai/openpilotci:latest || true
@@ -41,7 +42,11 @@ jobs:
       # non-empty strings are always true
       is_default_repo: ${{ github.repository == env.REPO && true || '' }}
       is_main_branch: ${{ github.ref == format('refs/head/{0}', env.MAIN_BRANCH) && true || '' }}
-      container_uri: ${{ env.REGISTRY_BASE }}/${{ env.REPO }}
+      container_uri: ${{ env.REGISTRY_BASE }}/${{ env.REPO }}/openpilot
+      docker_login: docker login ${{ env.REGISTRY_BASE }} -u jamcar23 -p 
+      docker_build: |
+        docker build -t ${{ env.REPO }}-base:latest -f Dockerfile.openpilot_base .
+        docker build -t tmppilot -f Dockerfile.openpilotci .
     steps:
       - name: Finish setup # At least one step is needed so just log that we're done
         run: echo "Finished workflow setup"
@@ -130,6 +135,10 @@ jobs:
     timeout-minutes: 50
     needs: [setup_workflow, static_analysis] # hack to ensure slow tests run first since this and static_analysis are fast
     if: github.event_name == 'push' && needs.setup_workflow.outputs.is_default_repo && needs.setup_workflow.outputs.is_main_branch
+    env:
+      URI: ${{ needs.setup_workflow.outputs.container_uri }}
+      LOGIN: ${{ needs.setup_workflow.outputs.docker_login }}
+      BUILD: ${{ needs.setup_workflow.outputs.docker_build }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -138,11 +147,15 @@ jobs:
         run: eval "$BUILD"
       - name: Push to dockerhub
         run: |
-          docker login ${{ env.REGISTRY_BASE }} -u jamcar23 -p ${{ secrets.GITHUB_TOKEN }}
-          docker tag ${{ env.REPO }}-base:latest ${{ env.REGISTRY_BASE }}/${{ env.REPO }}-base:latest
-          docker push ${{ env.REGISTRY_BASE }}/${{ env.REPO }}-base:latest
-          docker tag tmppilot ${{ env.REGISTRY_BASE }}/${{ env.REPO }}ci:latest
-          docker push ${{ env.REGISTRY_BASE }}/${{ env.REPO }}ci:latest
+          eval "$LOGIN ${{ secrets.PACKAGE_PAT }}"
+          docker tag ${{ env.REPO }}-base:latest ${{ env.URI }}-base:latest
+          docker push ${{ env.CONTAINER_URI }}-base:latest
+          docker tag tmppilot ${{ env.CONTAINER_URI}}ci:latest
+          docker push ${{ env.CONTAINER_URI }}ci:latest
+      - name: Docker Logout
+        if: always()
+        continue-on-error: true
+        run: docker logout
 
   docker_push_prebuilt:
     name: docker push prebuilt
@@ -150,6 +163,8 @@ jobs:
     timeout-minutes: 50
     needs: [setup_workflow, static_analysis, unit_tests, process_replay, test_longitudinal, test_car_models]
     if: github.event_name == 'push' && needs.setup_workflow.outputs.is_default_repo && needs.setup_workflow.outputs.is_main_branch
+    env:
+      URI: ${{ needs.setup_workflow.outputs.container_uri }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -158,7 +173,7 @@ jobs:
         run: echo "RUN cd /tmp/openpilot && scons -c && scons -j\$(nproc)" >> Dockerfile.openpilotci && eval "$BUILD"
       - name: Push to dockerhub
         run: |
-          docker login ${{ env.REGISTRY_BASE }} -u jamcar23 -p ${{ secrets.GITHUB_TOKEN }}
+          docker login $REGISTRY_BASE -u jamcar23 -p ${{ secrets.GITHUB_TOKEN }}
           docker tag tmppilot ${{ env.REGISTRY_BASE }}/${{ env.REPO }}:latest
           docker push ${{ env.REGISTRY_BASE }}/${{ env.REPO }}:latest
 
