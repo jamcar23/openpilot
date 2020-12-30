@@ -4,7 +4,7 @@ import sys
 import threading
 import traceback
 
-from selfdrive.version import version, dirty
+
 from selfdrive.swaglog import cloudlog
 from selfdrive.hardware import PC
 from datetime import datetime
@@ -22,23 +22,13 @@ if os.getenv("NOLOG") or os.getenv("NOCRASH") or PC:
   def install():
     pass
 else:
-  from raven import Client
-  from raven.transport.http import HTTPTransport
-  from selfdrive.version import origin, branch, get_git_commit
-  from common.op_params import opParams
+  from selfdrive.sentryd.sentryd import create_client
 
   CRASHES_DIR = '/data/community/crashes'
   if not os.path.exists(CRASHES_DIR):
     os.makedirs(CRASHES_DIR)
 
-  error_tags = {'dirty': dirty, 'origin': origin, 'branch': branch, 'commit': get_git_commit()}
-  username = opParams().get('username')
-  if username is None or not isinstance(username, str):
-    username = 'undefined'
-  error_tags['username'] = username
-
-  client = Client('https://ee3dca66da104ef388e010fcefbd06c6:df79d17e3a0743c387d4cbf05932abde@o484202.ingest.sentry.io/5537090',
-                  install_sys_hook=False, transport=HTTPTransport, release=version, tags=error_tags)
+  client = create_client()
   def save_exception(exc_text):
     log_file = '{}/{}'.format(CRASHES_DIR, datetime.now().strftime('%m-%d-%Y--%I:%M.%S-%p.log'))
     with open(log_file, 'w') as f:
