@@ -29,7 +29,7 @@ def create_client(*args, tags=None, **kwargs):
         tags = create_standard_tags()
 
     client = Client('https://ee3dca66da104ef388e010fcefbd06c6:df79d17e3a0743c387d4cbf05932abde@o484202.ingest.sentry.io/5537090',
-                  install_sys_hook=False, transport=HTTPTransport, release=version, tags=tags)
+                  install_sys_hook=False, transport=HTTPTransport, release=version, tags=tags, *args, **kwargs)
 
     client.user_context({'dongle_id': os.environ.get('DONGLE_ID'), 'username': get_username()})
 
