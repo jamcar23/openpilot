@@ -19,6 +19,7 @@ env:
   UNIT_TEST: coverage run --append -m unittest discover
   REPO: jamcar23/openpilot
   REGISTRY_BASE: ghcr.io
+  MAIN_BRANCH: src
   BUILD: |
       # build the openpilot docker base image
       # docker pull $(grep -ioP '(?<=^from)\s+\S+' Dockerfile.openpilot_base) || true
@@ -35,10 +36,12 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 10
     outputs:
-      # `&& true || null` is a fake ternary op that actually evals to true and false
+      # `&& true || ''` is a fake ternary op that actually evals to true and false
       # Needed because outputs are always strings (i.e. 'true' and 'false') and
       # non-empty strings are always true
-      is_default_repo: ${{ github.repository == env.REPO && true || null }} 
+      is_default_repo: ${{ github.repository == env.REPO && true || '' }}
+      is_main_branch: ${{ github.ref == format('refs/head/{0}', env.MAIN_BRANCH) && true || '' }}
+      container_uri: ${{ env.REGISTRY_BASE }}/${{ env.REPO }}
     steps:
       - name: Finish setup # At least one step is needed so just log that we're done
         run: echo "Finished workflow setup"
@@ -126,7 +129,7 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 50
     needs: [setup_workflow, static_analysis] # hack to ensure slow tests run first since this and static_analysis are fast
-    if: github.ref == 'refs/heads/src' && github.event_name == 'push' && needs.setup_workflow.outputs.is_default_repo 
+    if: github.event_name == 'push' && needs.setup_workflow.outputs.is_default_repo && needs.setup_workflow.outputs.is_main_branch
     steps:
       - uses: actions/checkout@v2
         with:
@@ -146,7 +149,7 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 50
     needs: [setup_workflow, static_analysis, unit_tests, process_replay, test_longitudinal, test_car_models]
-    if: github.ref == 'refs/heads/src' && github.event_name == 'push' && needs.setup_workflow.outputs.is_default_repo 
+    if: github.event_name == 'push' && needs.setup_workflow.outputs.is_default_repo && needs.setup_workflow.outputs.is_main_branch
     steps:
       - uses: actions/checkout@v2
         with:
