@@ -35,10 +35,13 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 10
     outputs:
-      is_default_repo: false
+      # `&& true || null` is a fake ternary op that actually evals to true and false
+      # Needed because outputs are always strings (i.e. 'true' and 'false') and
+      # non-empty strings are always true
+      is_default_repo: ${{ github.repository == env.REPO && true || null }} 
     steps:
-      - name: Check for default repo
-        run: echo "::set-output name=is_default_repo::${{github.repository == env.REPO}}"
+      - name: Finish setup # At least one step is needed so just log that we're done
+        run: echo "Finished workflow setup"
 
   build_release:
     name: build release
