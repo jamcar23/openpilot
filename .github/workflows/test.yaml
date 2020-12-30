@@ -3,7 +3,13 @@ on:
   push:
     branches-ignore:
       - 'testing-closet*'
+    paths-ignore:
+      - '**.md'
+      - 'README*'
   pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'README*'
 
 env:
   RUN: docker run --shm-size 1G --rm tmppilot /bin/sh -c
@@ -28,6 +34,8 @@ jobs:
     name: setup workflow
     runs-on: ubuntu-20.04
     timeout-minutes: 10
+    outputs:
+      is_default_repo: false
     steps:
       - name: Check for default repo
         run: echo "::set-output name=is_default_repo::${{github.repository == env.REPO}}"
