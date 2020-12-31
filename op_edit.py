@@ -355,7 +355,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     dat = dat.strip()
     try:
       dat = ast.literal_eval(dat)
-    except:
+    except: # noqa E722 pylint: disable=bare-except
       if dat.lower() == 'none':
         dat = None
       elif dat.lower() in ['false', 'f']:
