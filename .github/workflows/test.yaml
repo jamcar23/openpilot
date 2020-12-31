@@ -75,8 +75,10 @@ jobs:
     name: build release
     runs-on: ubuntu-20.04
     timeout-minutes: 50
+    needs: setup_workflow
     env:
       TEST_DIR: tmppilot
+      BUILD: ${{ needs.setup_workflow.outputs.docker_build }}
     steps:
     - uses: actions/checkout@v2
       with:
@@ -207,6 +209,9 @@ jobs:
     name: static analysis
     runs-on: ubuntu-20.04
     timeout-minutes: 50
+    needs: setup_workflow
+    env:
+      BUILD: ${{ needs.setup_workflow.outputs.docker_build }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -220,6 +225,9 @@ jobs:
     name: valgrind
     runs-on: ubuntu-20.04
     timeout-minutes: 50
+    needs: setup_workflow
+    env:
+      BUILD: ${{ needs.setup_workflow.outputs.docker_build }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -254,6 +262,9 @@ jobs:
     name: unit tests
     runs-on: ubuntu-20.04
     timeout-minutes: 50
+    needs: setup_workflow
+    env:
+      BUILD: ${{ needs.setup_workflow.outputs.docker_build }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -285,6 +296,9 @@ jobs:
     name: process replay
     runs-on: ubuntu-20.04
     timeout-minutes: 50
+    needs: setup_workflow
+    env:
+      BUILD: ${{ needs.setup_workflow.outputs.docker_build }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -324,6 +338,9 @@ jobs:
     name: longitudinal
     runs-on: ubuntu-20.04
     timeout-minutes: 50
+    needs: setup_workflow
+    env:
+      BUILD: ${{ needs.setup_workflow.outputs.docker_build }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -353,6 +370,9 @@ jobs:
     name: test car models
     runs-on: ubuntu-20.04
     timeout-minutes: 50
+    needs: setup_workflow
+    env:
+      BUILD: ${{ needs.setup_workflow.outputs.docker_build }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -383,10 +403,11 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 50
     if: github.repository == 'jamcar23/openpilot'
-    needs: [static_analysis, unit_tests, process_replay, test_longitudinal, test_car_models]
+    needs: [setup_workflow, static_analysis, unit_tests, process_replay, test_longitudinal, test_car_models]
     env:
       BRANCH: ''
       TARGET_DIR: tmp_op_ci
+      BUILD: ${{ needs.setup_workflow.outputs.docker_build }}
     steps:
       - uses: actions/checkout@v2
         with:
