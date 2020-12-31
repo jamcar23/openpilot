@@ -44,10 +44,17 @@ jobs:
       is_main_branch: ${{ github.ref == format('refs/head/{0}', env.MAIN_BRANCH) && true || '' }}
       container_uri: ${{ env.REGISTRY_BASE }}/${{ env.REPO }}/openpilot
       docker_login: docker login ${{ env.REGISTRY_BASE }} -u jamcar23 -p 
-      docker_build: |
-        docker build -t ${{ env.REPO }}-base:latest -f Dockerfile.openpilot_base .
-        docker build -t tmppilot -f Dockerfile.openpilotci .
+      docker_build: ${{ env.BUILD_CMD }}
     steps:
+      - name: Create docker_build command main branch
+        id: db_main_branch
+        if: github.event_name == 'push' && github.ref == format('refs/head/{0}', env.MAIN_BRANCH) # TODO: figure out how to load is_main_branch
+        run: |
+          echo "BUILD_CMD=docker build -t ${{ env.REPO }}-base:latest -f Dockerfile.openpilot_base . && docker build -t tmppilot -f Dockerfile.openpilotci ." >> $GITHUB_ENV
+      - name: Create docker_build command other branch
+        if: steps.db_main_branch.outcome != 'success'
+        run: |
+          echo "BUILD_CMD=docker pull ${{ env.REGISTRY_BASE }}/${{ env.REPO }}/openpilotci:latest && docker tag ${{ env.REGISTRY_BASE }}/${{ env.REPO }}/openpilotci tmppilot" >> $GITHUB_ENV
       - name: Finish setup # At least one step is needed so just log that we're done
         run: echo "Finished workflow setup"
 
@@ -173,7 +180,7 @@ jobs:
           submodules: true
       - name: Build Docker image
         run: echo "RUN cd /tmp/openpilot && scons -c && scons -j\$(nproc)" >> Dockerfile.openpilotci && eval "$BUILD"
-      - name: Push to dockerhub
+      - name: Push to container registry
         run: |
           eval "$LOGIN ${{ secrets.PACKAGE_PAT }}"
           docker tag tmppilot ${{ env.CONTAINER_URI }}:latest
