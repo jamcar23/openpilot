@@ -3,6 +3,7 @@ FROM ghcr.io/jamcar23/openpilot/openpilotci:latest
 COPY SConstruct \
      .pylintrc \
      .pre-commit-config.yaml \
+     op_edit.py \
      /tmp/openpilot/
 
 COPY ./pyextra /tmp/openpilot/pyextra
