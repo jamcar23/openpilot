@@ -23,6 +23,8 @@ jobs:
     name: setup workflow
     runs-on: ubuntu-20.04
     timeout-minutes: 10
+    env:
+      RUN_CMD_BASE: docker run --shm-size 1G -e PYTHONPATH=/tmp/openpilot -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v /tmp/comma_download_cache:/tmp/comma_download_cache
     outputs:
       is_default_repo: ${{ env.IS_DEFAULT }}
       is_main_branch: ${{ env.IS_MAIN }}
@@ -62,13 +64,16 @@ jobs:
         run: |
           echo "MAIN_IMAGE=${{ env.FAT_IMAGE }}" >> $GITHUB_ENV
           echo "BUILD_CMD=docker build -t ${{ env.BASE_IMAGE }} -f Dockerfile.openpilot_base . && docker build -t ${{ env.CI_IMAGE }} -f Dockerfile.openpilotci . && docker build -t ${{ env.FAT_IMAGE }} -f Dockerfile.openpilot_fat ." >> $GITHUB_ENV
-          echo "RUN_CMD=docker run --shm-size 1G -e PYTHONPATH=/tmp/openpilot -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v /tmp/comma_download_cache:/tmp/comma_download_cache --name ${{ env.TEMP_IMAGE }} \$IMAGE /bin/sh -c" >> $GITHUB_ENV
+          echo "RUN_CMD=${{ env.RUN_CMD_BASE }} --name ${{ env.TEMP_IMAGE }}" >> $GITHUB_ENV
       - name: Create docker commands other branch
         if: steps.docker_main_branch.outcome != 'success'
         run: |
           echo "MAIN_IMAGE=${{ env.CI_IMAGE }}" >> $GITHUB_ENV
           echo "BUILD_CMD=docker pull \$IMAGE" >> $GITHUB_ENV
-          echo "RUN_CMD=docker run --rm --shm-size 1G -v $PWD:/tmp/openpilot -e PYTHONPATH=/tmp/openpilot -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v /tmp/comma_download_cache:/tmp/comma_download_cache \$IMAGE /bin/sh -c" >> $GITHUB_ENV
+          echo "RUN_CMD=${{ env.RUN_CMD_BASE }} -v $PWD:/tmp/openpilot --rm" >> $GITHUB_ENV
+      - name: Finalize docker commands
+        run: |
+          echo "RUN_CMD=${{ env.RUN_CMD }} \$IMAGE /bin/sh -c" >> $GITHUB_ENV
       - name: Finish setup # At least one step is needed so just log that we're done
         run: echo "Finished workflow setup"
 
