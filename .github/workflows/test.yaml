@@ -37,24 +37,37 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 10
     outputs:
-      # `&& true || ''` is a fake ternary op that actually evals to true and false
-      # Needed because outputs are always strings (i.e. 'true' and 'false') and
-      # non-empty strings are always true
-      is_default_repo: ${{ github.repository == env.REPO && true || '' }}
-      is_main_branch: ${{ github.ref == format('refs/head/{0}', env.MAIN_BRANCH) && true || '' }}
-      container_uri: ${{ env.REGISTRY_BASE }}/${{ env.REPO }}/openpilot
+      is_default_repo: ${{ env.IS_DEFAULT }}
+      is_main_branch: ${{ env.IS_MAIN }}
+      should_build_docker: ${{ env.SHOULD_BUILD_DOCKER }}
+      container_uri: ${{ env.URI }}
       docker_login: docker login ${{ env.REGISTRY_BASE }} -u jamcar23 -p 
       docker_build: ${{ env.BUILD_CMD }}
     steps:
+      - name: Set default repo
+        # `&& true || ''` is a fake ternary op that actually evals to true and false
+        # Needed because env vars are always strings (i.e. 'true' and 'false') and
+        # non-empty strings are always true
+        run: |
+          echo "IS_DEFAULT=${{ github.repository == env.REPO && true || '' }}" >> $GITHUB_ENV
+      - name: Set main branch
+        run: |
+          echo "IS_MAIN=${{ github.ref == format('refs/head/{0}', env.MAIN_BRANCH) && true || '' }}" >> $GITHUB_ENV
+      - name: Set container uri
+        run: |
+          echo "URI=${{ env.REGISTRY_BASE }}/${{ env.REPO }}/openpilot" >> $GITHUB_ENV
+      - name: Set should build docker
+        run: |
+          echo "SHOULD_BUILD_DOCKER=${{ github.event_name == 'push' && env.IS_DEFAULT && env.IS_MAIN && true || '' }}" >> $GITHUB_ENV
       - name: Create docker_build command main branch
         id: db_main_branch
-        if: github.event_name == 'push' && github.ref == format('refs/head/{0}', env.MAIN_BRANCH) # TODO: figure out how to load is_main_branch
+        if: env.SHOULD_BUILD_DOCKER
         run: |
           echo "BUILD_CMD=docker build -t ${{ env.REPO }}-base:latest -f Dockerfile.openpilot_base . && docker build -t tmppilot -f Dockerfile.openpilotci ." >> $GITHUB_ENV
       - name: Create docker_build command other branch
         if: steps.db_main_branch.outcome != 'success'
         run: |
-          echo "BUILD_CMD=docker pull ${{ env.REGISTRY_BASE }}/${{ env.REPO }}/openpilotci:latest && docker tag ${{ env.REGISTRY_BASE }}/${{ env.REPO }}/openpilotci tmppilot" >> $GITHUB_ENV
+          echo "BUILD_CMD=docker pull ${{ env.URI }}ci:latest && docker tag ${{ env.URI }}ci tmppilot" >> $GITHUB_ENV
       - name: Finish setup # At least one step is needed so just log that we're done
         run: echo "Finished workflow setup"
 
@@ -141,7 +154,7 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 50
     needs: [setup_workflow, static_analysis] # hack to ensure slow tests run first since this and static_analysis are fast
-    if: github.event_name == 'push' && needs.setup_workflow.outputs.is_default_repo && needs.setup_workflow.outputs.is_main_branch
+    if: needs.setup_workflow.outputs.should_build_docker
     env:
       URI: ${{ needs.setup_workflow.outputs.container_uri }}
       LOGIN: ${{ needs.setup_workflow.outputs.docker_login }}
@@ -169,7 +182,7 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 50
     needs: [setup_workflow, static_analysis, unit_tests, process_replay, test_longitudinal, test_car_models]
-    if: github.event_name == 'push' && needs.setup_workflow.outputs.is_default_repo && needs.setup_workflow.outputs.is_main_branch
+    if: needs.setup_workflow.outputs.should_build_docker
     env:
       URI: ${{ needs.setup_workflow.outputs.container_uri }}
       LOGIN: ${{ needs.setup_workflow.outputs.docker_login }}
