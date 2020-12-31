@@ -63,7 +63,7 @@ jobs:
         id: db_main_branch
         if: env.SHOULD_BUILD_DOCKER
         run: |
-          echo "BUILD_CMD=docker build -t ${{ env.REPO }}-base:latest -f Dockerfile.openpilot_base . && docker build -t tmppilot -f Dockerfile.openpilotci ." >> $GITHUB_ENV
+          echo "BUILD_CMD=docker build -t ${{ env.REPO }}-base:latest -f Dockerfile.openpilot_base . && docker build -t tmppilot -f Dockerfile.openpilotci . && docker build -t ${{ env.REPO }}-fat:latest -f Dockerfile.openpilot_fat ." >> $GITHUB_ENV
       - name: Create docker_build command other branch
         if: steps.db_main_branch.outcome != 'success'
         run: |
@@ -165,6 +165,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
+          lfs: true
       - name: Build Docker image
         run: eval "$BUILD"
       - name: Push to container registry
@@ -174,6 +175,8 @@ jobs:
           docker push ${{ env.CONTAINER_URI }}-base:latest
           docker tag tmppilot ${{ env.CONTAINER_URI}}ci:latest
           docker push ${{ env.CONTAINER_URI }}ci:latest
+          docker tag ${{ env.REPO }}-fat:latest ${{ env.URI }}-fat:latest
+          docker push ${{ env.CONTAINER_URI }}-fat:latest
       - name: Docker Logout
         if: always()
         continue-on-error: true
@@ -193,8 +196,9 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
+          lfs: true
       - name: Build Docker image
-        run: echo "RUN cd /tmp/openpilot && scons -c && scons -j\$(nproc)" >> Dockerfile.openpilotci && eval "$BUILD"
+        run: echo "RUN cd /tmp/openpilot && scons -c && scons -j\$(nproc)" >> Dockerfile.openpilot_fat && eval "$BUILD"
       - name: Push to container registry
         run: |
           eval "$LOGIN ${{ secrets.PACKAGE_PAT }}"
