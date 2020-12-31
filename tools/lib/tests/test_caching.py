@@ -3,6 +3,8 @@
 import os
 import unittest
 import shutil
+
+os.environ["COMMA_CACHE"] = "/tmp/__test_cache__"
 from tools.lib.url_file import URLFile, CACHE_DIR
 
 
