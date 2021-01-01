@@ -129,13 +129,6 @@ class opParams:
                         'indi_time_constant_v': Param([5.5, 5.5, 5.5], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
                         'indi_actuator_effectiveness_bp': Param([0, 255, 255], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
                         'indi_actuator_effectiveness_v': Param([6, 6, 6], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        SHOW_A_CRUISE: Param(False, bool, live=True),
-                        'a_cruise_min_bp': Param([0., 5.,  10., 20.,  40.], [list, float], live=True, depends_on=SHOW_A_CRUISE),
-                        'a_cruise_min_v': Param([-1.0, -.8, -.67, -.5, -.30], [list, float], live=True, depends_on=SHOW_A_CRUISE),
-                        'a_cruise_min_v_following': Param([-1.0, -.8, -.67, -.5, -.30], [list, float], live=True, depends_on=SHOW_A_CRUISE),
-                        'a_cruise_max_bp': Param([0.,  6.4, 22.5, 40.], [list, float], live=True, depends_on=SHOW_A_CRUISE),
-                        'a_cruise_max_v': Param([1.2, 1.2, 0.65, .4], [list, float], live=True, depends_on=SHOW_A_CRUISE),
-                        'a_cruise_max_v_following': Param([1.6, 1.6, 0.65, .4], [list, float], live=True, depends_on=SHOW_A_CRUISE),
                         ENABLE_UNSAFE_STEERING_RATE: Param(False, bool, depends_on=SHOW_UNSAFE_OPTS, description='Toyota only.\nThis is HIGHLY unsafe, '
                                                           'at best, you have less time to react, at worst, you\'ll have steering faults.\nDo NOT use.'),
                         ENABLE_LAT_PARAMS: Param(False, bool, live=True, description="When true, the lat params set in op_edit."),
@@ -169,7 +162,15 @@ class opParams:
                         ENABLE_TOYOTA_CAN_PARAMS: Param(False, [bool], live=True, depends_on=SHOW_TOYOTA_OPTS),
                         ENABLE_TOYOTA_ACCEL_PARAMS: Param(False, [bool], live=True, depends_on=ENABLE_TOYOTA_CAN_PARAMS),
                         TOYOTA_ACC_TYPE: Param(1, [int], live=True, depends_on=ENABLE_TOYOTA_ACCEL_PARAMS),
-                        TOYOTA_PERMIT_BRAKING: Param(1, [1, 0, 'lead'], live=True, depends_on=ENABLE_TOYOTA_ACCEL_PARAMS)}
+                        TOYOTA_PERMIT_BRAKING: Param(1, [1, 0, 'lead'], live=True, depends_on=ENABLE_TOYOTA_ACCEL_PARAMS),
+                        ENABLE_PLANNER_PARAMS: Param(False, [bool], live=True),
+                        ENABLE_PLNR_ACCEL_LIMITS: Param(False, [bool], live=True, depends_on=ENABLE_PLANNER_PARAMS),
+                        'a_cruise_min_bp': Param([0., 5.,  10., 20.,  40.], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
+                        'a_cruise_min_v': Param([-1.0, -.8, -.67, -.5, -.30], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
+                        'a_cruise_min_v_following': Param([-1.0, -.8, -.67, -.5, -.30], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
+                        'a_cruise_max_bp': Param([0.,  6.4, 22.5, 40.], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
+                        'a_cruise_max_v': Param([1.2, 1.2, 0.65, .4], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
+                        'a_cruise_max_v_following': Param([1.6, 1.6, 0.65, .4], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
@@ -386,3 +387,6 @@ ENABLE_TOYOTA_CAN_PARAMS = 'enable_toyota_can_params'
 ENABLE_TOYOTA_ACCEL_PARAMS = 'enable_toyota_accel_params'
 TOYOTA_ACC_TYPE = 'toyota_acc_type'
 TOYOTA_PERMIT_BRAKING = 'toyota_permit_braking'
+
+ENABLE_PLANNER_PARAMS = 'enable_planner_params'
+ENABLE_PLNR_ACCEL_LIMITS = 'enable_accel_limits_planner'
