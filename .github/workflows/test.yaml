@@ -46,7 +46,7 @@ jobs:
           echo "IS_DEFAULT=${{ github.repository == env.REPO && true || '' }}" >> $GITHUB_ENV
       - name: Set main branch
         run: |
-          echo "IS_MAIN=${{ github.ref == format('refs/head/{0}', env.MAIN_BRANCH) && true || '' }}" >> $GITHUB_ENV
+          echo "IS_MAIN=${{ github.ref == format('refs/heads/{0}', env.MAIN_BRANCH) && true || '' }}" >> $GITHUB_ENV
       - name: Set container uri
         run: |
           echo "URI=${{ env.REGISTRY_BASE }}/${{ env.REPO }}/openpilot" >> $GITHUB_ENV
