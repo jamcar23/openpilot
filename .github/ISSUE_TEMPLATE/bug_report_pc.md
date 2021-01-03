@@ -2,8 +2,9 @@
 name: PC Bug report
 about: For issues with running openpilot on PC
 title: ''
-labels: 'PC'
+labels: ''
 assignees: ''
+
 ---
 
 **Describe the bug**
