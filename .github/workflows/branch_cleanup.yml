@@ -24,11 +24,11 @@ jobs:
               if (!branch.name.endsWith("-ci"))
                 continue;
               
-              const source = branch.substring(0, branch.length - 3);
+              const source = branch.name.substring(0, branch.length - 3);
 
               var found_source = false;
 
-              for (const b of branches) {
+              for (const b of branches.data) {
                 if (b.name == source) {
                   found_source = true;
                   break;
