@@ -1,8 +1,8 @@
 name: Branch cleanup
 on:
   push:
-    # branches:
-    #   - src
+    branches:
+      - src
 
 jobs:
   cleanup:
@@ -42,6 +42,7 @@ jobs:
                 continue;
               }
 
+              console.log(`Deleting branch: ${branch.name}`);
 
               const response = await github.git.deleteRef({
                 owner: context.repo.owner,
