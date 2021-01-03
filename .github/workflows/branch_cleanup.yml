@@ -24,7 +24,7 @@ jobs:
               if (!branch.name.endsWith('-ci'))
                 continue;
               
-              const source = branch.name.substring(0, branch.length - 3);
+              const source = branch.name.substring(0, branch.name.length - 3);
               console.log(`Branch: ${branch.name}, source: ${source}`)
 
               var found_source = false;
@@ -46,10 +46,10 @@ jobs:
               const response = await github.git.deleteRef({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                ref: "refs/heads/" + branch.name
+                ref: "heads/" + branch.name
               })
 
-              if (response.status != 200) {
+              if (response.status != 204) {
                 core.setFailed(`Failed to delete branch ${branch.name}, status: ${response.status}`)
               }
             }
