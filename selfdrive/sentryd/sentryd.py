@@ -17,7 +17,7 @@ def get_username():
     _USERNAME = opParams().get('username')
 
     if _USERNAME is None or not isinstance(_USERNAME, str):
-        _USERNAME = 'undefined'
+        _USERNAME = ''
 
     return _USERNAME
 
@@ -31,7 +31,15 @@ def create_client(*args, tags=None, **kwargs):
     client = Client('https://ee3dca66da104ef388e010fcefbd06c6:df79d17e3a0743c387d4cbf05932abde@o484202.ingest.sentry.io/5537090',
                   install_sys_hook=False, transport=HTTPTransport, release=version, tags=tags, *args, **kwargs)
 
-    client.user_context({'dongle_id': os.environ.get('DONGLE_ID'), 'username': get_username()})
+    username = get_username()
+    user_context = {}
+
+    if username:
+        user_context['username'] = username
+
+    user_context['dongle_id'] = os.environ.get('DONGLE_ID')
+
+    client.user_context(user_context)
 
     return client
 
