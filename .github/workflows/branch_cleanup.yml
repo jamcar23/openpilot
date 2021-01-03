@@ -20,7 +20,7 @@ jobs:
               repo: context.repo.repo
             });
 
-            for (const branch of branches) {
+            for (const branch of branches.data) {
               if (!branch.name.endsWith("-ci"))
                 continue;
               
@@ -45,6 +45,7 @@ jobs:
                 ref: "refs/heads/" + branch.name
               })
 
-              console.log(response);
-              break;
+              if (response.status != 200) {
+                core.setFailed("Failed to delete branch ${branch.name}, status: ${response.status}")
+              }
             }
