@@ -21,10 +21,11 @@ jobs:
             });
 
             for (const branch of branches.data) {
-              if (!branch.name.endsWith("-ci"))
+              if (!branch.name.endsWith('-ci'))
                 continue;
               
               const source = branch.name.substring(0, branch.length - 3);
+              console.log(`Branch: ${branch.name}, source: ${source}`)
 
               var found_source = false;
 
@@ -35,9 +36,12 @@ jobs:
                 }
               }
 
+              console.log(`Found source: ${found_source}`)
+
               if (found_source) {
                 continue;
               }
+
 
               const response = await github.git.deleteRef({
                 owner: context.repo.owner,
@@ -46,6 +50,6 @@ jobs:
               })
 
               if (response.status != 200) {
-                core.setFailed("Failed to delete branch ${branch.name}, status: ${response.status}")
+                core.setFailed(`Failed to delete branch ${branch.name}, status: ${response.status}`)
               }
             }
