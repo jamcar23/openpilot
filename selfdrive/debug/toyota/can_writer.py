@@ -2,7 +2,7 @@
 from time import sleep
 
 import cereal.messaging as messaging
-from cereal.services import service_list
+#from cereal.services import service_list
 from opendbc.can.packer import CANPacker
 from common.op_params import opParams, ENABLE_AUTO_HIGH_BEAMS, CAN_WRITE_LIGHT_STALK, \
                             CAN_LIGHT_STALK_AUTO_HB, CAN_LIGHT_STALK_AUTO_HB_ON, \
@@ -15,12 +15,13 @@ from selfdrive.boardd.boardd import can_list_to_can_capnp
 
 
 def main():
-  packer = CANPacker()
+  packer = CANPacker('toyota_nodsu_hybrid_pt_generated')
   op_params = opParams()
-  sendcan = messaging.pub_sock(service_list['sendcan'].port)
+  sendcan = messaging.pub_sock('8017') #sendcan service port
 
   while True:
     if op_params.get(ENABLE_AUTO_HIGH_BEAMS) and op_params.get(CAN_WRITE_LIGHT_STALK):
+      print('Writing light stalk message')
       cmd = create_high_beam_command(packer, op_params.get(CAN_LIGHT_STALK_HB_ON), op_params.get(CAN_LIGHT_STALK_LB_ON),
                               op_params.get(CAN_LIGHT_STALK_AUTO_LIGHTS), op_params.get(CAN_LIGHT_STALK_TRANSITION),
                               op_params.get(CAN_LIGHT_STALK_AUTO_HB), op_params.get(CAN_LIGHT_STALK_DASH_ICON),
