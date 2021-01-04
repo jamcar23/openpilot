@@ -178,7 +178,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
       if param_info.has_description:
         to_print.append(COLORS.OKGREEN + '>>  Description: {}'.format(param_info.description.replace('\n', '\n  > ')) + COLORS.ENDC)
       if param_info.has_allowed_types:
-        to_print.append(COLORS.RED + '>>  Allowed types: {}'.format(', '.join([at.__name__ if isinstance(at, type) else at for at in param_info.allowed_types])) + COLORS.ENDC)
+        to_print.append(COLORS.RED + '>>  Allowed types: {}'.format(', '.join([at.__name__ if isinstance(at, type) else str(at) for at in param_info.allowed_types])) + COLORS.ENDC)
       if param_info.live:
         live_msg = '>>  This parameter supports live tuning!'
         if not self.live_tuning:
@@ -230,7 +230,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
   def change_param_list(self, old_value, param_info, chosen_key):
     while True:
       self.info('Current value: {} (type: {})'.format(old_value, type(old_value).__name__), sleep_time=0)
-      self.prompt('\nEnter index to edit (0 to {}), or -i to remove index, or +value to append value:'.format(len(old_value) - 1))
+      self.prompt('\nEnter index to edit (0 to {}), or -i to remove index, or +value to append value:'.format(len(old_value) - 1 if old_value else 0))
 
       append_val = False
       remove_idx = False
@@ -355,7 +355,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
     dat = dat.strip()
     try:
       dat = ast.literal_eval(dat)
-    except:
+    except: # noqa E722 pylint: disable=bare-except
       if dat.lower() == 'none':
         dat = None
       elif dat.lower() in ['false', 'f']:

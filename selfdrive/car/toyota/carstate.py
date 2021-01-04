@@ -106,7 +106,7 @@ class CarState(CarStateBase):
 
     if self.CP.carFingerprint in TSS2_CAR:
       ret.leftBlindspot = (cp.vl["BSM"]['L_ADJACENT'] == 1) or (cp.vl["BSM"]['L_APPROACHING'] == 1)
-      ret.rightBlindspot = (cp.vl["BSM"]['R_ADJACENT'] == 1) or (cp.vl["BSM"]['R_APPROACHING'] == 1) 
+      ret.rightBlindspot = (cp.vl["BSM"]['R_ADJACENT'] == 1) or (cp.vl["BSM"]['R_APPROACHING'] == 1)
 
     if cp.vl["LIGHT_STALK"]['DASH_ICON']:
       if cp.vl["LIGHT_STALK"]['HIGH_BEAM_ON']:
@@ -120,6 +120,8 @@ class CarState(CarStateBase):
 
     ret.headLights.autoHighBeams = bool(cp.vl["LIGHT_STALK"]['AUTO_HIGH_BEAM'] and cp.vl["LIGHT_STALK"]['AUTO_HIGH_BEAM_ON'])
     ret.headLights.transitioning = bool(cp.vl["LIGHT_STALK"]['STATE_TRANSITION'])
+
+    ret.engineRPM = cp.vl["ENGINE_RPM"]['RPM']
 
     return ret
 
@@ -160,6 +162,7 @@ class CarState(CarStateBase):
       ("AUTO_LIGHTS", "LIGHT_STALK", 0),
       ("DASH_ICON", "LIGHT_STALK", 0),
       ("STATE_TRANSITION", "LIGHT_STALK", 0),
+      ("RPM", "ENGINE_RPM", 0)
     ]
 
     checks = [

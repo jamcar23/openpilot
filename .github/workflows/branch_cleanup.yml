@@ -1,0 +1,56 @@
+name: Branch cleanup
+on:
+  push:
+    branches:
+      - src
+
+jobs:
+  cleanup:
+    name: remove old ci branches
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: cleanup
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branches = await github.repos.listBranches({
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+
+            for (const branch of branches.data) {
+              if (!branch.name.endsWith('-ci'))
+                continue;
+              
+              const source = branch.name.substring(0, branch.name.length - 3);
+              console.log(`Branch: ${branch.name}, source: ${source}`)
+
+              var found_source = false;
+
+              for (const b of branches.data) {
+                if (b.name == source) {
+                  found_source = true;
+                  break;
+                }
+              }
+
+              console.log(`Found source: ${found_source}`)
+
+              if (found_source) {
+                continue;
+              }
+
+              console.log(`Deleting branch: ${branch.name}`);
+
+              const response = await github.git.deleteRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: "heads/" + branch.name
+              })
+
+              if (response.status != 204) {
+                core.setFailed(`Failed to delete branch ${branch.name}, status: ${response.status}`)
+              }
+            }

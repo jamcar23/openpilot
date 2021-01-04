@@ -14,6 +14,7 @@
 #include "ui.hpp"
 #include "paint.hpp"
 #include "android/sl_sound.hpp"
+#include "dashcam.h"
 
 volatile sig_atomic_t do_exit = 0;
 static void set_do_exit(int sig) {
@@ -134,7 +135,7 @@ int main(int argc, char* argv[]) {
   float brightness_b = 0, brightness_m = 0;
   int result = read_param(&brightness_b, "BRIGHTNESS_B", true);
   result += read_param(&brightness_m, "BRIGHTNESS_M", true);
-  if(result != 0) {
+  if (result != 0) {
     brightness_b = LEON ? 10.0 : 5.0;
     brightness_m = LEON ? 2.6 : 1.3;
     write_param_float(brightness_b, "BRIGHTNESS_B", true);
@@ -161,7 +162,11 @@ int main(int argc, char* argv[]) {
       handle_sidebar_touch(s, touch_x, touch_y);
       handle_vision_touch(s, touch_x, touch_y);
     }
-
+    
+    if (s->awake) {
+      dashcam(s, touch_x, touch_y);
+    }
+    
     // Don't waste resources on drawing in case screen is off
     handle_display_state(s, touched == 1);
     if (!s->awake) {

@@ -4,9 +4,9 @@ from selfdrive.car import apply_toyota_steer_torque_limits, create_gas_command, 
 from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_command, \
                                            create_accel_command, create_acc_cancel_command, \
                                            create_fcw_command
-from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, SteerLimitParams
+from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, NO_STOP_TIMER_CAR, SteerLimitParams
 from opendbc.can.packer import CANPacker
-from common.op_params import opParams
+from common.op_params import opParams, ENABLE_TOYOTA_CAN_PARAMS, ENABLE_TOYOTA_ACCEL_PARAMS, TOYOTA_ACC_TYPE, TOYOTA_PERMIT_BRAKING
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -32,14 +32,13 @@ def accel_hysteresis(accel, accel_steady, enabled, accel_gap):
 
 
 class CarController():
-  def __init__(self, dbc_name, CP, VM):
+  def __init__(self, dbc_name, CP, VM, OP=None):
     self.last_steer = 0
     self.accel_steady = 0.
     self.alert_active = False
     self.last_standstill = False
     self.standstill_req = False
 
-    self.last_fault_frame = -200
     self.steer_rate_limited = False
 
     self.fake_ecus = set()
@@ -49,7 +48,10 @@ class CarController():
       self.fake_ecus.add(Ecu.dsu)
 
     self.packer = CANPacker(dbc_name)
-    self.opParams = opParams()
+    
+    if not OP:
+      OP = opParams()
+    self.opParams = OP
 
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
              left_line, right_line, lead, left_lane_depart, right_lane_depart):
@@ -74,12 +76,8 @@ class CarController():
     apply_steer = apply_toyota_steer_torque_limits(new_steer, self.last_steer, CS.out.steeringTorqueEps, SteerLimitParams)
     self.steer_rate_limited = new_steer != apply_steer
 
-    # only cut torque when steer state is a known fault
-    if CS.steer_state in [9, 25]:
-      self.last_fault_frame = frame
-
-    # Cut steering for 2s after fault
-    if not enabled or (frame - self.last_fault_frame < 200):
+    # Cut steering while we're in a known fault state (2s)
+    if not enabled or CS.steer_state in [9, 25]:
       apply_steer = 0
       apply_steer_req = 0
     else:
@@ -90,7 +88,7 @@ class CarController():
       pcm_cancel_cmd = 1
 
     # on entering standstill, send standstill request
-    if CS.out.standstill and not self.last_standstill:
+    if CS.out.standstill and not self.last_standstill and CS.CP.carFingerprint not in NO_STOP_TIMER_CAR:
       self.standstill_req = True
     if CS.pcm_acc_status != 8:
       # pcm entered standstill or it's disabled
@@ -124,7 +122,16 @@ class CarController():
       if pcm_cancel_cmd and CS.CP.carFingerprint == CAR.LEXUS_IS:
         can_sends.append(create_acc_cancel_command(self.packer))
       elif CS.CP.openpilotLongitudinalControl:
-        can_sends.append(create_accel_command(self.packer, apply_accel, pcm_cancel_cmd, self.standstill_req, lead))
+        acc_type = 1
+        permit_braking = 1
+
+        if self.opParams.get(ENABLE_TOYOTA_CAN_PARAMS) and self.opParams.get(ENABLE_TOYOTA_ACCEL_PARAMS):
+          acc_type = self.opParams.get(TOYOTA_ACC_TYPE) & 0xFF
+          permit_braking = self.opParams.get(TOYOTA_PERMIT_BRAKING)
+          if permit_braking == 'lead':
+            permit_braking = lead
+
+        can_sends.append(create_accel_command(self.packer, apply_accel, pcm_cancel_cmd, self.standstill_req, lead, acc_type=acc_type, permit_braking=permit_braking))
       else:
         can_sends.append(create_accel_command(self.packer, 0, pcm_cancel_cmd, False, lead))
 
