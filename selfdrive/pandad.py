@@ -46,7 +46,7 @@ def get_firmware_fn():
     if OP_PARAMS.get(ENABLE_UNSAFE_STEERING_RATE):
       mk += " UNSAFE_TORQUE_RATE=1"
     if OP_PARAMS.get(ENABLE_AUTO_HIGH_BEAMS):
-      mk += " ENABLE_AUTO_HIGH_BEAMS"
+      mk += " ENABLE_AUTO_HIGH_BEAMS=1"
 
     if not os.path.exists(obj_path):
       os.makedirs(obj_path)
