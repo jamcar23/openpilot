@@ -7,7 +7,7 @@ from common.numpy_fast import interp, incremental_avg
 import cereal.messaging as messaging
 from cereal import car, log
 from common.realtime import sec_since_boot
-from common.op_params import opParams, ENABLE_COASTING, COAST_SPEED, DOWNHILL_INCLINE, ALWAYS_EVAL_COAST
+from common.op_params import opParams, ENABLE_COASTING, COAST_SPEED, DOWNHILL_INCLINE, ALWAYS_EVAL_COAST, ENABLE_PLANNER_PARAMS, ENABLE_PLNR_ACCEL_LIMITS
 from selfdrive.swaglog import cloudlog
 from selfdrive.config import Conversions as CV
 from selfdrive.controls.lib.speed_smoother import speed_smoother
@@ -38,17 +38,25 @@ Source = log.Plan.LongitudinalPlanSource
 
 
 def calc_cruise_accel_limits(v_ego, following, op_params):
-  min_key = "a_cruise_min_v"
-  max_key = "a_cruise_max_v"
+  if op_params.get(ENABLE_PLANNER_PARAMS) and op_params.get(ENABLE_PLNR_ACCEL_LIMITS):
+    min_key = "a_cruise_min_v"
+    max_key = "a_cruise_max_v"
 
-  if following:
-    min_key += "_following"
-    max_key += "_following"
+    if following:
+      min_key += "_following"
+      max_key += "_following"
 
-  a_cruise_min = interp(v_ego, op_params.get('a_cruise_min_bp'), op_params.get(min_key))
-  a_cruise_max = interp(v_ego, op_params.get('a_cruise_max_bp'), op_params.get(max_key))
+    min_bp = op_params.get('a_cruise_min_bp')
+    min_v = op_params.get(min_key)
+    max_bp = op_params.get('a_cruise_max_bp')
+    max_v = op_params.get(max_key)
+  else:
+    min_bp = _A_CRUISE_MIN_BP
+    min_v = _A_CRUISE_MIN_V
+    max_bp = _A_CRUISE_MAX_BP
+    max_v = _A_CRUISE_MAX_V_FOLLOWING if following else _A_CRUISE_MAX_V
 
-  return np.vstack([a_cruise_min, a_cruise_max])
+  return np.vstack([interp(v_ego, min_bp, min_v), interp(v_ego, max_bp, max_v)])
 
 
 def limit_accel_in_turns(v_ego, angle_steers, a_target, CP):
