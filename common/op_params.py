@@ -170,7 +170,14 @@ class opParams:
                         ENABLE_TOYOTA_ACCEL_PARAMS: Param(False, [bool], live=True, depends_on=ENABLE_TOYOTA_CAN_PARAMS),
                         TOYOTA_ACC_TYPE: Param(1, [int], live=True, depends_on=ENABLE_TOYOTA_ACCEL_PARAMS),
                         TOYOTA_PERMIT_BRAKING: Param(1, [1, 0, 'lead'], live=True, depends_on=ENABLE_TOYOTA_ACCEL_PARAMS),
-                        ENABLE_AUTO_HIGH_BEAMS: Param(False, [bool], depends_on=SHOW_EXPERIMENTAL_OPTS)}
+                        ENABLE_AUTO_HIGH_BEAMS: Param(False, [bool], depends_on=SHOW_EXPERIMENTAL_OPTS),
+                        CAN_WRITE_LIGHT_STALK: Param(False, [bool], live=True, depends_on=ENABLE_AUTO_HIGH_BEAMS),
+                        CAN_LIGHT_STALK_AUTO_HB: Param(0, [0, 1], live=True, depends_on=CAN_WRITE_LIGHT_STALK),
+                        CAN_LIGHT_STALK_AUTO_HB_ON: Param(0, [0, 1], live=True, depends_on=CAN_WRITE_LIGHT_STALK),
+                        CAN_LIGHT_STALK_AUTO_LIGHTS: Param(0, [0, 1], live=True, depends_on=CAN_WRITE_LIGHT_STALK),
+                        CAN_LIGHT_STALK_HB_ON: Param(0, [0, 1], live=True, depends_on=CAN_WRITE_LIGHT_STALK),
+                        CAN_LIGHT_STALK_LB_ON: Param(0, [0, 1], live=True, depends_on=CAN_WRITE_LIGHT_STALK),
+                        CAN_LIGHT_STALK_TRANSITION: Param(0, [0, 1], live=True, depends_on=CAN_WRITE_LIGHT_STALK)}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
@@ -389,3 +396,11 @@ TOYOTA_ACC_TYPE = 'toyota_acc_type'
 TOYOTA_PERMIT_BRAKING = 'toyota_permit_braking'
 
 ENABLE_AUTO_HIGH_BEAMS = 'enable_auto_high_beams'
+CAN_WRITE_LIGHT_STALK = 'can_write_light_stalk'
+CAN_LIGHT_STALK_HB_ON = 'can_light_stalk_high_beam_on'
+CAN_LIGHT_STALK_LB_ON = 'can_light_stalk_low_beam_on'
+CAN_LIGHT_STALK_AUTO_LIGHTS = 'can_light_stalk_auto_lights'
+CAN_LIGHT_STALK_TRANSITION = 'can_light_stalk_transition'
+CAN_LIGHT_STALK_AUTO_HB = 'can_light_stalk_auto_high_beam'
+CAN_LIGHT_STALK_AUTO_HB_ON = 'can_light_stalk_auto_high_beam_on'
+
