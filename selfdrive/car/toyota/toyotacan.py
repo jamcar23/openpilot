@@ -86,11 +86,11 @@ def create_high_beam_command(packer, high_beam, low_beam_on=1, auto_lights=1, tr
   values = {
     "SET_ME_X12": 0x12,
     "HIGH_BEAM_ON": 1 if high_beam else 0,
-    "LOW_BEAM_ON": low_beam_on
-    "AUTO_LIGHTS": auto_lights
+    "LOW_BEAM_ON": low_beam_on,
+    "AUTO_LIGHTS": auto_lights,
     "STATE_TRANSITION": transition,
     "AUTO_HIGH_BEAM": auto_hb,
     "DASH_ICON": dash_icon,
-    "AUTO_HIGH_BEAM_ON" : auto_hb_on
+    "AUTO_HIGH_BEAM_ON" : auto_hb_on,
   }
   return packer.make_can_msg("LIGHT_STALK", 0, values)
