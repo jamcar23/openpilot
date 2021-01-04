@@ -177,7 +177,9 @@ class opParams:
                         CAN_LIGHT_STALK_AUTO_LIGHTS: Param(0, [0, 1], live=True, depends_on=CAN_WRITE_LIGHT_STALK),
                         CAN_LIGHT_STALK_HB_ON: Param(0, [0, 1], live=True, depends_on=CAN_WRITE_LIGHT_STALK),
                         CAN_LIGHT_STALK_LB_ON: Param(0, [0, 1], live=True, depends_on=CAN_WRITE_LIGHT_STALK),
-                        CAN_LIGHT_STALK_TRANSITION: Param(0, [0, 1], live=True, depends_on=CAN_WRITE_LIGHT_STALK)}
+                        CAN_LIGHT_STALK_TRANSITION: Param(0, [0, 1], live=True, depends_on=CAN_WRITE_LIGHT_STALK),
+                        CAN_LIGHT_STALK_DASH_ICON: Param(0, [0, 1], live=True, depends_on=CAN_WRITE_LIGHT_STALK),
+                        CAN_LIGHT_STALK_SLEEP: Param(0, VT.number, live=True, depends_on=CAN_WRITE_LIGHT_STALK)}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
@@ -403,4 +405,5 @@ CAN_LIGHT_STALK_AUTO_LIGHTS = 'can_light_stalk_auto_lights'
 CAN_LIGHT_STALK_TRANSITION = 'can_light_stalk_transition'
 CAN_LIGHT_STALK_AUTO_HB = 'can_light_stalk_auto_high_beam'
 CAN_LIGHT_STALK_AUTO_HB_ON = 'can_light_stalk_auto_high_beam_on'
-
+CAN_LIGHT_STALK_DASH_ICON = 'can_light_stalk_dash_icon'
+CAN_LIGHT_STALK_SLEEP = 'can_light_stalk_sleep'
