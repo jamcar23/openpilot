@@ -1,5 +1,7 @@
 import json
 import os
+import sys
+
 from common.file_helpers import mkdirs_exists_ok
 from selfdrive.hardware import PC
 
@@ -32,3 +34,14 @@ def set_token(token):
 
 def clear_token():
   os.unlink(os.path.join(CONFIG_DIR, 'auth.json'))
+
+
+if __name__ == "__main__":
+  l = len(sys.argv)
+
+  if l == 2:
+    set_token(sys.argv[1])
+  elif l == 1:
+    clear_token()
+  else:
+    print('Unknown number of args.')
