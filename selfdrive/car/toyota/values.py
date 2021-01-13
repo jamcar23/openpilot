@@ -1,6 +1,5 @@
 # flake8: noqa
 
-from common.class_property import classproperty
 from common.op_params import opParams, ENABLE_UNSAFE_STEERING_RATE, ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE
 from selfdrive.car import dbc_dict
 from cereal import car
@@ -13,12 +12,10 @@ class SteerLimitParams:
   _op_params = opParams()
 
   @classmethod
-  @classproperty
   def STEER_DELTA_UP(cls):
     return 15 if cls._op_params.get(ENABLE_UNSAFE_STEERING_RATE) and cls._op_params.get(ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE) else 10
 
   @classmethod
-  @classproperty
   def STEER_DELTA_DOWN(cls):
     return 44 if cls._op_params.get(ENABLE_UNSAFE_STEERING_RATE) and cls._op_params.get(ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE) else 25
 
