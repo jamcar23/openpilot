@@ -71,10 +71,10 @@ class PathPlanner():
     self.alca_nudge_required = self.op_params.get('alca_nudge_required')
     self.alca_min_speed = self.op_params.get('alca_min_speed') * CV.MPH_TO_MS
     
-    self.update_params()
+    self.update_params(CP)
     self.last_steer_rate_cost = self.steer_rate_cost
 
-  def update_params(self):
+  def update_params(self, CP):
     self.steer_rate_cost = CP.steerRateCost if not self.op_params.get(ENABLE_PLANNER_PARAMS) and not self.op_params.get(ENABLE_STEER_RATE_COST) else self.op_params.get(STEER_RATE_COST)
 
   def setup_mpc(self):
@@ -94,7 +94,7 @@ class PathPlanner():
     self.angle_steers_des_time = 0.0
 
   def update(self, sm, pm, CP, VM):
-    self.update_params()
+    self.update_params(CP)
 
     v_ego = sm['carState'].vEgo
     angle_steers = sm['carState'].steeringAngle
