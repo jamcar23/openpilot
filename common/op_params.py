@@ -132,7 +132,7 @@ class opParams:
                         ENABLE_UNSAFE_STEERING_RATE: Param(False, bool, depends_on=SHOW_UNSAFE_OPTS, description='Toyota only.\nThis is HIGHLY unsafe, '
                                                           'at best, you have less time to react, at worst, you\'ll have steering faults.\nDo NOT use.'),
                         ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE: Param(False, bool, depends_on=SHOW_UNSAFE_OPTS, description='Toyota only.\nThis is HIGHLY unsafe, '
-                                                          'at best, you have less time to react, at worst, you\'ll have steering faults.\nDo NOT use.', live=True)
+                                                          'at best, you have less time to react, at worst, you\'ll have steering faults.\nDo NOT use.', live=True),
                         ENABLE_LAT_PARAMS: Param(False, bool, live=True, description="When true, the lat params set in op_edit."),
                         WHICH_LAT_CTRL: Param('indi', ['pid', 'indi', 'lqr'], live=True, depends_on= ENABLE_LAT_PARAMS, description='Which lat controller to use, '
                                               'options are pid, indi, or lqr.'),
@@ -172,7 +172,9 @@ class opParams:
                         'a_cruise_min_v_following': Param([-1.0, -.8, -.67, -.5, -.30], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
                         'a_cruise_max_bp': Param([0.,  6.4, 22.5, 40.], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
                         'a_cruise_max_v': Param([1.2, 1.2, 0.65, .4], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
-                        'a_cruise_max_v_following': Param([1.6, 1.6, 0.65, .4], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),}
+                        'a_cruise_max_v_following': Param([1.6, 1.6, 0.65, .4], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
+                        ENABLE_STEER_RATE_COST: Param(False, [bool], live=True, depends_on=ENABLE_PLANNER_PARAMS, description='Technically live but treat it like it\'s not.'),
+                        STEER_RATE_COST: Param(1., VT.number, live=True, depends_on=ENABLE_STEER_RATE_COST)}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
@@ -393,3 +395,5 @@ TOYOTA_PERMIT_BRAKING = 'toyota_permit_braking'
 
 ENABLE_PLANNER_PARAMS = 'enable_planner_params'
 ENABLE_PLNR_ACCEL_LIMITS = 'enable_accel_limits_planner'
+ENABLE_STEER_RATE_COST = 'enable_steer_rate_cost'
+STEER_RATE_COST = 'steer_rate_cost'

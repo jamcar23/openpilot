@@ -7,7 +7,9 @@ from selfdrive.controls.lib.drive_helpers import MPC_COST_LAT
 from selfdrive.controls.lib.lane_planner import LanePlanner
 from selfdrive.config import Conversions as CV
 from common.params import Params
-from common.op_params import opParams, ENABLE_LAT_PARAMS, ENABLE_ACTUATOR_DELAY_BPS, STEER_ACTUATOR_DELAY, STEER_ACTUATOR_DELAY_BP, STEER_ACTUATOR_DELAY_V
+from common.op_params import opParams, ENABLE_LAT_PARAMS, ENABLE_ACTUATOR_DELAY_BPS, STEER_ACTUATOR_DELAY, \
+                            STEER_ACTUATOR_DELAY_BP, STEER_ACTUATOR_DELAY_V, \
+                            ENABLE_STEER_RATE_COST, STEER_RATE_COST, ENABLE_PLANNER_PARAMS  
 import cereal.messaging as messaging
 from cereal import log
 from common.numpy_fast import interp
@@ -68,6 +70,7 @@ class PathPlanner():
 
     self.alca_nudge_required = self.op_params.get('alca_nudge_required')
     self.alca_min_speed = self.op_params.get('alca_min_speed') * CV.MPH_TO_MS
+    self.last_steer_rate_cost = 1.0
 
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
@@ -199,16 +202,19 @@ class PathPlanner():
 
     self.angle_steers_des_mpc = float(math.degrees(delta_desired * VM.sR) + angle_offset)
 
+    steer_cost = CP.steerRateCost if not (self.op_params.get(ENABLE_PLANNER_PARAMS) and self.op_params.get(ENABLE_STEER_RATE_COST)) else self.op_params.get(STEER_RATE_COST)
+
     #  Check for infeasable MPC solution
     mpc_nans = any(math.isnan(x) for x in self.mpc_solution[0].delta)
     t = sec_since_boot()
-    if mpc_nans:
+    if mpc_nans or not math.isclose(steer_cost, self.last_steer_rate_cost):
       self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, CP.steerRateCost)
       self.cur_state[0].delta = math.radians(angle_steers - angle_offset) / VM.sR
+      self.last_steer_rate_cost = steer_cost
 
       if t > self.last_cloudlog_t + 5.0:
         self.last_cloudlog_t = t
-        cloudlog.warning("Lateral mpc - nan: True")
+        # cloudlog.warning("Lateral mpc - nan: True")
 
     if self.mpc_solution[0].cost > 20000. or mpc_nans:   # TODO: find a better way to detect when MPC did not converge
       self.solution_invalid_cnt += 1
