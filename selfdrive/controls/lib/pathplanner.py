@@ -70,7 +70,12 @@ class PathPlanner():
 
     self.alca_nudge_required = self.op_params.get('alca_nudge_required')
     self.alca_min_speed = self.op_params.get('alca_min_speed') * CV.MPH_TO_MS
-    self.last_steer_rate_cost = 1.0
+    
+    self.update_params()
+    self.last_steer_rate_cost = self.steer_rate_cost
+
+  def update_params():
+    self.steer_rate_cost = CP.steerRateCost if not self.op_params.get(ENABLE_PLANNER_PARAMS) and not self.op_params.get(ENABLE_STEER_RATE_COST) else self.op_params.get(STEER_RATE_COST)
 
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
@@ -89,6 +94,8 @@ class PathPlanner():
     self.angle_steers_des_time = 0.0
 
   def update(self, sm, pm, CP, VM):
+    self.update_params()
+
     v_ego = sm['carState'].vEgo
     angle_steers = sm['carState'].steeringAngle
     active = sm['controlsState'].active
@@ -202,15 +209,13 @@ class PathPlanner():
 
     self.angle_steers_des_mpc = float(math.degrees(delta_desired * VM.sR) + angle_offset)
 
-    steer_cost = CP.steerRateCost if not self.op_params.get(ENABLE_PLANNER_PARAMS) and not self.op_params.get(ENABLE_STEER_RATE_COST) else self.op_params.get(STEER_RATE_COST)
-
     #  Check for infeasable MPC solution
     mpc_nans = any(math.isnan(x) for x in self.mpc_solution[0].delta)
     t = sec_since_boot()
-    if mpc_nans or not math.isclose(steer_cost, self.last_steer_rate_cost):
-      self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, CP.steerRateCost)
+    if mpc_nans or not math.isclose(self.steer_rate_cost, self.last_steer_rate_cost):
+      self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, self.steer_rate_cost)
       self.cur_state[0].delta = math.radians(angle_steers - angle_offset) / VM.sR
-      self.last_steer_rate_cost = steer_cost
+      self.last_steer_rate_cost = self.steer_rate_cost
 
       if t > self.last_cloudlog_t + 5.0:
         self.last_cloudlog_t = t
