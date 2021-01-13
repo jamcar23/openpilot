@@ -164,7 +164,7 @@ jobs:
     name: docker push
     runs-on: ubuntu-20.04
     timeout-minutes: 50
-    needs: [setup_workflow, static_analysis] # hack to ensure slow tests run first since this and static_analysis are fast
+    needs: [setup_workflow, static_analysis, unit_tests, process_replay, test_longitudinal, test_car_models, build_release]
     if: needs.setup_workflow.outputs.should_build_docker
     env:
       LOGIN: ${{ needs.setup_workflow.outputs.docker_login }}
@@ -194,7 +194,7 @@ jobs:
     name: docker push prebuilt
     runs-on: ubuntu-20.04
     timeout-minutes: 50
-    needs: [setup_workflow, static_analysis, unit_tests, process_replay, test_longitudinal, test_car_models]
+    needs: [setup_workflow, static_analysis, unit_tests, process_replay, test_longitudinal, test_car_models, build_release]
     if: needs.setup_workflow.outputs.should_build_docker
     env:
       URI: ${{ needs.setup_workflow.outputs.container_uri }}
@@ -436,7 +436,7 @@ jobs:
     name: github push prebuilt
     runs-on: ubuntu-20.04
     timeout-minutes: 50
-    needs: [setup_workflow, static_analysis, unit_tests, process_replay, test_longitudinal, test_car_models]
+    needs: [setup_workflow, static_analysis, unit_tests, process_replay, test_longitudinal, test_car_models, build_release]
     if: needs.setup_workflow.outputs.is_default_repo
     env:
       BRANCH: ''
