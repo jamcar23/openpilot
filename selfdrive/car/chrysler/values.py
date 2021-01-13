@@ -6,9 +6,15 @@ Ecu = car.CarParams.Ecu
 
 class SteerLimitParams:
   STEER_MAX = 261         # 262 faults
-  STEER_DELTA_UP = 3      # 3 is stock. 100 is fine. 200 is too much it seems
-  STEER_DELTA_DOWN = 3    # no faults on the way down it seems
   STEER_ERROR_MAX = 80
+
+  @classmethod
+  def STEER_DELTA_UP(cls):
+    return 3 # 3 is stock. 100 is fine. 200 is too much it seems
+
+  @classmethod
+  def STEER_DELTA_DOWN(cls):
+    return 3 # no faults on the way down it seems
 
 
 class CAR:
