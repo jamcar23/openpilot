@@ -74,7 +74,7 @@ class PathPlanner():
     self.update_params()
     self.last_steer_rate_cost = self.steer_rate_cost
 
-  def update_params():
+  def update_params(self):
     self.steer_rate_cost = CP.steerRateCost if not self.op_params.get(ENABLE_PLANNER_PARAMS) and not self.op_params.get(ENABLE_STEER_RATE_COST) else self.op_params.get(STEER_RATE_COST)
 
   def setup_mpc(self):
