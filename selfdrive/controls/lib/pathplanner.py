@@ -202,7 +202,7 @@ class PathPlanner():
 
     self.angle_steers_des_mpc = float(math.degrees(delta_desired * VM.sR) + angle_offset)
 
-    steer_cost = CP.steerRateCost if not (self.op_params.get(ENABLE_PLANNER_PARAMS) and self.op_params.get(ENABLE_STEER_RATE_COST)) else self.op_params.get(STEER_RATE_COST)
+    steer_cost = CP.steerRateCost if not self.op_params.get(ENABLE_PLANNER_PARAMS) and not self.op_params.get(ENABLE_STEER_RATE_COST) else self.op_params.get(STEER_RATE_COST)
 
     #  Check for infeasable MPC solution
     mpc_nans = any(math.isnan(x) for x in self.mpc_solution[0].delta)
