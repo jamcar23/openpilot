@@ -214,7 +214,7 @@ class PathPlanner():
 
       if t > self.last_cloudlog_t + 5.0:
         self.last_cloudlog_t = t
-        # cloudlog.warning("Lateral mpc - nan: True")
+        cloudlog.info("Lateral mpc - reset")
 
     if self.mpc_solution[0].cost > 20000. or mpc_nans:   # TODO: find a better way to detect when MPC did not converge
       self.solution_invalid_cnt += 1
