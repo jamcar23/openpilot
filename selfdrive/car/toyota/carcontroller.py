@@ -54,6 +54,8 @@ class CarController():
       OP = opParams()
     self.op_params = OP
 
+    self.last_permit_braking = False
+
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
              left_line, right_line, lead, left_lane_depart, right_lane_depart):
 
@@ -135,7 +137,7 @@ class CarController():
         permit_braking = 1
 
         if self.op_params.get(ENABLE_TOYOTA_CAN_PARAMS) and self.op_params.get(ENABLE_TOYOTA_ACCEL_PARAMS):
-          acc_type = self.op_params.get(TOYOTA_ACC_TYPE) & 0xFF
+          acc_type = self.op_params.get(TOYOTA_ACC_TYPE) & 3
           permit_braking = self.op_params.get(TOYOTA_PERMIT_BRAKING)
           if permit_braking == 'lead':
             permit_braking = lead
