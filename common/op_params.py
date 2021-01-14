@@ -3,6 +3,7 @@ import os
 import json
 import math
 import time
+from common.numpy_fast import find_nearest_index, interp
 from common.colors import opParams_error as error
 from common.colors import opParams_warning as warning
 from selfdrive.hardware import PC
@@ -39,6 +40,13 @@ def eval_breakpoint_type(bps, CS, path_plan):
       raise ValueError(f'Unknown value option: {bp}')
 
   return [eval_breakpoint(bp) for bp in bps]
+
+def interp_multi_bp(x, bp, v):
+  idx = find_nearest_index(bp[0], x[0])
+  print(f'indexes: {idx}')
+
+  return [interp(x[i], bp[1][i], v[i]) for i in idx] if hasattr(idx, '__iter__') else interp(x[1], bp[1][idx], v[idx])
+  # return interp(x[1], bp[1][idx], v[idx])
 
 class ValueTypes:
   number = [float, int]
