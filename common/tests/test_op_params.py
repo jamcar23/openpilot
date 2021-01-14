@@ -18,5 +18,7 @@ class OpParamsTest(unittest.TestCase):
 
     for v_ego in steer_vego_arr:
       actual = interp(v_ego, bps, v)
-      print(f'actual: {actual}'
-      
+      print(f'actual: {actual}')
+
+if __name__ == "__main__":
+  unittest.main()
