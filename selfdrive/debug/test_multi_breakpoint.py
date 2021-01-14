@@ -10,13 +10,19 @@ def interp_multi_bp(x, bp, v):
   l_bp = len(bp)
   l_v = len(v)
   is_bp_multi_iter = is_multi_iter(bp)
-
+  is_v_multi_iter = is_multi_iter(v)
 
   if not is_bp_multi_iter:
     return interp(x[-1], bp, v[-1])
 
   if not is_multi_iter(bp[-1]):
     bp[-1] = [bp[-1], bp[-1]]
+
+  if not is_v_multi_iter:
+    v = [v, v]
+
+  if l_v <= 1:
+    v = [v[-1], v[-1]]
 
   if l_bp < l_x or l_bp <= 1 or len(bp[0]) <= 1:
     # return interp(x[0], bp[0][0], v[0])

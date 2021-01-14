@@ -2,7 +2,7 @@ import numpy as np
 import unittest
 
 from cereal import car, log
-from common.numpy_fast import interp
+from common.numpy_fast import interp, is_multi_iter
 from selfdrive.debug.test_multi_breakpoint import interp_multi_bp
 from common.op_params import opParams, eval_breakpoint_source, INDI_INNER_GAIN_BP_MULTI, INDI_INNER_GAIN_V_MULTI, \
                               INDI_MULTI_BREAKPOINT_SOURCE
@@ -210,6 +210,46 @@ class OpParamsTest(unittest.TestCase):
             # print(f'interped: {interped}')
 
             expected = interp(vego, bps[1][-1], v[i])
+            np.testing.assert_equal(interped, expected)
+
+  def test_multi_breakpoint_short_v(self):
+    idxs = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
+    bps = [[0, 10], [[20, 24], [20, 24, 30]]]
+    v_args = \
+            [
+              [[5, 5.75], [6, 7.25, 7.5]], # proper value set
+              [[5, 5.75]], # value set missing one option
+              [6, 7.25, 7.5], # normal value breakpoint, no set
+            ]
+    v_expected = \
+                [
+                  [[5, 5.75], [6, 7.25, 7.5]],
+                  [5, 5.75],
+                  [6, 7.25, 7.5],
+                ]
+    steer_vego_arr = \
+                    [
+                      [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 6, 7, 10, 11], # desired steer angle
+                      [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41] # vego
+                    ]
+
+    for v_expct, v in zip(v_expected, v_args):
+      with self.subTest(msg='Testing with short v value: v_value', v_value=v):
+        interped = interp_multi_bp(steer_vego_arr, bps, v)
+        # print(f'interped: {interped}')
+
+        expected = [interp(steer_vego_arr[1], bps[1][i], v_expct[i] if is_multi_iter(v_expct) else v_expct) for i in set(idxs)]
+        # print(f'expected: {expected}')
+        np.testing.assert_equal(interped, expected)
+
+        for i, desired_steer in zip(idxs, steer_vego_arr[0]):
+          for vego in steer_vego_arr[1]:
+            # print(f'i: {i}, steer: {desired_steer}, vego: {vego}')
+
+            interped = interp_multi_bp([desired_steer, vego], bps, v)
+            # print(f'interped: {interped}')
+
+            expected = interp(vego, bps[1][i], v_expct[i] if is_multi_iter(v_expct) else v_expct)
             np.testing.assert_equal(interped, expected)
 
 
