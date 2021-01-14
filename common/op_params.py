@@ -271,6 +271,9 @@ class opParams:
         os.chmod(self._params_file, 0o764)
 
   def get(self, key=None, force_live=False):  # any params you try to get MUST be in fork_params
+    if PC:
+      assert isinstance(self, opParams), f'Self is type: {type(self).__name__}, expected opParams'
+
     param_info = self.param_info(key)
     self._update_params(param_info, force_live)
 

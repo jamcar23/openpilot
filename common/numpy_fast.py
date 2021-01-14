@@ -38,7 +38,7 @@ def find_nearest_index(x, y):
 
     for xv in x:
       d = abs(abs(xv) - abs(yv))
-      print(f'd({d}) = xv({xv}) - yv({yv})')
+      # print(f'd({d}) = xv({xv}) - yv({yv})')
       if d <= dist:
         dist = d
         i = xi

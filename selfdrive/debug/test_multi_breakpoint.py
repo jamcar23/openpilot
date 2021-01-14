@@ -7,7 +7,7 @@ from common.numpy_fast import interp, find_nearest_index
 
 def interp_multi_bp(x, bp, v):
   idx = find_nearest_index(bp[0], x[0])
-  print(f'indexes: {idx}')
+  # print(f'indexes: {idx}')
 
   return [interp(x[1], bp[1][i], v[i]) for i in set(idx)] if hasattr(idx, '__iter__') else interp(x[1], bp[1][idx], v[idx])
   # return interp(x[1], bp[1][idx], v[idx])
