@@ -16,30 +16,43 @@ except ImportError:
 travis = True if PC else False  # replace with travis_checker if you use travis or GitHub Actions
 
 
-def eval_breakpoint_source(bps, CS, path_plan):
-  def parse_extras(bp, value):
-    if bp:
-      if '_abs' in bp:
-        return parse_extras(bp.replace('_abs', ''), abs(value))
-      elif '_deg' in bp:
-        return parse_extras(bp.replace('_deg', ''), math.degrees(value))
-      elif '_rad' in bp:
-        return parse_extras(bp.replace('_rad', ''), math.radians(value))
+def parse_param_modifiers(src, value):
+  if src:
+    if ParamModifierKeys.ABS in src:
+      return parse_param_modifiers(src.replace(ParamModifierKeys.ABS, ''), abs(value))
+    elif ParamModifierKeys.DEGREES in src:
+      return parse_param_modifiers(src.replace(ParamModifierKeys.DEGREES, ''), math.degrees(value))
+    elif ParamModifierKeys.RADIANS in src:
+      return parse_param_modifiers(src.replace(ParamModifierKeys.RADIANS, ''), math.radians(value))
+  else:
+    return value
+
+def eval_breakpoint_source(sources, CS, path_plan):
+  '''
+  Maps a breakpoint source array to actual values
+  '''
+
+  def eval_source(src):
+    if BreakPointSourceKeys.VEGO in src:
+      return parse_param_modifiers(src.replace(BreakPointSourceKeys.VEGO, ''), CS.vEgo)
+    elif BreakPointSourceKeys.AEGO in src:
+      return parse_param_modifiers(src.replace(BreakPointSourceKeys.AEGO, ''), CS.aEgo)
+    elif BreakPointSourceKeys.DESIRED_STEER in src:
+      return parse_param_modifiers(src.replace(BreakPointSourceKeys.DESIRED_STEER, ''), path_plan.angleSteers)
     else:
-      return value
+      raise ValueError(f'Unknown value option: {src}')
 
+  return [eval_source(source) for source in sources]
 
-  def eval_breakpoint(bp):
-    if 'vego' in bp:
-      return parse_extras(bp.replace('vego', ''), CS.vEgo)
-    elif 'aego' in bp:
-      return parse_extras(bp.replace('aego' ''), CS.aEgo)
-    elif 'desire_steer' in bp:
-      return parse_extras(bp.replace('desire_steer', ''), path_plan.angleSteers)
-    else:
-      raise ValueError(f'Unknown value option: {bp}')
+class BreakPointSourceKeys:
+  VEGO = 'vego'
+  AEGO = 'aego'
+  DESIRED_STEER = 'desired_steer'
 
-  return [eval_breakpoint(bp) for bp in bps]
+class ParamModifierKeys:
+  ABS = '_abs'
+  DEGREES = '_deg'
+  RADIANS = '_rad'
 
 class ValueTypes:
   number = [float, int]
@@ -167,7 +180,7 @@ class opParams:
                         INDI_TIME_CONSTANT_V_MULTI: Param([5.5, 5.5, 5.5], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
                         INDI_ACTUATOR_EFFECTIVENESS_BP_MULTI: Param([0, 255, 255], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
                         INDI_ACTUATOR_EFFECTIVENESS_V_MULTI: Param([6, 6, 6], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
-                        INDI_MULTI_BREAKPOINT_SOURCE: Param(['desire_steer_abs', 'vego'], [list, str], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_MULTI_BREAKPOINT_SOURCE: Param(['desired_steer_abs', 'vego'], [list, str], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
                         ENABLE_UNSAFE_STEERING_RATE: Param(False, bool, depends_on=SHOW_UNSAFE_OPTS, description='Toyota only.\nThis is HIGHLY unsafe, '
                                                           'at best, you have less time to react, at worst, you\'ll have steering faults.\nDo NOT use.'),
                         ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE: Param(False, bool, depends_on=ENABLE_UNSAFE_STEERING_RATE, description='Toyota only.\nThis is HIGHLY unsafe, '
