@@ -92,7 +92,11 @@ class opParams:
                         DOWNHILL_INCLINE: Param(-1, VT.number, 'If the angle between the current road and the future predicted road is less than this value, '
                                                               'the car will try to coast downhill. Unit: degrees', live=True, depends_on=ENABLE_COASTING),
                         'corolla_use_indi': Param(False, bool, depends_on=SHOW_TOYOTA_OPTS),
-                        'accel_hyst_gap': Param(0.02, VT.number, live=True, depends_on=SHOW_TOYOTA_OPTS),
+                        ENABLE_ACCEL_HYST_GAP: Param(False, bool, live=True, depends_on=SHOW_TOYOTA_OPTS),
+                        ACCEL_HYST_GAP: Param(0.02, VT.number, live=True, depends_on=ENABLE_ACCEL_HYST_GAP),
+                        ENABLE_ACCEL_HYST_GAP_BPS: Param(False, bool, live=True, depends_on=ENABLE_ACCEL_HYST_GAP),
+                        ACCEL_HYST_GAP_BP: Param([0.], [list, float, int], live=True, depends_on=ENABLE_ACCEL_HYST_GAP_BPS),
+                        ACCEL_HYST_GAP_V: Param([0.02], [list, float], live=True, depends_on=ENABLE_ACCEL_HYST_GAP_BPS),
                         ALWAYS_EVAL_COAST: Param(False, bool, live=True, depends_on=ENABLE_COASTING),
                         EVAL_COAST_LONG: Param(False, bool, live=True, depends_on=ENABLE_COASTING),
                         ENABLE_LONG_PARAMS: Param(False, bool, live=True, description='When true the long controller will used the params in opParam '
@@ -384,6 +388,11 @@ SHOW_EXPERIMENTAL_OPTS = 'show_experimental_options'
 
 SHOW_TOYOTA_OPTS = 'show_toyota_options'
 COROLLA_BODY_TYPE = 'corolla_body_type'
+ENABLE_ACCEL_HYST_GAP = 'enable_accel_hyst_gap'
+ACCEL_HYST_GAP = 'accel_hyst_gap'
+ENABLE_ACCEL_HYST_GAP_BPS = 'enable_accel_hyst_gap_breakpoints'
+ACCEL_HYST_GAP_BP = 'accel_hyst_gap_bp'
+ACCEL_HYST_GAP_V = 'accel_hyst_gap_v'
 
 ENABLE_MANAGER_PARAMS = 'enable_manager_params'
 DISABLED_PROCESSES = 'disabled_processes'
