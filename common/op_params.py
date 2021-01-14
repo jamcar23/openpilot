@@ -122,17 +122,23 @@ class opParams:
                         STOP_BRAKE_RATE_V: Param([0.2], [list, float, int], live=True, depends_on=ENABLE_START_STOP_PARAMS),
                         START_BRAKE_RATE_BP: Param([0], [list, float, int], live=True, depends_on=ENABLE_START_STOP_PARAMS),
                         START_BRAKE_RATE_V: Param([0.8], [list, float, int], live=True, depends_on=ENABLE_START_STOP_PARAMS),
-                        INDI_SHOW_BREAKPOINTS: Param(False, bool, live=True, depends_on=SHOW_INDI_PARAMS),
-                        'indi_use_vego_breakpoints': Param(False, bool, live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_use_steer_angle_breakpoints': Param(False, bool, live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_inner_gain_bp': Param([0, 255, 255], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_inner_gain_v': Param([6.0, 6.0, 6.0], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_outer_gain_bp': Param([0, 255, 255], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_outer_gain_v': Param([15, 15, 15], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_time_constant_bp': Param([0, 255, 255], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_time_constant_v': Param([5.5, 5.5, 5.5], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_actuator_effectiveness_bp': Param([0, 255, 255], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_actuator_effectiveness_v': Param([6, 6, 6], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
+                        ENABLE_INDI_BREAKPOINTS: Param(False, bool, live=True, depends_on=SHOW_INDI_PARAMS),
+                        INDI_INNER_GAIN_BP: Param([0, 255, 255], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        INDI_INNER_GAIN_V: Param([6.0, 6.0, 6.0], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        INDI_OUTER_GAIN_BP: Param([0, 255, 255], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        INDI_OUTER_GAIN_V: Param([15, 15, 15], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        INDI_TIME_CONSTANT_BP: Param([0, 255, 255], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        INDI_TIME_CONSTANT_V: Param([5.5, 5.5, 5.5], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        INDI_ACTUATOR_EFFECTIVENESS_BP: Param([0, 255, 255], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        ENABLE_MULTI_INDI_BREAKPOINTS: Param(False, bool, live=True, depends_on=SHOW_INDI_PARAMS),
+                        INDI_INNER_GAIN_BP_MULTI: Param([0, 255, 255], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_INNER_GAIN_V_MULTI: Param([6.0, 6.0, 6.0], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_OUTER_GAIN_BP_MULTI: Param([0, 255, 255], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_OUTER_GAIN_V_MULTI: Param([15, 15, 15], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_TIME_CONSTANT_BP_MULTI: Param([0, 255, 255], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_TIME_CONSTANT_V_MULTI: Param([5.5, 5.5, 5.5], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_ACTUATOR_EFFECTIVENESS_BP: Param([0, 255, 255], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_ACTUATOR_EFFECTIVENESS_V: Param([6, 6, 6], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
                         ENABLE_UNSAFE_STEERING_RATE: Param(False, bool, depends_on=SHOW_UNSAFE_OPTS, description='Toyota only.\nThis is HIGHLY unsafe, '
                                                           'at best, you have less time to react, at worst, you\'ll have steering faults.\nDo NOT use.'),
                         ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE: Param(False, bool, depends_on=ENABLE_UNSAFE_STEERING_RATE, description='Toyota only.\nThis is HIGHLY unsafe, '
@@ -329,7 +335,24 @@ ALWAYS_EVAL_COAST = "always_eval_coast_plan"
 EVAL_COAST_LONG = "eval_coast_long_controller"
 
 SHOW_INDI_PARAMS = 'show_indi_params'
-INDI_SHOW_BREAKPOINTS = 'indi_show_breakpoint_opts'
+ENABLE_INDI_BREAKPOINTS = 'enable_indi_breakpoints'
+INDI_INNER_GAIN_BP = 'indi_inner_gain_bp'
+INDI_INNER_GAIN_V = 'indi_inner_gain_v'
+INDI_OUTER_GAIN_BP = 'indi_outer_gain_bp'
+INDI_OUTER_GAIN_V = 'indi_outer_gain_v'
+INDI_ACTUATOR_EFFECTIVENESS_BP = 'indi_actuator_effectiveness_bp'
+INDI_ACTUATOR_EFFECTIVENESS_V = 'indi_actuator_effectiveness_v'
+INDI_TIME_CONSTANT_BP = 'indi_time_constant_bp'
+INDI_TIME_CONSTANT_V = 'indi_time_constant_v'
+ENABLE_MULTI_INDI_BREAKPOINTS = 'enable_multi_indi_breakpoints'
+INDI_INNER_GAIN_BP_MULTI = 'indi_inner_gain_bp_multi'
+INDI_INNER_GAIN_V_MULTI = 'indi_inner_gain_v_multi'
+INDI_OUTER_GAIN_BP_MULTI = 'indi_outer_gain_bp_multi'
+INDI_OUTER_GAIN_V_MULTI = 'indi_outer_gain_v_multi'
+INDI_ACTUATOR_EFFECTIVENESS_BP_MULTI = 'indi_actuator_effectiveness_bp_multi'
+INDI_ACTUATOR_EFFECTIVENESS_V_MULTI = 'indi_actuator_effectiveness_v_multi'
+INDI_TIME_CONSTANT_BP_MULTI = 'indi_time_constant_bp_multi'
+INDI_TIME_CONSTANT_V_MULTI = 'indi_time_constant_v_multi'
 
 SHOW_A_CRUISE = 'a_cruise_show_opts'
 
