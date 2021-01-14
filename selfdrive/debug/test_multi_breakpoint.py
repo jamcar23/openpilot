@@ -16,9 +16,14 @@ def interp_multi_bp(x, bp, v):
   else:
     idx = find_nearest_index(bp[0], x[0])
 
-  # print(f'indexes: {idx}')
+  print(f'indexes: {idx}')
 
-  return [interp(x[-1], bp[-1][i], v[i]) for i in set(idx)] if hasattr(idx, '__iter__') else interp(x[-1], bp[-1][idx], v[idx])
+  if hasattr(idx, '__iter__'):
+    return [interp(x[-1], bp[-1][-1], v[i]) for i in set(idx)]
+  else:
+    return interp(x[-1], bp[-1][-1], v[idx])
+
+  # return [interp(x[-1], bp[-1][i], v[i]) for i in set(idx)] if hasattr(idx, '__iter__') else interp(x[-1], bp[-1][idx], v[idx])
   # return interp(x[1], bp[1][idx], v[idx])
 
 def main():
