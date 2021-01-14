@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import json
+import math
 import time
 from common.colors import opParams_error as error
 from common.colors import opParams_warning as warning
@@ -13,6 +14,31 @@ except ImportError:
 
 travis = True if PC else False  # replace with travis_checker if you use travis or GitHub Actions
 
+
+def eval_breakpoint_type(bps, CS, path_plan):
+  def parse_extras(bp, value):
+    if bp:
+      if '_abs' in bp:
+        return parse_extras(bp.replace('_abs', ''), abs(value))
+      elif '_deg' in bp:
+        return parse_extras(bp.replace('_deg', ''), math.degrees(value))
+      elif '_rad' in bp:
+        return parse_extras(bp.replace('_rad', ''), math.radians(value))
+    else:
+      return value
+
+
+  def eval_breakpoint(bp):
+    if 'vego' in bp:
+      return parse_extras(bp.replace('vego', ''), CS.vEgo)
+    elif 'aego' in bp:
+      return parse_extras(bp.replace('aego' ''), CS.aEgo)
+    elif 'desire_steer' in bp:
+      return parse_extras(bp.replace('desire_steer', ''), path_plan.angleSteers)
+    else:
+      raise ValueError(f'Unknown value option: {bp}')
+
+  return [eval_breakpoint(bp) for bp in bps]
 
 class ValueTypes:
   number = [float, int]
@@ -139,6 +165,7 @@ class opParams:
                         INDI_TIME_CONSTANT_V_MULTI: Param([5.5, 5.5, 5.5], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
                         INDI_ACTUATOR_EFFECTIVENESS_BP_MULTI: Param([0, 255, 255], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
                         INDI_ACTUATOR_EFFECTIVENESS_V_MULTI: Param([6, 6, 6], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_MULTI_BREAKPOINT_SOURCE: Param(['desire_steer_abs', 'vego'], [list, str], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
                         ENABLE_UNSAFE_STEERING_RATE: Param(False, bool, depends_on=SHOW_UNSAFE_OPTS, description='Toyota only.\nThis is HIGHLY unsafe, '
                                                           'at best, you have less time to react, at worst, you\'ll have steering faults.\nDo NOT use.'),
                         ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE: Param(False, bool, depends_on=ENABLE_UNSAFE_STEERING_RATE, description='Toyota only.\nThis is HIGHLY unsafe, '
@@ -353,6 +380,7 @@ INDI_ACTUATOR_EFFECTIVENESS_BP_MULTI = 'indi_actuator_effectiveness_bp_multi'
 INDI_ACTUATOR_EFFECTIVENESS_V_MULTI = 'indi_actuator_effectiveness_v_multi'
 INDI_TIME_CONSTANT_BP_MULTI = 'indi_time_constant_bp_multi'
 INDI_TIME_CONSTANT_V_MULTI = 'indi_time_constant_v_multi'
+INDI_MULTI_BREAKPOINT_SOURCE = 'indi_multi_breakpoint_source'
 
 SHOW_A_CRUISE = 'a_cruise_show_opts'
 

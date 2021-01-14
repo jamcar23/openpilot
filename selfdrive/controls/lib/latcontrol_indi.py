@@ -7,7 +7,8 @@ from common.numpy_fast import clip, interp
 from common.op_params import opParams, ENABLE_LAT_PARAMS, STEER_LIMIT_TIMER, ENABLE_INDI_BREAKPOINTS, \
                             INDI_INNER_GAIN_BP, INDI_INNER_GAIN_V, INDI_OUTER_GAIN_BP, INDI_OUTER_GAIN_V, \
                             INDI_TIME_CONSTANT_BP, INDI_TIME_CONSTANT_V, INDI_ACTUATOR_EFFECTIVENESS_BP, \
-                            INDI_ACTUATOR_EFFECTIVENESS_V
+                            INDI_ACTUATOR_EFFECTIVENESS_V, ENABLE_MULTI_INDI_BREAKPOINTS, INDI_MULTI_BREAKPOINT_SOURCE, \
+                            eval_breakpoint_type
 from selfdrive.car.toyota.values import SteerLimitParams
 from selfdrive.car import apply_toyota_steer_torque_limits
 from selfdrive.controls.lib.drive_helpers import get_steer_max
@@ -66,12 +67,22 @@ class LatControlINDI():
     if self.op_params.get(ENABLE_LAT_PARAMS):
       self.sat_limit = self.op_params.get(STEER_LIMIT_TIMER)
       
-      
-      if self.op_params.get(ENABLE_INDI_BREAKPOINTS):
-        self.G = interp(CS.vEgo, self.op_params.get(INDI_ACTUATOR_EFFECTIVENESS_BP), self.op_params.get(INDI_ACTUATOR_EFFECTIVENESS_V))
-        self.outer_loop_gain = interp(CS.vEgo, self.op_params.get(INDI_OUTER_GAIN_BP), self.op_params.get(INDI_OUTER_GAIN_V))
-        self.inner_loop_gain = interp(CS.vEgo, self.op_params.get(INDI_INNER_GAIN_BP), self.op_params.get(INDI_INNER_GAIN_V))
-        self.RC = interp(CS.vEgo, self.op_params.get(INDI_TIME_CONSTANT_BP), self.op_params.get(INDI_TIME_CONSTANT_V))
+      use_multi = self.op_params.get(ENABLE_MULTI_INDI_BREAKPOINTS)
+      use_bp = self.op_params.get(ENABLE_INDI_BREAKPOINTS)
+
+      if use_multi or use_bp:
+        postfix = ''
+        
+        if use_multi:
+          postfix = '_multi'
+          i = eval_breakpoint_type(self.op_params.get(INDI_MULTI_BREAKPOINT_SOURCE), CS, path_plan)
+        else:
+          i = CS.vEgo
+
+        self.G = interp(i, self.op_params.get(INDI_ACTUATOR_EFFECTIVENESS_BP + postfix), self.op_params.get(INDI_ACTUATOR_EFFECTIVENESS_V + postfix))
+        self.outer_loop_gain = interp(i, self.op_params.get(INDI_OUTER_GAIN_BP + postfix), self.op_params.get(INDI_OUTER_GAIN_V + postfix))
+        self.inner_loop_gain = interp(i, self.op_params.get(INDI_INNER_GAIN_BP + postfix), self.op_params.get(INDI_INNER_GAIN_V + postfix))
+        self.RC = interp(i, self.op_params.get(INDI_TIME_CONSTANT_BP + postfix), self.op_params.get(INDI_TIME_CONSTANT_V + postfix))
       else:
         self.G = self.op_params.get('indi_actuator_effectiveness')
         self.outer_loop_gain = self.op_params.get('indi_outer_gain')
