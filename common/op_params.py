@@ -3,7 +3,7 @@ import os
 import json
 import math
 import time
-from common.numpy_fast import find_nearest_index, interp
+from common.numpy_fast import find_nearest_index, interp, is_multi_iter
 from common.colors import opParams_error as error
 from common.colors import opParams_warning as warning
 from selfdrive.hardware import PC
@@ -43,6 +43,41 @@ def eval_breakpoint_source(sources, CS, path_plan):
       raise ValueError(f'Unknown value option: {src}')
 
   return [eval_source(source) for source in sources]
+
+def interp_multi_bp(x, bp, v):
+  l_x = len(x)
+  l_bp = len(bp)
+  l_v = len(v)
+  is_bp_multi_iter = is_multi_iter(bp)
+  is_v_multi_iter = is_multi_iter(v)
+
+  if not is_bp_multi_iter:
+    return interp(x[-1], bp, v[-1])
+
+  if not is_multi_iter(bp[-1]):
+    bp[-1] = [bp[-1], bp[-1]]
+
+  if not is_v_multi_iter:
+    v = [v, v]
+
+  if l_v <= 1:
+    v = [v[-1], v[-1]]
+
+  if l_bp < l_x or l_bp <= 1 or len(bp[0]) <= 1:
+    # return interp(x[0], bp[0][0], v[0])
+    idx = 0
+  else:
+    idx = find_nearest_index(bp[0], x[0])
+
+  # print(f'indexes: {idx}')
+
+  if hasattr(idx, '__iter__'):
+    return [interp(x[-1], bp[-1][-1], v[i]) for i in set(idx)]
+  else:
+    return interp(x[-1], bp[-1][-1], v[idx])
+
+  # return [interp(x[-1], bp[-1][i], v[i]) for i in set(idx)] if hasattr(idx, '__iter__') else interp(x[-1], bp[-1][idx], v[idx])
+  # return interp(x[1], bp[1][idx], v[idx])
 
 class BreakPointSourceKeys:
   VEGO = 'vego'

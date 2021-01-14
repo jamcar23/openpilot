@@ -3,8 +3,7 @@ import unittest
 
 from cereal import car, log
 from common.numpy_fast import interp, is_multi_iter
-from selfdrive.debug.test_multi_breakpoint import interp_multi_bp
-from common.op_params import opParams, eval_breakpoint_source, INDI_INNER_GAIN_BP_MULTI, INDI_INNER_GAIN_V_MULTI, \
+from common.op_params import opParams, eval_breakpoint_source, interp_multi_bp, INDI_INNER_GAIN_BP_MULTI, INDI_INNER_GAIN_V_MULTI, \
                               INDI_MULTI_BREAKPOINT_SOURCE
 
 def create_car_state(vego=0.):
