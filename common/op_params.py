@@ -16,7 +16,7 @@ except ImportError:
 travis = True if PC else False  # replace with travis_checker if you use travis or GitHub Actions
 
 
-def eval_breakpoint_type(bps, CS, path_plan):
+def eval_breakpoint_source(bps, CS, path_plan):
   def parse_extras(bp, value):
     if bp:
       if '_abs' in bp:

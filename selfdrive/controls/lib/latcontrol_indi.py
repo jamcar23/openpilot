@@ -8,7 +8,7 @@ from common.op_params import opParams, ENABLE_LAT_PARAMS, STEER_LIMIT_TIMER, ENA
                             INDI_INNER_GAIN_BP, INDI_INNER_GAIN_V, INDI_OUTER_GAIN_BP, INDI_OUTER_GAIN_V, \
                             INDI_TIME_CONSTANT_BP, INDI_TIME_CONSTANT_V, INDI_ACTUATOR_EFFECTIVENESS_BP, \
                             INDI_ACTUATOR_EFFECTIVENESS_V, ENABLE_MULTI_INDI_BREAKPOINTS, INDI_MULTI_BREAKPOINT_SOURCE, \
-                            eval_breakpoint_type
+                            eval_breakpoint_source
 from selfdrive.car.toyota.values import SteerLimitParams
 from selfdrive.car import apply_toyota_steer_torque_limits
 from selfdrive.controls.lib.drive_helpers import get_steer_max
@@ -66,16 +66,16 @@ class LatControlINDI():
   def update(self, active, CS, CP, path_plan):
     if self.op_params.get(ENABLE_LAT_PARAMS):
       self.sat_limit = self.op_params.get(STEER_LIMIT_TIMER)
-      
+
       use_multi = self.op_params.get(ENABLE_MULTI_INDI_BREAKPOINTS)
       use_bp = self.op_params.get(ENABLE_INDI_BREAKPOINTS)
 
       if use_multi or use_bp:
         postfix = ''
-        
+
         if use_multi:
           postfix = '_multi'
-          i = eval_breakpoint_type(self.op_params.get(INDI_MULTI_BREAKPOINT_SOURCE), CS, path_plan)
+          i = eval_breakpoint_source(self.op_params.get(INDI_MULTI_BREAKPOINT_SOURCE), CS, path_plan)
         else:
           i = CS.vEgo
 
@@ -94,7 +94,7 @@ class LatControlINDI():
       self.outer_loop_gain = CP.lateralTuning.indi.outerLoopGain
       self.inner_loop_gain = CP.lateralTuning.indi.innerLoopGain
       self.sat_limit = CP.steerLimitTimer
-    
+
     self.alpha = 1. - DT_CTRL / (self.RC + DT_CTRL)
 
     # Update Kalman filter
