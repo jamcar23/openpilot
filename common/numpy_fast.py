@@ -29,22 +29,29 @@ def incremental_avg(cur_avg, new_val, new_size):
 
 def find_nearest_index(x, y):
   '''
-  Finds nearest index of x based on the values of y.
+  Finds nearest index of x based on the value(s) of y.
   '''
-  idxs = []
-
-  for yv in y:
+  def get_nearest(yv):
     dist = sys.maxsize
     i = 0
     xi = 0
 
     for xv in x:
-      d = abs(xv - yv)
-      if d < dist:
+      d = abs(abs(xv) - abs(yv))
+      print(f'd({d}) = xv({xv}) - yv({yv})')
+      if d <= dist:
         dist = d
         i = xi
       xi += 1
 
-    idxs.append(i)
+    return i
+
+  idxs = [get_nearest(yv) for yv in y] if hasattr(y, '__iter__') else get_nearest(y)
+
+  # if hasattr(y, '__iter__'):
+  #   for yv in y:
+  #     idxs.append(get_nearest(yv))
+  # else:
+  #   idxs.append(get_nearest(y))
 
   return idxs
