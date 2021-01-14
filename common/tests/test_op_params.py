@@ -174,7 +174,13 @@ class OpParamsTest(unittest.TestCase):
   def test_multi_breakpoint_short_vego_bp(self):
     idxs = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
     steer_args = [0, 10]
-    v_ego_args = [[[20, 24], [20, 24, 30]], [[20, 24]], [20, 24, 30]]
+    v_ego_args = \
+                [
+                  [[20, 24], [20, 24, 30]], # proper v_ego set
+                  [[20, 24]], # v_ego set missing one option
+                  [20, 24, 30] # normal v_ego breakpoint, no set
+                ]
+    bps_expected = [[0, 10], [[20, 24], [20, 24, 30]]]
     v = [[5, 5.75], [6, 7.25, 7.5]]
     steer_vego_arr = \
                     [
@@ -186,22 +192,22 @@ class OpParamsTest(unittest.TestCase):
       with self.subTest(msg='Testing with short vego: v_ego', v_ego=vego):
         bps = [steer_args, vego]
         interped = interp_multi_bp(steer_vego_arr, bps, v)
-        print(f'interped: {interped}')
+        # print(f'interped: {interped}')
 
         bps = np.asarray(bps, dtype=object)
         v = np.asarray(v, dtype=object)
         steer_vego_arr = np.asarray(steer_vego_arr, dtype=object)
 
-        expected = [interp(steer_vego_arr[-1], bps[-1][min(len(bps[-1]) - 1, i)], v[i]) for i in set(idxs)]
-        print(f'expected: {expected}')
+        expected = [interp(steer_vego_arr[1], bps_expected[1][i], v[i]) for i in set(idxs)]
+        # print(f'expected: {expected}')
         np.testing.assert_equal(interped, expected)
 
         for i, desired_steer in zip(idxs, steer_vego_arr[0]):
           for vego in steer_vego_arr[1]:
-            print(f'i: {i}, steer: {desired_steer}, vego: {vego}')
+            # print(f'i: {i}, steer: {desired_steer}, vego: {vego}')
 
             interped = interp_multi_bp([desired_steer, vego], bps, v)
-            print(f'interped: {interped}')
+            # print(f'interped: {interped}')
 
             expected = interp(vego, bps[1][-1], v[i])
             np.testing.assert_equal(interped, expected)

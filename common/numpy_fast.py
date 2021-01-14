@@ -55,3 +55,14 @@ def find_nearest_index(x, y):
   #   idxs.append(get_nearest(y))
 
   return idxs
+
+def is_multi_iter(x):
+  multi_iter = False
+
+  if hasattr(x, '__iter__'):
+    for i in x:
+      if hasattr(i, '__iter__'):
+        multi_iter = True
+        break
+
+  return multi_iter

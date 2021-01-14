@@ -2,13 +2,21 @@
 
 import numpy as np
 
-from common.numpy_fast import interp, find_nearest_index
+from common.numpy_fast import interp, find_nearest_index, is_multi_iter
 
 
 def interp_multi_bp(x, bp, v):
   l_x = len(x)
   l_bp = len(bp)
   l_v = len(v)
+  is_bp_multi_iter = is_multi_iter(bp)
+
+
+  if not is_bp_multi_iter:
+    return interp(x[-1], bp, v[-1])
+
+  if not is_multi_iter(bp[-1]):
+    bp[-1] = [bp[-1], bp[-1]]
 
   if l_bp < l_x or l_bp <= 1 or len(bp[0]) <= 1:
     # return interp(x[0], bp[0][0], v[0])
@@ -16,7 +24,7 @@ def interp_multi_bp(x, bp, v):
   else:
     idx = find_nearest_index(bp[0], x[0])
 
-  print(f'indexes: {idx}')
+  # print(f'indexes: {idx}')
 
   if hasattr(idx, '__iter__'):
     return [interp(x[-1], bp[-1][-1], v[i]) for i in set(idx)]
