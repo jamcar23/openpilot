@@ -6,10 +6,19 @@ from common.numpy_fast import interp, find_nearest_index
 
 
 def interp_multi_bp(x, bp, v):
-  idx = find_nearest_index(bp[0], x[0])
+  l_x = len(x)
+  l_bp = len(bp)
+  l_v = len(v)
+
+  if l_bp < l_x:
+    # return interp(x[0], bp[0][0], v[0])
+    idx = 0
+  else:
+    idx = find_nearest_index(bp[0], x[0])
+
   # print(f'indexes: {idx}')
 
-  return [interp(x[1], bp[1][i], v[i]) for i in set(idx)] if hasattr(idx, '__iter__') else interp(x[1], bp[1][idx], v[idx])
+  return [interp(x[-1], bp[-1][i], v[i]) for i in set(idx)] if hasattr(idx, '__iter__') else interp(x[-1], bp[-1][idx], v[idx])
   # return interp(x[1], bp[1][idx], v[idx])
 
 def main():
