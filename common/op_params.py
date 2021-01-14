@@ -137,8 +137,8 @@ class opParams:
                         INDI_OUTER_GAIN_V_MULTI: Param([15, 15, 15], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
                         INDI_TIME_CONSTANT_BP_MULTI: Param([0, 255, 255], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
                         INDI_TIME_CONSTANT_V_MULTI: Param([5.5, 5.5, 5.5], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
-                        INDI_ACTUATOR_EFFECTIVENESS_BP: Param([0, 255, 255], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
-                        INDI_ACTUATOR_EFFECTIVENESS_V: Param([6, 6, 6], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_ACTUATOR_EFFECTIVENESS_BP_MULTI: Param([0, 255, 255], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_ACTUATOR_EFFECTIVENESS_V_MULTI: Param([6, 6, 6], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
                         ENABLE_UNSAFE_STEERING_RATE: Param(False, bool, depends_on=SHOW_UNSAFE_OPTS, description='Toyota only.\nThis is HIGHLY unsafe, '
                                                           'at best, you have less time to react, at worst, you\'ll have steering faults.\nDo NOT use.'),
                         ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE: Param(False, bool, depends_on=ENABLE_UNSAFE_STEERING_RATE, description='Toyota only.\nThis is HIGHLY unsafe, '
