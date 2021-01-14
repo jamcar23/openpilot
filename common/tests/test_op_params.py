@@ -2,6 +2,7 @@ import numpy as np
 import unittest
 
 from common.numpy_fast import interp
+from selfdrive.debug.test_multi_breakpoint import interp_multi_bp
 # from common.op_params import opParams
 
 
