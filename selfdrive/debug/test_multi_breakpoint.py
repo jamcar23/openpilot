@@ -10,7 +10,7 @@ def interp_multi_bp(x, bp, v):
   l_bp = len(bp)
   l_v = len(v)
 
-  if l_bp < l_x:
+  if l_bp < l_x or l_bp <= 1 or len(bp[0]) <= 1:
     # return interp(x[0], bp[0][0], v[0])
     idx = 0
   else:
