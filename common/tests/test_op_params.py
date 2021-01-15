@@ -255,9 +255,9 @@ class OpParamsTest(unittest.TestCase):
     idxs = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
     bp_args = \
               [
-                [[0, 10], [[20, 24], [20, 24, 30]]], # proper steer and vego breakpoint set
-                [[0, 10], [[20, 24]]], # proper steer set, missing one vego
-                # [[0, 10], [[20, 24], [20, 24, 30], [10, 20, 24, 30]]], # proper steer set, extra vego
+                (0, [[0, 10], [[20, 24], [20, 24, 30]]]), # proper steer and vego breakpoint set
+                (0, [[0, 10], [[20, 24]]]), # proper steer set, missing one vego
+                (1, [[0, 10], [[20, 24], [20, 24, 30], [10, 20, 24, 30]]]), # proper steer set, extra vego
                 # [[0, 10], [20, 24]], # proper steer set, normal vego breakpoints (no set)
                 # [[0, 10], [[20, 24], [20, 24, 30]], [12]], # proper steer and vego breakpoint set, extra arg
                 # [[0, 10], [[20, 24]], [12]], # proper steer set, missing one vego, extra arg
@@ -265,7 +265,8 @@ class OpParamsTest(unittest.TestCase):
               ]
     bp_expected = \
                   [
-                    [[0, 10], [[20, 24], [20, 24, 30]]]
+                    [[0, 10], [[20, 24], [20, 24, 30]]],
+                    [[0, 10], [[20, 24], [10, 20, 24, 30]]],
                   ]
     v_args = \
             [
@@ -284,8 +285,7 @@ class OpParamsTest(unittest.TestCase):
                       [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 6, 7, 10, 11], # desired steer angle
                       [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41] # vego
                     ]
-    for bp_i in range(len(bp_args)):
-      bps = bp_args[bp_i]
+    for bp_i, bps in bp_args:
       bps_expct = bp_expected[bp_i if bp_i < len(bp_expected) else 0]
 
       for v_i in range(len(v_args)):
@@ -294,9 +294,9 @@ class OpParamsTest(unittest.TestCase):
 
         with self.subTest(msg='Fuzzing multi breakpoints bp: bp, v value: v_value', bp=bps, v_value=v):
           interped = interp_multi_bp(steer_vego_arr, bps, v)
-          print(f'interped: {interped}')
+          # print(f'interped: {interped}')
 
-          expected = [interp(steer_vego_arr[1], bps_expct[1][i], v_expct[i] if is_multi_iter(v_expct) else v_expct) for i in set(idxs)]
+          expected = [interp(steer_vego_arr[-1], bps_expct[-1][-1], v_expct[i] if is_multi_iter(v_expct) else v_expct) for i in set(idxs)]
           # print(f'expected: {expected}')
           np.testing.assert_equal(interped, expected)
 
@@ -307,7 +307,7 @@ class OpParamsTest(unittest.TestCase):
               interped = interp_multi_bp([desired_steer, vego], bps, v)
               # print(f'interped: {interped}')
 
-              expected = interp(vego, bps_expct[1][i], v_expct[i] if is_multi_iter(v_expct) else v_expct)
+              expected = interp(vego, bps_expct[-1][-1], v_expct[i] if is_multi_iter(v_expct) else v_expct)
               np.testing.assert_equal(interped, expected)
 
 
