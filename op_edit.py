@@ -260,6 +260,12 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         if append_val or remove_idx or is_list:
           new_value = choice_idx
         else:
+          if hasattr(old_value[choice_idx], '__iter__'):
+            self.change_param_list(old_value[choice_idx], param_info, chosen_key)
+            self.op_params.put(chosen_key, old_value)
+            self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, old_value, type(old_value).__name__), end='\n')
+            break
+
           self.info('Chosen index: {}'.format(choice_idx), sleep_time=0)
           self.info('Value: {} (type: {})'.format(old_value[choice_idx], type(old_value[choice_idx]).__name__), sleep_time=0)
           self.prompt('\nEnter your new value:')
