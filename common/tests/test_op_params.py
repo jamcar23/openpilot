@@ -258,7 +258,7 @@ class OpParamsTest(unittest.TestCase):
                 (0, [[0, 10], [[20, 24], [20, 24, 30]]]), # proper steer and vego breakpoint set
                 (0, [[0, 10], [[20, 24]]]), # proper steer set, missing one vego
                 (1, [[0, 10], [[20, 24], [20, 24, 30], [10, 20, 24, 30]]]), # proper steer set, extra vego
-                # [[0, 10], [20, 24]], # proper steer set, normal vego breakpoints (no set)
+                (0, [[0, 10], [20, 24]]), # proper steer set, normal vego breakpoints (no set)
                 # [[0, 10], [[20, 24], [20, 24, 30]], [12]], # proper steer and vego breakpoint set, extra arg
                 # [[0, 10], [[20, 24]], [12]], # proper steer set, missing one vego, extra arg
                 # [[0, 10], [20, 24], [12]], # proper steer set, normal vego breakpoints (no set), extra arg
