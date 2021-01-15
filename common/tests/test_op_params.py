@@ -2,7 +2,7 @@ import numpy as np
 import unittest
 
 from cereal import car, log
-from common.numpy_fast import interp, is_multi_iter
+from common.numpy_fast import interp, is_multi_iter, find_nearest_index
 from common.op_params import opParams, eval_breakpoint_source, interp_multi_bp, INDI_INNER_GAIN_BP_MULTI, INDI_INNER_GAIN_V_MULTI, \
                               INDI_MULTI_BREAKPOINT_SOURCE
 
@@ -110,65 +110,66 @@ class OpParamsTest(unittest.TestCase):
         expected = interp(vego, bps[1][i], v[i])
         np.testing.assert_equal(interped, expected)
 
-  def test_multi_breakpoint_no_steer_bp(self):
-    idxs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    bps = [[[20, 24], [20, 24, 30]]]
-    v = [[5, 5.75], [6, 7.25, 7.5]]
-    steer_vego_arr = \
-                    [
-                      [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 6, 7, 10, 11], # desired steer angle
-                      [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41] # vego
-                    ]
+  # def test_multi_breakpoint_no_steer_bp(self):
+  #   idxs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  #   bps = [[[20, 24], [20, 24, 30]]]
+  #   v = [[5, 5.75], [6, 7.25, 7.5]]
+  #   steer_vego_arr = \
+  #                   [
+  #                     [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 6, 7, 10, 11], # desired steer angle
+  #                     [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41] # vego
+  #                   ]
 
-    interped = interp_multi_bp(steer_vego_arr, bps, v)
-    # print(f'interped: {interped}')
+  #   interped = interp_multi_bp(steer_vego_arr, bps, v)
+  #   # print(f'interped: {interped}')
 
-    bps = np.asarray(bps, dtype=object)
-    v = np.asarray(v, dtype=object)
-    steer_vego_arr = np.asarray(steer_vego_arr, dtype=object)
+  #   bps = np.asarray(bps, dtype=object)
+  #   v = np.asarray(v, dtype=object)
+  #   steer_vego_arr = np.asarray(steer_vego_arr, dtype=object)
 
-    expected = interp(steer_vego_arr[-1], bps[-1][0], v[0])
-    # print(f'expected: {expected}')
-    np.testing.assert_equal(interped, expected)
+  #   expected = interp(steer_vego_arr[-1], bps[-1][0], v[0])
+  #   # print(f'expected: {expected}')
+  #   np.testing.assert_equal(interped, expected)
 
-    for i, desired_steer in zip(idxs, steer_vego_arr[0]):
-      for vego in steer_vego_arr[-1]:
-        # print(f'i: {i}, steer: {desired_steer}, vego: {vego}')
+  #   for i, desired_steer in zip(idxs, steer_vego_arr[0]):
+  #     for vego in steer_vego_arr[-1]:
+  #       # print(f'i: {i}, steer: {desired_steer}, vego: {vego}')
 
-        interped = interp_multi_bp([desired_steer, vego], bps, v)
-        # print(f'interped: {interped}')
+  #       interped = interp_multi_bp([desired_steer, vego], bps, v)
+  #       # print(f'interped: {interped}')
 
-        expected = interp(vego, bps[-1][i], v[i])
-        np.testing.assert_equal(interped, expected)
+  #       expected = interp(vego, bps[-1][i], v[i])
+  #       np.testing.assert_equal(interped, expected)
 
-  def test_multi_breakpoint_missing_steer_equivalence(self):
-    idxs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    bps = [[[20, 24], [20, 24, 30]]]
-    v = [[5, 5.75], [6, 7.25, 7.5]]
-    steer_vego_arr = \
-                    [
-                      [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 6, 7, 10, 11], # desired steer angle
-                      [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41] # vego
-                    ]
+  # def test_multi_breakpoint_missing_steer_equivalence(self):
+  #   idxs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  #   bps = [[[20, 24], [20, 24, 30]]]
+  #   v = [[5, 5.75], [6, 7.25, 7.5]]
+  #   steer_vego_arr = \
+  #                   [
+  #                     [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 6, 7, 10, 11], # desired steer angle
+  #                     [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41] # vego
+  #                   ]
 
-    expected = interp_multi_bp(steer_vego_arr, bps, v)
-    # print(f'expected: {expected}')
+  #   interped = interp_multi_bp(steer_vego_arr, bps, v)
+  #   print(f'interped: {interped}')
 
-    bps.insert(0, [0])
-    interped = interp_multi_bp(steer_vego_arr, bps, v)
-    # print(f'interped: {interped}')
 
-    np.testing.assert_equal(interped, expected)
+  #   bps.insert(0, [0])
+  #   expected = interp_multi_bp(steer_vego_arr, bps, v)
+  #   print(f'expected: {expected}')
 
-    for i, desired_steer in zip(idxs, steer_vego_arr[0]):
-      for vego in steer_vego_arr[-1]:
-        # print(f'i: {i}, steer: {desired_steer}, vego: {vego}')
+  #   np.testing.assert_equal(interped, expected)
 
-        interped = interp_multi_bp([desired_steer, vego], bps, v)
-        # print(f'interped: {interped}')
+  #   for i, desired_steer in zip(idxs, steer_vego_arr[0]):
+  #     for vego in steer_vego_arr[-1]:
+  #       # print(f'i: {i}, steer: {desired_steer}, vego: {vego}')
 
-        expected = interp(vego, bps[-1][i], v[i])
-        np.testing.assert_equal(interped, expected)
+  #       interped = interp_multi_bp([desired_steer, vego], bps, v)
+  #       # print(f'interped: {interped}')
+
+  #       expected = interp(vego, bps[-1][i], v[i])
+  #       np.testing.assert_equal(interped, expected)
 
   def test_multi_breakpoint_short_vego_bp(self):
     idxs = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
@@ -264,6 +265,7 @@ class OpParamsTest(unittest.TestCase):
                 (4, [[0, 10], [[20, 24], [20, 24, 30]], [12]]), # proper steer and vego breakpoint set, extra arg
                 (4, [[0, 10], [[20, 24]], [12]]), # proper steer set, missing one vego, extra arg
                 (4, [[0, 10], [20, 24], [12]]), # proper steer set, normal vego breakpoints (no set), extra arg
+                (5, [[0], [[20, 24], [20, 24, 30]]]), # proper vego set, missing one steer
               ]
     bp_expected = \
                   [
@@ -272,6 +274,7 @@ class OpParamsTest(unittest.TestCase):
                     [[0, 10], [0, 10]],
                     [0, 10],
                     [[0, 10], [[20, 24], [12]]],
+                    [[0, 0], [[20, 24], [20, 24, 30]]]
                   ]
     v_args = \
             [
@@ -293,6 +296,9 @@ class OpParamsTest(unittest.TestCase):
                     ]
     for bp_i, bps in bp_args:
       # print(f'bps: {bps}')
+      if is_multi_iter(bps):
+        idxs = find_nearest_index(bps[0], steer_vego_arr[0])
+
       bps_expct = bp_expected[bp_i if bp_i < len(bp_expected) else 0]
 
       if is_multi_iter(bps_expct) and not is_multi_iter(bps_expct[-1]):
@@ -304,7 +310,7 @@ class OpParamsTest(unittest.TestCase):
         with self.subTest(msg='Fuzzing multi breakpoints bp: bp, v value: v_value', bp=bps, v_value=v):
           interped = interp_multi_bp(steer_vego_arr, bps, v)
 
-          # print(f'interped: {interped}')
+          print(f'interped:\n {interped}')
           # print(f'bps: {bps}')
           # print(f'bps_expected: {bps_expct}')
 
@@ -312,7 +318,10 @@ class OpParamsTest(unittest.TestCase):
                       bps_expct[-1][-1] if is_multi_iter(bps_expct) else bps_expct,
                       v_expct[i] if is_multi_iter(v_expct) else v_expct)
                       for i in set(idxs)]
-          # print(f'expected: {expected}')
+          if len(set(idxs)) <= 1:
+            expected = expected[0]
+
+          print(f'expected:\n {expected}')
 
           np.testing.assert_equal(interped, expected)
 
@@ -321,11 +330,12 @@ class OpParamsTest(unittest.TestCase):
               # print(f'i: {i}, steer: {desired_steer}, vego: {vego}')
 
               interped = interp_multi_bp([desired_steer, vego], bps, v)
-              # print(f'interped: {interped}')
+              # print(f'interped:\n {interped}')
 
               expected = interp(vego,
                                 bps_expct[-1][-1] if is_multi_iter(bps_expct) else bps_expct,
                                 v_expct[i] if is_multi_iter(v_expct) else v_expct)
+              # print(f'expected:\n {expected}')
               np.testing.assert_equal(interped, expected)
 
 

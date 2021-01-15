@@ -45,17 +45,21 @@ def eval_breakpoint_source(sources, CS, path_plan):
   return [eval_source(source) for source in sources]
 
 def interp_multi_bp(x, bp, v):
+  def correct_multi_bp(idx):
+    if not is_multi_iter(bp[idx]):
+      bp[idx] = [bp[idx], bp[idx]]
+
+      if len(bp) <= 1:
+        bp.insert(0, bp[idx][0])
+
   is_bp_multi_iter = is_multi_iter(bp)
   is_v_multi_iter = is_multi_iter(v)
 
   if not is_bp_multi_iter:
     bp = [bp, bp]
 
-  if not is_multi_iter(bp[-1]):
-    bp[-1] = [bp[-1], bp[-1]]
-
-    if len(bp) <= 1:
-      bp.insert(0, bp[-1][0])
+  # correct_multi_bp(0)
+  correct_multi_bp(-1)
 
   if not is_v_multi_iter:
     v = [v, v]
@@ -70,6 +74,8 @@ def interp_multi_bp(x, bp, v):
 
   if l_bp < l_x or len(bp[0]) <= 1:
     # return interp(x[0], bp[0][0], v[0])
+    # idx = range(len(x)) if is_multi_iter(x) else 0
+    # idx = [0] if is_multi_iter(x) else 0
     idx = 0
   else:
     idx = find_nearest_index(bp[0], x[0])
