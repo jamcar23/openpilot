@@ -8,7 +8,7 @@ from common.op_params import opParams, ENABLE_LAT_PARAMS, STEER_LIMIT_TIMER, ENA
                             INDI_INNER_GAIN_BP, INDI_INNER_GAIN_V, INDI_OUTER_GAIN_BP, INDI_OUTER_GAIN_V, \
                             INDI_TIME_CONSTANT_BP, INDI_TIME_CONSTANT_V, INDI_ACTUATOR_EFFECTIVENESS_BP, \
                             INDI_ACTUATOR_EFFECTIVENESS_V, ENABLE_MULTI_INDI_BREAKPOINTS, INDI_MULTI_BREAKPOINT_SOURCE, \
-                            eval_breakpoint_source
+                            eval_breakpoint_source, interp_multi_bp
 from selfdrive.car.toyota.values import SteerLimitParams
 from selfdrive.car import apply_toyota_steer_torque_limits
 from selfdrive.controls.lib.drive_helpers import get_steer_max
@@ -76,13 +76,15 @@ class LatControlINDI():
         if use_multi:
           postfix = '_multi'
           i = eval_breakpoint_source(self.op_params.get(INDI_MULTI_BREAKPOINT_SOURCE), CS, path_plan)
+          itrp = interp_multi_bp
         else:
           i = CS.vEgo
+          itrp = interp
 
-        self.G = interp(i, self.op_params.get(INDI_ACTUATOR_EFFECTIVENESS_BP + postfix), self.op_params.get(INDI_ACTUATOR_EFFECTIVENESS_V + postfix))
-        self.outer_loop_gain = interp(i, self.op_params.get(INDI_OUTER_GAIN_BP + postfix), self.op_params.get(INDI_OUTER_GAIN_V + postfix))
-        self.inner_loop_gain = interp(i, self.op_params.get(INDI_INNER_GAIN_BP + postfix), self.op_params.get(INDI_INNER_GAIN_V + postfix))
-        self.RC = interp(i, self.op_params.get(INDI_TIME_CONSTANT_BP + postfix), self.op_params.get(INDI_TIME_CONSTANT_V + postfix))
+        self.G = itrp(i, self.op_params.get(INDI_ACTUATOR_EFFECTIVENESS_BP + postfix), self.op_params.get(INDI_ACTUATOR_EFFECTIVENESS_V + postfix))
+        self.outer_loop_gain = itrp(i, self.op_params.get(INDI_OUTER_GAIN_BP + postfix), self.op_params.get(INDI_OUTER_GAIN_V + postfix))
+        self.inner_loop_gain = itrp(i, self.op_params.get(INDI_INNER_GAIN_BP + postfix), self.op_params.get(INDI_INNER_GAIN_V + postfix))
+        self.RC = itrp(i, self.op_params.get(INDI_TIME_CONSTANT_BP + postfix), self.op_params.get(INDI_TIME_CONSTANT_V + postfix))
       else:
         self.G = self.op_params.get('indi_actuator_effectiveness')
         self.outer_loop_gain = self.op_params.get('indi_outer_gain')
