@@ -73,7 +73,7 @@ class CarController():
 
     if self.op_params.get(ENABLE_ACCEL_HYST_GAP):
       if self.op_params.get(ENABLE_ACCEL_HYST_GAP_BPS):
-        accel_gap = interp(CS.vEgo, self.op_params.get(ACCEL_HYST_GAP_BP), self.op_params.get(ACCEL_HYST_GAP_V))
+        accel_gap = interp(CS.out.vEgo, self.op_params.get(ACCEL_HYST_GAP_BP), self.op_params.get(ACCEL_HYST_GAP_V))
       else:
         accel_gap = self.op_params.get(GAP)
     else:
