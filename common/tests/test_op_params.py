@@ -266,6 +266,7 @@ class OpParamsTest(unittest.TestCase):
                 (4, [[0, 10], [[20, 24]], [12]]), # proper steer set, missing one vego, extra arg
                 (4, [[0, 10], [20, 24], [12]]), # proper steer set, normal vego breakpoints (no set), extra arg
                 (5, [[0], [[20, 24], [20, 24, 30]]]), # proper vego set, missing one steer
+                (5, [0, [[20, 24], [20, 24, 30]]]), # proper vego set, normal steer breakpoints (no set)
               ]
     bp_expected = \
                   [
@@ -296,7 +297,7 @@ class OpParamsTest(unittest.TestCase):
                     ]
     for bp_i, bps in bp_args:
       # print(f'bps: {bps}')
-      if is_multi_iter(bps):
+      if is_multi_iter(bps) and hasattr(bps[0], '__iter__'):
         idxs = find_nearest_index(bps[0], steer_vego_arr[0])
 
       bps_expct = bp_expected[bp_i if bp_i < len(bp_expected) else 0]
@@ -310,7 +311,7 @@ class OpParamsTest(unittest.TestCase):
         with self.subTest(msg='Fuzzing multi breakpoints bp: bp, v value: v_value', bp=bps, v_value=v):
           interped = interp_multi_bp(steer_vego_arr, bps, v)
 
-          print(f'interped:\n {interped}')
+          # print(f'interped:\n {interped}')
           # print(f'bps: {bps}')
           # print(f'bps_expected: {bps_expct}')
 
@@ -321,7 +322,7 @@ class OpParamsTest(unittest.TestCase):
           if len(set(idxs)) <= 1:
             expected = expected[0]
 
-          print(f'expected:\n {expected}')
+          # print(f'expected:\n {expected}')
 
           np.testing.assert_equal(interped, expected)
 

@@ -72,7 +72,7 @@ def interp_multi_bp(x, bp, v):
   if l_v <= 1:
     v = [v[-1], v[-1]]
 
-  if l_bp < l_x or len(bp[0]) <= 1:
+  if l_bp < l_x or not hasattr(bp[0], '__iter__') or len(bp[0]) <= 1:
     # return interp(x[0], bp[0][0], v[0])
     # idx = range(len(x)) if is_multi_iter(x) else 0
     # idx = [0] if is_multi_iter(x) else 0
