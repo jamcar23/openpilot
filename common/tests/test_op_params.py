@@ -275,9 +275,10 @@ class OpParamsTest(unittest.TestCase):
                   ]
     v_args = \
             [
-              [[5, 5.75], [6, 7.25, 7.5]], # proper value set
-              [[5, 5.75]], # value set missing one option
-              [6, 7.25, 7.5], # normal value breakpoint, no set
+              (0, [[5, 5.75], [6, 7.25, 7.5]]), # proper value set
+              (1, [[5, 5.75]]), # value set missing one option
+              (2, [6, 7.25, 7.5]), # normal value breakpoint, no set
+              (0, [[5, 5.75], [6, 7.25, 7.5], [8, 9]]) # value set with extra arg
             ]
     v_expected = \
                 [
@@ -297,8 +298,7 @@ class OpParamsTest(unittest.TestCase):
       if is_multi_iter(bps_expct) and not is_multi_iter(bps_expct[-1]):
         bps_expct[-1] = [bps_expct[-1], bps_expct[-1]]
 
-      for v_i in range(len(v_args)):
-        v = v_args[v_i]
+      for v_i, v in v_args:
         v_expct = v_expected[v_i if v_i < len(v_expected) else 0]
 
         with self.subTest(msg='Fuzzing multi breakpoints bp: bp, v value: v_value', bp=bps, v_value=v):
