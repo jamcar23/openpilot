@@ -83,9 +83,9 @@ def interp_multi_bp(x, bp, v):
   # print(f'indexes: {idx}')
 
   if hasattr(idx, '__iter__'):
-    return [interp(x[-1], bp[-1][-1], v[i]) for i in set(idx)]
+    return [interp(x[-1], bp[-1][-1], v[min(l_v - 1, i)]) for i in set(idx)]
   else:
-    return interp(x[-1], bp[-1][-1], v[idx])
+    return interp(x[-1], bp[-1][-1], v[min(l_v - 1, idx)])
 
   # return [interp(x[-1], bp[-1][i], v[i]) for i in set(idx)] if hasattr(idx, '__iter__') else interp(x[-1], bp[-1][idx], v[idx])
   # return interp(x[1], bp[1][idx], v[idx])

@@ -79,7 +79,7 @@ class OpParamsTest(unittest.TestCase):
         expected = interp(vego, bps[1][i], v[i])
         np.testing.assert_equal(interped, expected)
 
-  def test_multi_breakpoint_fuzzing(self):
+  def test_multi_breakpoint_fuzzing(self, check_equality=True, bp_extra=None, bp_expected_extra=None, v_extra=None, v_expected_extra=None):
     idxs = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
     bp_args = \
               [
@@ -94,6 +94,9 @@ class OpParamsTest(unittest.TestCase):
                 (4, [[0, 10], [20, 24], [12]]), # proper steer set, normal vego breakpoints (no set), extra arg
                 (5, [[0], [[20, 24], [20, 24, 30]]]), # proper vego set, missing one steer
                 (5, [0, [[20, 24], [20, 24, 30]]]), # proper vego set, normal steer breakpoints (no set)
+                (0, [[0, 10, 20, 30 , 40, 50], [[20, 24], [20, 24, 30]]]), # extra steer args, proper vego breakpoint set
+                # (3, [[0, 10, 20, 30 , 40, 50], [20, 24, 30]]), # extra steer args, proper vego breakpoint set
+                # (6, [[0, 5, 15], [20, 24, 30]]) # steer set causes index overflow when find index is higher than v
               ]
     bp_expected = \
                   [
@@ -102,26 +105,39 @@ class OpParamsTest(unittest.TestCase):
                     [[0, 10], [0, 10]],
                     [0, 10],
                     [[0, 10], [[20, 24], [12]]],
-                    [[0, 0], [[20, 24], [20, 24, 30]]]
+                    [[0, 0], [[20, 24], [20, 24, 30]]],
+                    [[0, 5, 15], [[20, 24, 30], [20, 24, 30]]]
                   ]
     v_args = \
             [
               (0, [[5, 5.75], [6, 7.25, 7.5]]), # proper value set
               (1, [[5, 5.75]]), # value set missing one option
               (2, [6, 7.25, 7.5]), # normal value breakpoint, no set
-              (0, [[5, 5.75], [6, 7.25, 7.5], [8, 9]]) # value set with extra arg
+              (0, [[5, 5.75], [6, 7.25, 7.5], [8, 9]]), # value set with extra arg
+              (3, [[7.5, 8.5, 11]])
             ]
     v_expected = \
                 [
                   [[5, 5.75], [6, 7.25, 7.5]],
                   [5, 5.75],
                   [6, 7.25, 7.5],
+                  [[7.5, 8.5, 11], [7.5, 8.5, 11]]
                 ]
     steer_vego_arr = \
                     [
                       [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 6, 7, 10, 11], # desired steer angle
                       [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41] # vego
                     ]
+
+    if bp_extra:
+      bp_args += bp_extra
+    if bp_expected_extra:
+      bp_expected += bp_expected_extra
+    if v_extra:
+      v_args += v_extra
+    if v_expected_extra:
+      v_expected += v_expected_extra
+
     for bp_i, bps in bp_args:
       # print(f'bps: {bps}')
       if is_multi_iter(bps) and hasattr(bps[0], '__iter__'):
@@ -144,14 +160,15 @@ class OpParamsTest(unittest.TestCase):
 
           expected = [interp(steer_vego_arr[-1],
                       bps_expct[-1][-1] if is_multi_iter(bps_expct) else bps_expct,
-                      v_expct[i] if is_multi_iter(v_expct) else v_expct)
+                      v_expct[min(len(v_expct) - 1, i)] if is_multi_iter(v_expct) else v_expct)
                       for i in set(idxs)]
           if len(set(idxs)) <= 1:
             expected = expected[0]
 
           # print(f'expected:\n {expected}')
 
-          np.testing.assert_equal(interped, expected)
+          if check_equality:
+            np.testing.assert_equal(interped, expected)
 
           for i, desired_steer in zip(idxs, steer_vego_arr[0]):
             for vego in steer_vego_arr[1]:
@@ -162,9 +179,30 @@ class OpParamsTest(unittest.TestCase):
 
               expected = interp(vego,
                                 bps_expct[-1][-1] if is_multi_iter(bps_expct) else bps_expct,
-                                v_expct[i] if is_multi_iter(v_expct) else v_expct)
+                                v_expct[min(len(v_expct) - 1, i)] if is_multi_iter(v_expct) else v_expct)
               # print(f'expected:\n {expected}')
-              np.testing.assert_equal(interped, expected)
+              if check_equality:
+                np.testing.assert_equal(interped, expected)
+
+  def test_multi_breakpoint_fuzzing_error(self):
+    bp_args = \
+              [
+                (0, [[0, 5, 15], [20, 24, 30]]) # steer set causes index overflow when find index is higher than v
+              ]
+    bp_expected = \
+                  [
+                    [[0, 5, 15], [[20, 24, 30], [20, 24, 30]]]
+                  ]
+    v_args = \
+            [
+
+            ]
+    v_expected = \
+                [
+
+                ]
+
+    self.test_multi_breakpoint_fuzzing(check_equality=False, bp_extra=bp_args, bp_expected_extra=bp_expected, v_extra=v_args, v_expected_extra=v_expected)
 
 
 if __name__ == "__main__":
