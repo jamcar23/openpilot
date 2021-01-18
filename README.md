@@ -104,6 +104,10 @@ indi_multi_breakpoint_source: ['desired_steer', 'v_ego']
 
 Here are our sources for our points (`bp`): `desired_steer` and `v_ego`. More specifically, the first list in `bp` (`[0, 6]`) are breakpoints for the `desired_steer` while the second list are the points for `v_ego`.
 
+During evaluation, the controller compares the `desired_steer` to the closest index in the first list in `bp`. Once it finds that index it selects the list at the same index from `v` and interpolates the `v_ego` points with the select values as if it was a single dimensional array. In other words, you can have multiple sets of `v_ego` breakpoints that are selected based on the `desired_steer` of the path planner.
+
+*Note: at the moment it selects each value list as is based on the closest index. In the future, I'd like to add an option to interpolate the lists themselves first.*
+
 # Licensing
 
 Flexpilot is released under the MIT license. Some parts of the software are released under other licenses as specified.
