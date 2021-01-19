@@ -168,6 +168,10 @@ class opParams:
                         ENABLE_ACTUATOR_DELAY_BPS: Param(False, bool, live=True, depends_on=SHOW_ACTUATOR_DELAY_PARAMS),
                         STEER_ACTUATOR_DELAY_BP: Param([0.], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS),
                         STEER_ACTUATOR_DELAY_V: Param([0.6], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS),
+                        ENABLE_ACTUATOR_DELAY_BPS_MULTI: Param(False, bool, live=True, depends_on=SHOW_ACTUATOR_DELAY_PARAMS),
+                        STEER_ACTUATOR_DELAY_BP_MULTI: Param([[0], [0, 4, 7]], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS_MULTI),
+                        STEER_ACTUATOR_DELAY_V_MULTI: Param([[0.5, 0.35, 0.3]], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS_MULTI),
+                        STEER_DELAY_MULTI_BP_SOURCE: Param(['vego', 'desired_steer_abs'], [list, str], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS_MULTI),
                         'alca_nudge_required': Param(False, bool, 'Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
                                                                  'If False, lane change will occur IMMEDIATELY after signaling'),
                         'alca_min_speed': Param(20.0, VT.number, 'The minimum speed allowed for an automatic lane change (in MPH)'),
@@ -490,6 +494,10 @@ STEER_ACTUATOR_DELAY = 'steer_actuator_delay'
 ENABLE_ACTUATOR_DELAY_BPS = 'enable_actuator_delay_breakpoints'
 STEER_ACTUATOR_DELAY_BP = 'steer_actuator_delay_bp'
 STEER_ACTUATOR_DELAY_V = 'steer_actuator_delay_v'
+ENABLE_ACTUATOR_DELAY_BPS_MULTI = 'enable_actuator_delay_breakpoints_multi'
+STEER_ACTUATOR_DELAY_BP_MULTI = 'steer_actuator_delay_bp_multi'
+STEER_ACTUATOR_DELAY_V_MULTI = 'steer_actuator_delay_v_multi'
+STEER_DELAY_MULTI_BP_SOURCE = 'steer_actuator_delay_multi_bp_source'
 
 SHOW_LAT_PID_PARAMS = 'show_lat_pid_params'
 LAT_PID_KP_BP = 'lat_pid_kp_bp'

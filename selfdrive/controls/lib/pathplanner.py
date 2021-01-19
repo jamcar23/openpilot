@@ -9,7 +9,9 @@ from selfdrive.config import Conversions as CV
 from common.params import Params
 from common.op_params import opParams, ENABLE_LAT_PARAMS, ENABLE_ACTUATOR_DELAY_BPS, STEER_ACTUATOR_DELAY, \
                             STEER_ACTUATOR_DELAY_BP, STEER_ACTUATOR_DELAY_V, \
-                            ENABLE_STEER_RATE_COST, STEER_RATE_COST, ENABLE_PLANNER_PARAMS  
+                            ENABLE_STEER_RATE_COST, STEER_RATE_COST, ENABLE_PLANNER_PARAMS, ENABLE_ACTUATOR_DELAY_BPS_MULTI, \
+                            STEER_ACTUATOR_DELAY_BP_MULTI, STEER_ACTUATOR_DELAY_V_MULTI, STEER_DELAY_MULTI_BP_SOURCE, \
+                            eval_breakpoint_source, interp_multi_bp
 import cereal.messaging as messaging
 from cereal import log
 from common.numpy_fast import interp
@@ -70,7 +72,7 @@ class PathPlanner():
 
     self.alca_nudge_required = self.op_params.get('alca_nudge_required')
     self.alca_min_speed = self.op_params.get('alca_min_speed') * CV.MPH_TO_MS
-    
+
     self.update_params(CP)
     self.last_steer_rate_cost = self.steer_rate_cost
 
@@ -95,6 +97,9 @@ class PathPlanner():
 
   def update(self, sm, pm, CP, VM):
     self.update_params(CP)
+
+    plan_send = messaging.new_message('pathPlan')
+    plan_send.pathPlan.angleSteers = float(self.angle_steers_des_mpc)
 
     v_ego = sm['carState'].vEgo
     angle_steers = sm['carState'].steeringAngle
@@ -127,7 +132,7 @@ class PathPlanner():
       self.lane_change_state = LaneChangeState.off
       self.lane_change_direction = LaneChangeDirection.none
     else:
-      torque_applied = not self.alca_nudge_required or (sm['carState'].steeringPressed and 
+      torque_applied = not self.alca_nudge_required or (sm['carState'].steeringPressed and
                        ((sm['carState'].steeringTorque > 0 and self.lane_change_direction == LaneChangeDirection.left) or
                         (sm['carState'].steeringTorque < 0 and self.lane_change_direction == LaneChangeDirection.right)))
 
@@ -180,10 +185,14 @@ class PathPlanner():
       self.LP.l_prob *= self.lane_change_ll_prob
       self.LP.r_prob *= self.lane_change_ll_prob
     self.LP.update_d_poly(v_ego)
-    
+
     # account for actuation delay
     if self.op_params.get(ENABLE_LAT_PARAMS):
-      if self.op_params.get(ENABLE_ACTUATOR_DELAY_BPS):
+      if self.op_params.get(ENABLE_ACTUATOR_DELAY_BPS_MULTI):
+        delay = interp_multi_bp(eval_breakpoint_source(self.op_params.get(STEER_DELAY_MULTI_BP_SOURCE), sm['carState'], plan_send.pathPlan),
+                                self.op_params.get(STEER_ACTUATOR_DELAY_BP_MULTI),
+                                self.op_params.get(STEER_ACTUATOR_DELAY_V_MULTI))
+      elif self.op_params.get(ENABLE_ACTUATOR_DELAY_BPS):
         delay = interp(v_ego, self.op_params.get(STEER_ACTUATOR_DELAY_BP), self.op_params.get(STEER_ACTUATOR_DELAY_V))
       else:
         delay = self.op_params.get(STEER_ACTUATOR_DELAY)
@@ -227,7 +236,6 @@ class PathPlanner():
       self.solution_invalid_cnt = 0
     plan_solution_valid = self.solution_invalid_cnt < 2
 
-    plan_send = messaging.new_message('pathPlan')
     plan_send.valid = sm.all_alive_and_valid(service_list=['carState', 'controlsState', 'liveParameters', 'model'])
     plan_send.pathPlan.laneWidth = float(self.LP.lane_width)
     plan_send.pathPlan.dPoly = [float(x) for x in self.LP.d_poly]

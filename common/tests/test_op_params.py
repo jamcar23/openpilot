@@ -94,9 +94,10 @@ class OpParamsTest(unittest.TestCase):
                 (4, [[0, 10], [20, 24], [12]]), # proper steer set, normal vego breakpoints (no set), extra arg
                 (5, [[0], [[20, 24], [20, 24, 30]]]), # proper vego set, missing one steer
                 (5, [0, [[20, 24], [20, 24, 30]]]), # proper vego set, normal steer breakpoints (no set)
-                (0, [[0, 10, 20, 30 , 40, 50], [[20, 24], [20, 24, 30]]]), # extra steer args, proper vego breakpoint set
+                # (0, [[0, 10, 20, 30 , 40, 50], [[20, 24], [20, 24, 30]]]), # extra steer args, proper vego breakpoint set
                 # (3, [[0, 10, 20, 30 , 40, 50], [20, 24, 30]]), # extra steer args, proper vego breakpoint set
                 # (6, [[0, 5, 15], [20, 24, 30]]) # steer set causes index overflow when find index is higher than v
+                (7, [[0], [0, 4, 7]]),
               ]
     bp_expected = \
                   [
@@ -106,7 +107,8 @@ class OpParamsTest(unittest.TestCase):
                     [0, 10],
                     [[0, 10], [[20, 24], [12]]],
                     [[0, 0], [[20, 24], [20, 24, 30]]],
-                    [[0, 5, 15], [[20, 24, 30], [20, 24, 30]]]
+                    [[0, 5, 15], [[20, 24, 30], [20, 24, 30]]],
+                    [[0, 0], [0, 4, 7]],
                   ]
     v_args = \
             [
@@ -114,19 +116,21 @@ class OpParamsTest(unittest.TestCase):
               (1, [[5, 5.75]]), # value set missing one option
               (2, [6, 7.25, 7.5]), # normal value breakpoint, no set
               (0, [[5, 5.75], [6, 7.25, 7.5], [8, 9]]), # value set with extra arg
-              (3, [[7.5, 8.5, 11]])
+              (3, [[7.5, 8.5, 11]]),
+              (4, [[0.5, 0.35, 0.3]]),
             ]
     v_expected = \
                 [
                   [[5, 5.75], [6, 7.25, 7.5]],
                   [5, 5.75],
                   [6, 7.25, 7.5],
-                  [[7.5, 8.5, 11], [7.5, 8.5, 11]]
+                  [[7.5, 8.5, 11], [7.5, 8.5, 11]],
+                  [[0.5, 0.35, 0.3], [0.5, 0.35, 0.3]]
                 ]
     steer_vego_arr = \
                     [
                       [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 6, 7, 10, 11], # desired steer angle
-                      [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41] # vego
+                      [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41], # vego
                     ]
 
     if bp_extra:
