@@ -30,7 +30,7 @@ Flexpilot is a fork of openpilot focused on flexibility, live tuning, and other 
 # Installation
 Easiest way is with this command:
 
-`git clone https://github.com/jamcar23/openpilot.git --branch r2++ --depth 1`
+`cd /data && rm -rf openpilot && git clone https://github.com/jamcar23/openpilot.git --branch r2++ --depth 1 && reboot`
 
 Using the `r2++` branch is the easiest way to get the latest "release" features of this fork. Generally, all features are optional so there shouldn't be any harm in always running the latest features.
 
