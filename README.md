@@ -223,7 +223,23 @@ Here are my final thoughts on multidimensional breakpoints:
 Lastly, here is my current favorite multidimensional indi tune for the TSS2 Corolla:
 
 ```
-# TODO: get current tune from device
+indi_actuator_effectiveness_bp_multi: [[0, 5], [20, 24]]
+indi_actuator_effectiveness_v_multi:[[1.5, 1.75], [2, 3]]
+indi_inner_gain_bp_multi: [[0, 6, 15], [20, 24, 30]]
+indi_inner_gain_v_multi: [[5.25, 5.5, 6.5], [6.25, 6.75, 8.5], [7.5, 8.5, 10]]
+indi_outer_gain_bp_multi: [[0, 3, 7], [20, 24, 30]]
+indi_outer_gain_v_multi: [[4, 4.5, 6], [4.5, 5.25, 6.25], [6, 6.5, 7.5]]
+indi_time_constant_bp_multi: [[0, 5, 10], [20, 24, 30]]
+indi_time_constant_v_multi: [[0.3, 0.5, 1], [1.25, 1.5], [2.25]]
+indi_multi_breakpoint_source: ['desired_steer_abs', 'vego']
+
+steer_actuator_delay_bp_multi: [[0], [0, 4, 9, 17]]
+steer_actuator_delay_v_multi: [[0.45, 0.4, 0.3, 0.16]]
+steer_actuator_delay_multi_bp_source: ['vego', 'desired_steer_abs']
+
+corolla_body_type: 'sedan' (wheelbase: 2.7)
+corolla_use_indi: True (tire_stiffness_factor: 0.996)
+safetyParam: 50
 ```
 
 # Licensing
