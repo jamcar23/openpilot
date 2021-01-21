@@ -59,7 +59,15 @@ I have made a few changes to opEdit and opParams, huge shout-out to [Shane](http
 - **Multidimensional List support**: _the new list features in opEdit apply to multidimensional lists of lists too_
 
 ## UI
-Something something dev ui
+I've made a few small changes to the UI as well.
+
+- **Dev UI**: *Shows info on certain internal measurements, while on-road, which may be helpful when tuning*
+  - Ex: `real_steer` vs `desired_steer`
+- **Brake Icon**: *Brake icon shows up when the car is applying the brakes*
+- **Colored Path**: *The color of the path changes to reflect internal values*
+  - When engaged, it interpolates between green and red depending on the amount of torque being used. Greener values mean less torque.
+  - Blue path means a steering correction / override is being applied.
+  - Gray path means OP isn't engaged.
 
 ## Multidimensional Breakpoints
 Multidimensional breakpoints are a new, highly experimental feature which allows for more complex breakpoints that take into account multiple factors. In other words, you can have multiple sets of traditional breakpoints that are selected by another set of values. These can be further extended by defining different sources for each dimension which lets you build highly customizable tunes which weren't previously possible. As an example: in lat tuning, you can now build a tune that not only takes into account the speed the car's going (like we were previously) but also the desired steering angle of the path planner.
