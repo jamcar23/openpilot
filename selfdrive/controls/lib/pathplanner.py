@@ -7,7 +7,11 @@ from selfdrive.controls.lib.drive_helpers import MPC_COST_LAT
 from selfdrive.controls.lib.lane_planner import LanePlanner
 from selfdrive.config import Conversions as CV
 from common.params import Params
-from common.op_params import opParams, ENABLE_LAT_PARAMS, ENABLE_ACTUATOR_DELAY_BPS, STEER_ACTUATOR_DELAY, STEER_ACTUATOR_DELAY_BP, STEER_ACTUATOR_DELAY_V
+from common.op_params import opParams, ENABLE_LAT_PARAMS, ENABLE_ACTUATOR_DELAY_BPS, STEER_ACTUATOR_DELAY, \
+                            STEER_ACTUATOR_DELAY_BP, STEER_ACTUATOR_DELAY_V, \
+                            ENABLE_STEER_RATE_COST, STEER_RATE_COST, ENABLE_PLANNER_PARAMS, ENABLE_ACTUATOR_DELAY_BPS_MULTI, \
+                            STEER_ACTUATOR_DELAY_BP_MULTI, STEER_ACTUATOR_DELAY_V_MULTI, STEER_DELAY_MULTI_BP_SOURCE, \
+                            eval_breakpoint_source, interp_multi_bp
 import cereal.messaging as messaging
 from cereal import log
 from common.numpy_fast import interp
@@ -69,6 +73,12 @@ class PathPlanner():
     self.alca_nudge_required = self.op_params.get('alca_nudge_required')
     self.alca_min_speed = self.op_params.get('alca_min_speed') * CV.MPH_TO_MS
 
+    self.update_params(CP)
+    self.last_steer_rate_cost = self.steer_rate_cost
+
+  def update_params(self, CP):
+    self.steer_rate_cost = CP.steerRateCost if not self.op_params.get(ENABLE_PLANNER_PARAMS) and not self.op_params.get(ENABLE_STEER_RATE_COST) else self.op_params.get(STEER_RATE_COST)
+
   def setup_mpc(self):
     self.libmpc = libmpc_py.libmpc
     self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, self.steer_rate_cost)
@@ -86,6 +96,11 @@ class PathPlanner():
     self.angle_steers_des_time = 0.0
 
   def update(self, sm, pm, CP, VM):
+    self.update_params(CP)
+
+    plan_send = messaging.new_message('pathPlan')
+    plan_send.pathPlan.angleSteers = float(self.angle_steers_des_mpc)
+
     v_ego = sm['carState'].vEgo
     angle_steers = sm['carState'].steeringAngle
     active = sm['controlsState'].active
@@ -117,7 +132,7 @@ class PathPlanner():
       self.lane_change_state = LaneChangeState.off
       self.lane_change_direction = LaneChangeDirection.none
     else:
-      torque_applied = not self.alca_nudge_required or (sm['carState'].steeringPressed and 
+      torque_applied = not self.alca_nudge_required or (sm['carState'].steeringPressed and
                        ((sm['carState'].steeringTorque > 0 and self.lane_change_direction == LaneChangeDirection.left) or
                         (sm['carState'].steeringTorque < 0 and self.lane_change_direction == LaneChangeDirection.right)))
 
@@ -170,10 +185,14 @@ class PathPlanner():
       self.LP.l_prob *= self.lane_change_ll_prob
       self.LP.r_prob *= self.lane_change_ll_prob
     self.LP.update_d_poly(v_ego)
-    
+
     # account for actuation delay
     if self.op_params.get(ENABLE_LAT_PARAMS):
-      if self.op_params.get(ENABLE_ACTUATOR_DELAY_BPS):
+      if self.op_params.get(ENABLE_ACTUATOR_DELAY_BPS_MULTI):
+        delay = interp_multi_bp(eval_breakpoint_source(self.op_params.get(STEER_DELAY_MULTI_BP_SOURCE), sm['carState'], plan_send.pathPlan),
+                                self.op_params.get(STEER_ACTUATOR_DELAY_BP_MULTI),
+                                self.op_params.get(STEER_ACTUATOR_DELAY_V_MULTI))
+      elif self.op_params.get(ENABLE_ACTUATOR_DELAY_BPS):
         delay = interp(v_ego, self.op_params.get(STEER_ACTUATOR_DELAY_BP), self.op_params.get(STEER_ACTUATOR_DELAY_V))
       else:
         delay = self.op_params.get(STEER_ACTUATOR_DELAY)
@@ -202,13 +221,14 @@ class PathPlanner():
     #  Check for infeasable MPC solution
     mpc_nans = any(math.isnan(x) for x in self.mpc_solution[0].delta)
     t = sec_since_boot()
-    if mpc_nans:
-      self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, CP.steerRateCost)
+    if mpc_nans or not math.isclose(self.steer_rate_cost, self.last_steer_rate_cost):
+      self.libmpc.init(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, self.steer_rate_cost)
       self.cur_state[0].delta = math.radians(angle_steers - angle_offset) / VM.sR
+      self.last_steer_rate_cost = self.steer_rate_cost
 
       if t > self.last_cloudlog_t + 5.0:
         self.last_cloudlog_t = t
-        cloudlog.warning("Lateral mpc - nan: True")
+        cloudlog.info("Lateral mpc - reset")
 
     if self.mpc_solution[0].cost > 20000. or mpc_nans:   # TODO: find a better way to detect when MPC did not converge
       self.solution_invalid_cnt += 1
@@ -216,7 +236,6 @@ class PathPlanner():
       self.solution_invalid_cnt = 0
     plan_solution_valid = self.solution_invalid_cnt < 2
 
-    plan_send = messaging.new_message('pathPlan')
     plan_send.valid = sm.all_alive_and_valid(service_list=['carState', 'controlsState', 'liveParameters', 'model'])
     plan_send.pathPlan.laneWidth = float(self.LP.lane_width)
     plan_send.pathPlan.dPoly = [float(x) for x in self.LP.d_poly]

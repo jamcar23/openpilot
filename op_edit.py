@@ -227,7 +227,7 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
             self.info('Not saved!', sleep_time=0)
           return
 
-  def change_param_list(self, old_value, param_info, chosen_key):
+  def change_param_list(self, old_value, param_info, chosen_key, parent_list=None, parent_idx=None):
     while True:
       self.info('Current value: {} (type: {})'.format(old_value, type(old_value).__name__), sleep_time=0)
       self.prompt('\nEnter index to edit (0 to {}), or -i to remove index, or +value to append value:'.format(len(old_value) - 1 if old_value else 0))
@@ -260,6 +260,10 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         if append_val or remove_idx or is_list:
           new_value = choice_idx
         else:
+          if hasattr(old_value[choice_idx], '__iter__'):
+            self.change_param_list(old_value[choice_idx], param_info, chosen_key, parent_list=old_value, parent_idx=choice_idx)
+            break
+
           self.info('Chosen index: {}'.format(choice_idx), sleep_time=0)
           self.info('Value: {} (type: {})'.format(old_value[choice_idx], type(old_value[choice_idx]).__name__), sleep_time=0)
           self.prompt('\nEnter your new value:')
@@ -283,8 +287,12 @@ class opEdit:  # use by running `python /data/openpilot/op_edit.py`
         else:
           old_value[choice_idx] = new_value
 
-        self.op_params.put(chosen_key, old_value)
-        self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, new_value, type(new_value).__name__), end='\n')
+        if parent_list and parent_idx is not None:
+          parent_list[parent_idx] = old_value
+
+        save_value = parent_list if parent_list else old_value
+        self.op_params.put(chosen_key, save_value)
+        self.success('Saved {} with value: {}! (type: {})'.format(chosen_key, save_value, type(save_value).__name__), end='\n')
         break
 
   def cyan(self, msg, end=''):

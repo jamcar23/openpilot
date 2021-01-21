@@ -1,12 +1,13 @@
 from cereal import car
-from common.numpy_fast import clip
+from common.numpy_fast import clip, interp
 from selfdrive.car import apply_toyota_steer_torque_limits, create_gas_command, make_can_msg
 from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_command, \
                                            create_accel_command, create_acc_cancel_command, \
                                            create_fcw_command
 from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, NO_STOP_TIMER_CAR, SteerLimitParams
 from opendbc.can.packer import CANPacker
-from common.op_params import opParams, ENABLE_TOYOTA_CAN_PARAMS, ENABLE_TOYOTA_ACCEL_PARAMS, TOYOTA_ACC_TYPE, TOYOTA_PERMIT_BRAKING
+from common.op_params import opParams, ENABLE_TOYOTA_CAN_PARAMS, ENABLE_TOYOTA_ACCEL_PARAMS, TOYOTA_ACC_TYPE, TOYOTA_PERMIT_BRAKING, \
+                            ENABLE_ACCEL_HYST_GAP, ENABLE_ACCEL_HYST_GAP_BPS, ACCEL_HYST_GAP as GAP, ACCEL_HYST_GAP_BP, ACCEL_HYST_GAP_V
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
@@ -51,7 +52,9 @@ class CarController():
     
     if not OP:
       OP = opParams()
-    self.opParams = OP
+    self.op_params = OP
+
+    self.last_permit_braking = False
 
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
              left_line, right_line, lead, left_lane_depart, right_lane_depart):
@@ -68,7 +71,15 @@ class CarController():
     else:
       apply_accel = actuators.gas - actuators.brake
 
-    apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady, enabled, self.opParams.get('accel_hyst_gap'))
+    if self.op_params.get(ENABLE_ACCEL_HYST_GAP):
+      if self.op_params.get(ENABLE_ACCEL_HYST_GAP_BPS):
+        accel_gap = interp(CS.out.vEgo, self.op_params.get(ACCEL_HYST_GAP_BP), self.op_params.get(ACCEL_HYST_GAP_V))
+      else:
+        accel_gap = self.op_params.get(GAP)
+    else:
+      accel_gap = ACCEL_HYST_GAP
+
+    apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady, enabled, accel_gap)
     apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
 
     # steer torque
@@ -125,9 +136,9 @@ class CarController():
         acc_type = 1
         permit_braking = 1
 
-        if self.opParams.get(ENABLE_TOYOTA_CAN_PARAMS) and self.opParams.get(ENABLE_TOYOTA_ACCEL_PARAMS):
-          acc_type = self.opParams.get(TOYOTA_ACC_TYPE) & 0xFF
-          permit_braking = self.opParams.get(TOYOTA_PERMIT_BRAKING)
+        if self.op_params.get(ENABLE_TOYOTA_CAN_PARAMS) and self.op_params.get(ENABLE_TOYOTA_ACCEL_PARAMS):
+          acc_type = self.op_params.get(TOYOTA_ACC_TYPE) & 3
+          permit_braking = self.op_params.get(TOYOTA_PERMIT_BRAKING)
           if permit_braking == 'lead':
             permit_braking = lead
 

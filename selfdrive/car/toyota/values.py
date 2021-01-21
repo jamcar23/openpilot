@@ -1,5 +1,6 @@
 # flake8: noqa
 
+from common.op_params import opParams, ENABLE_UNSAFE_STEERING_RATE, ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE
 from selfdrive.car import dbc_dict
 from cereal import car
 Ecu = car.CarParams.Ecu
@@ -7,9 +8,16 @@ Ecu = car.CarParams.Ecu
 # Steer torque limits
 class SteerLimitParams:
   STEER_MAX = 1500
-  STEER_DELTA_UP = 10       # 1.5s time to peak torque
-  STEER_DELTA_DOWN = 25     # always lower than 45 otherwise the Rav4 faults (Prius seems ok with 50)
   STEER_ERROR_MAX = 350     # max delta between torque cmd and torque motor
+  _op_params = opParams()
+
+  @classmethod
+  def STEER_DELTA_UP(cls):
+    return 15 if cls._op_params.get(ENABLE_UNSAFE_STEERING_RATE) and cls._op_params.get(ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE) else 10
+
+  @classmethod
+  def STEER_DELTA_DOWN(cls):
+    return 44 if cls._op_params.get(ENABLE_UNSAFE_STEERING_RATE) and cls._op_params.get(ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE) else 25
 
 class CAR:
   PRIUS = "TOYOTA PRIUS 2017"

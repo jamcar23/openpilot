@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import os
 import json
+import math
 import time
+from common.numpy_fast import find_nearest_index, interp, is_multi_iter
 from common.colors import opParams_error as error
 from common.colors import opParams_warning as warning
 from selfdrive.hardware import PC
@@ -13,6 +15,90 @@ except ImportError:
 
 travis = True if PC else False  # replace with travis_checker if you use travis or GitHub Actions
 
+
+def parse_param_modifiers(src, value):
+  if src:
+    if ParamModifierKeys.ABS in src:
+      return parse_param_modifiers(src.replace(ParamModifierKeys.ABS, ''), abs(value))
+    elif ParamModifierKeys.DEGREES in src:
+      return parse_param_modifiers(src.replace(ParamModifierKeys.DEGREES, ''), math.degrees(value))
+    elif ParamModifierKeys.RADIANS in src:
+      return parse_param_modifiers(src.replace(ParamModifierKeys.RADIANS, ''), math.radians(value))
+  else:
+    return value
+
+def eval_breakpoint_source(sources, CS, path_plan):
+  '''
+  Maps a breakpoint source array to actual values
+  '''
+
+  def eval_source(src):
+    if BreakPointSourceKeys.VEGO in src:
+      return parse_param_modifiers(src.replace(BreakPointSourceKeys.VEGO, ''), CS.vEgo)
+    elif BreakPointSourceKeys.AEGO in src:
+      return parse_param_modifiers(src.replace(BreakPointSourceKeys.AEGO, ''), CS.aEgo)
+    elif BreakPointSourceKeys.DESIRED_STEER in src:
+      return parse_param_modifiers(src.replace(BreakPointSourceKeys.DESIRED_STEER, ''), path_plan.angleSteers)
+    else:
+      raise ValueError(f'Unknown value option: {src}')
+
+  return [eval_source(source) for source in sources]
+
+def interp_multi_bp(x, bp, v):
+  def correct_multi_bp(idx):
+    if not is_multi_iter(bp[idx]):
+      bp[idx] = [bp[idx], bp[idx]]
+
+      if len(bp) <= 1:
+        bp.insert(0, bp[idx][0])
+
+  is_bp_multi_iter = is_multi_iter(bp)
+  is_v_multi_iter = is_multi_iter(v)
+
+  if not is_bp_multi_iter:
+    bp = [bp, bp]
+
+  # correct_multi_bp(0)
+  correct_multi_bp(-1)
+
+  if not is_v_multi_iter:
+    v = [v, v]
+
+  l_x = len(x)
+  l_bp = len(bp)
+  l_v = len(v)
+
+  # print(f'bp: {bp}')
+  if l_v <= 1:
+    v = [v[-1], v[-1]]
+
+  if l_bp < l_x or not hasattr(bp[0], '__iter__') or len(bp[0]) <= 1:
+    # return interp(x[0], bp[0][0], v[0])
+    # idx = range(len(x)) if is_multi_iter(x) else 0
+    # idx = [0] if is_multi_iter(x) else 0
+    idx = 0
+  else:
+    idx = find_nearest_index(bp[0], x[0])
+
+  # print(f'indexes: {idx}')
+
+  if hasattr(idx, '__iter__'):
+    return [interp(x[-1], bp[-1][-1], v[min(l_v - 1, i)]) for i in set(idx)]
+  else:
+    return interp(x[-1], bp[-1][-1], v[min(l_v - 1, idx)])
+
+  # return [interp(x[-1], bp[-1][i], v[i]) for i in set(idx)] if hasattr(idx, '__iter__') else interp(x[-1], bp[-1][idx], v[idx])
+  # return interp(x[1], bp[1][idx], v[idx])
+
+class BreakPointSourceKeys:
+  VEGO = 'vego'
+  AEGO = 'aego'
+  DESIRED_STEER = 'desired_steer'
+
+class ParamModifierKeys:
+  ABS = '_abs'
+  DEGREES = '_deg'
+  RADIANS = '_rad'
 
 class ValueTypes:
   number = [float, int]
@@ -82,6 +168,10 @@ class opParams:
                         ENABLE_ACTUATOR_DELAY_BPS: Param(False, bool, live=True, depends_on=SHOW_ACTUATOR_DELAY_PARAMS),
                         STEER_ACTUATOR_DELAY_BP: Param([0.], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS),
                         STEER_ACTUATOR_DELAY_V: Param([0.6], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS),
+                        ENABLE_ACTUATOR_DELAY_BPS_MULTI: Param(False, bool, live=True, depends_on=SHOW_ACTUATOR_DELAY_PARAMS),
+                        STEER_ACTUATOR_DELAY_BP_MULTI: Param([[0], [0, 4, 7]], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS_MULTI),
+                        STEER_ACTUATOR_DELAY_V_MULTI: Param([[0.5, 0.35, 0.3]], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS_MULTI),
+                        STEER_DELAY_MULTI_BP_SOURCE: Param(['vego', 'desired_steer_abs'], [list, str], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS_MULTI),
                         'alca_nudge_required': Param(False, bool, 'Whether to wait for applied torque to the wheel (nudge) before making lane changes. '
                                                                  'If False, lane change will occur IMMEDIATELY after signaling'),
                         'alca_min_speed': Param(20.0, VT.number, 'The minimum speed allowed for an automatic lane change (in MPH)'),
@@ -92,7 +182,11 @@ class opParams:
                         DOWNHILL_INCLINE: Param(-1, VT.number, 'If the angle between the current road and the future predicted road is less than this value, '
                                                               'the car will try to coast downhill. Unit: degrees', live=True, depends_on=ENABLE_COASTING),
                         'corolla_use_indi': Param(False, bool, depends_on=SHOW_TOYOTA_OPTS),
-                        'accel_hyst_gap': Param(0.02, VT.number, live=True, depends_on=SHOW_TOYOTA_OPTS),
+                        ENABLE_ACCEL_HYST_GAP: Param(False, bool, live=True, depends_on=SHOW_TOYOTA_OPTS),
+                        ACCEL_HYST_GAP: Param(0.02, VT.number, live=True, depends_on=ENABLE_ACCEL_HYST_GAP),
+                        ENABLE_ACCEL_HYST_GAP_BPS: Param(False, bool, live=True, depends_on=ENABLE_ACCEL_HYST_GAP),
+                        ACCEL_HYST_GAP_BP: Param([0.], [list, float, int], live=True, depends_on=ENABLE_ACCEL_HYST_GAP_BPS),
+                        ACCEL_HYST_GAP_V: Param([0.02], [list, float], live=True, depends_on=ENABLE_ACCEL_HYST_GAP_BPS),
                         ALWAYS_EVAL_COAST: Param(False, bool, live=True, depends_on=ENABLE_COASTING),
                         EVAL_COAST_LONG: Param(False, bool, live=True, depends_on=ENABLE_COASTING),
                         ENABLE_LONG_PARAMS: Param(False, bool, live=True, description='When true the long controller will used the params in opParam '
@@ -118,19 +212,29 @@ class opParams:
                         STOP_BRAKE_RATE_V: Param([0.2], [list, float, int], live=True, depends_on=ENABLE_START_STOP_PARAMS),
                         START_BRAKE_RATE_BP: Param([0], [list, float, int], live=True, depends_on=ENABLE_START_STOP_PARAMS),
                         START_BRAKE_RATE_V: Param([0.8], [list, float, int], live=True, depends_on=ENABLE_START_STOP_PARAMS),
-                        INDI_SHOW_BREAKPOINTS: Param(False, bool, live=True, depends_on=SHOW_INDI_PARAMS),
-                        'indi_use_vego_breakpoints': Param(False, bool, live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_use_steer_angle_breakpoints': Param(False, bool, live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_inner_gain_bp': Param([0, 255, 255], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_inner_gain_v': Param([6.0, 6.0, 6.0], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_outer_gain_bp': Param([0, 255, 255], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_outer_gain_v': Param([15, 15, 15], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_time_constant_bp': Param([0, 255, 255], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_time_constant_v': Param([5.5, 5.5, 5.5], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_actuator_effectiveness_bp': Param([0, 255, 255], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
-                        'indi_actuator_effectiveness_v': Param([6, 6, 6], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS),
+                        ENABLE_INDI_BREAKPOINTS: Param(False, bool, live=True, depends_on=SHOW_INDI_PARAMS),
+                        INDI_INNER_GAIN_BP: Param([20, 24, 30], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        INDI_INNER_GAIN_V: Param([7.25, 7.5, 9], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        INDI_OUTER_GAIN_BP: Param([20, 24, 30], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        INDI_OUTER_GAIN_V: Param([6, 7.25, 6], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        INDI_TIME_CONSTANT_BP: Param([20, 24], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        INDI_TIME_CONSTANT_V: Param([1.6, 1.83], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        INDI_ACTUATOR_EFFECTIVENESS_BP: Param([0, 24], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        INDI_ACTUATOR_EFFECTIVENESS_V: Param([2, 3], [list, float, int], live=True, depends_on=ENABLE_INDI_BREAKPOINTS),
+                        ENABLE_MULTI_INDI_BREAKPOINTS: Param(False, bool, live=True, depends_on=SHOW_INDI_PARAMS),
+                        INDI_INNER_GAIN_BP_MULTI: Param([[0, 10], [20, 24, 30]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_INNER_GAIN_V_MULTI: Param([[5.5, 6, 7.5], [7.25, 7.5, 9]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_OUTER_GAIN_BP_MULTI: Param([[0, 10], [20, 24, 30]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_OUTER_GAIN_V_MULTI: Param([[5, 5.75], [6, 7.25, 7.5]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_TIME_CONSTANT_BP_MULTI: Param([[0, 10], [20, 24, 30]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_TIME_CONSTANT_V_MULTI: Param([[1, 1.25], [2.2, 2.5]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_ACTUATOR_EFFECTIVENESS_BP_MULTI: Param([[0, 10], [20, 24, 30]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_ACTUATOR_EFFECTIVENESS_V_MULTI: Param([[1.25, 1.5], [2, 3]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
+                        INDI_MULTI_BREAKPOINT_SOURCE: Param(['desired_steer_abs', 'vego'], [list, str], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS),
                         ENABLE_UNSAFE_STEERING_RATE: Param(False, bool, depends_on=SHOW_UNSAFE_OPTS, description='Toyota only.\nThis is HIGHLY unsafe, '
                                                           'at best, you have less time to react, at worst, you\'ll have steering faults.\nDo NOT use.'),
+                        ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE: Param(False, bool, depends_on=ENABLE_UNSAFE_STEERING_RATE, description='Toyota only.\nThis is HIGHLY unsafe, '
+                                                          'at best, you have less time to react, at worst, you\'ll have steering faults.\nDo NOT use.', live=True),
                         ENABLE_LAT_PARAMS: Param(False, bool, live=True, description="When true, the lat params set in op_edit."),
                         WHICH_LAT_CTRL: Param('indi', ['pid', 'indi', 'lqr'], live=True, depends_on= ENABLE_LAT_PARAMS, description='Which lat controller to use, '
                                               'options are pid, indi, or lqr.'),
@@ -170,7 +274,9 @@ class opParams:
                         'a_cruise_min_v_following': Param([-1.0, -.8, -.67, -.5, -.30], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
                         'a_cruise_max_bp': Param([0.,  6.4, 22.5, 40.], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
                         'a_cruise_max_v': Param([1.2, 1.2, 0.65, .4], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
-                        'a_cruise_max_v_following': Param([1.6, 1.6, 0.65, .4], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),}
+                        'a_cruise_max_v_following': Param([1.6, 1.6, 0.65, .4], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
+                        ENABLE_STEER_RATE_COST: Param(False, [bool], live=True, depends_on=ENABLE_PLANNER_PARAMS, description='Technically live but treat it like it\'s not.'),
+                        STEER_RATE_COST: Param(1., VT.number, live=True, depends_on=ENABLE_STEER_RATE_COST)}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
@@ -215,6 +321,9 @@ class opParams:
         os.chmod(self._params_file, 0o764)
 
   def get(self, key=None, force_live=False):  # any params you try to get MUST be in fork_params
+    if PC:
+      assert isinstance(self, opParams), f'Self is type: {type(self).__name__}, expected opParams'
+
     param_info = self.param_info(key)
     self._update_params(param_info, force_live)
 
@@ -311,6 +420,7 @@ class opParams:
 CAM_OFFSET = 'camera_offset'
 
 ENABLE_UNSAFE_STEERING_RATE = "enable_unsafe_steering_rate"
+ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE = "enable_unsafe_steering_rate_selfdrive"
 
 ENABLE_COASTING = "enable_coasting"
 COAST_SPEED = "coast_speed"
@@ -320,7 +430,25 @@ ALWAYS_EVAL_COAST = "always_eval_coast_plan"
 EVAL_COAST_LONG = "eval_coast_long_controller"
 
 SHOW_INDI_PARAMS = 'show_indi_params'
-INDI_SHOW_BREAKPOINTS = 'indi_show_breakpoint_opts'
+ENABLE_INDI_BREAKPOINTS = 'enable_indi_breakpoints'
+INDI_INNER_GAIN_BP = 'indi_inner_gain_bp'
+INDI_INNER_GAIN_V = 'indi_inner_gain_v'
+INDI_OUTER_GAIN_BP = 'indi_outer_gain_bp'
+INDI_OUTER_GAIN_V = 'indi_outer_gain_v'
+INDI_ACTUATOR_EFFECTIVENESS_BP = 'indi_actuator_effectiveness_bp'
+INDI_ACTUATOR_EFFECTIVENESS_V = 'indi_actuator_effectiveness_v'
+INDI_TIME_CONSTANT_BP = 'indi_time_constant_bp'
+INDI_TIME_CONSTANT_V = 'indi_time_constant_v'
+ENABLE_MULTI_INDI_BREAKPOINTS = 'enable_multi_indi_breakpoints'
+INDI_INNER_GAIN_BP_MULTI = 'indi_inner_gain_bp_multi'
+INDI_INNER_GAIN_V_MULTI = 'indi_inner_gain_v_multi'
+INDI_OUTER_GAIN_BP_MULTI = 'indi_outer_gain_bp_multi'
+INDI_OUTER_GAIN_V_MULTI = 'indi_outer_gain_v_multi'
+INDI_ACTUATOR_EFFECTIVENESS_BP_MULTI = 'indi_actuator_effectiveness_bp_multi'
+INDI_ACTUATOR_EFFECTIVENESS_V_MULTI = 'indi_actuator_effectiveness_v_multi'
+INDI_TIME_CONSTANT_BP_MULTI = 'indi_time_constant_bp_multi'
+INDI_TIME_CONSTANT_V_MULTI = 'indi_time_constant_v_multi'
+INDI_MULTI_BREAKPOINT_SOURCE = 'indi_multi_breakpoint_source'
 
 SHOW_A_CRUISE = 'a_cruise_show_opts'
 
@@ -366,6 +494,10 @@ STEER_ACTUATOR_DELAY = 'steer_actuator_delay'
 ENABLE_ACTUATOR_DELAY_BPS = 'enable_actuator_delay_breakpoints'
 STEER_ACTUATOR_DELAY_BP = 'steer_actuator_delay_bp'
 STEER_ACTUATOR_DELAY_V = 'steer_actuator_delay_v'
+ENABLE_ACTUATOR_DELAY_BPS_MULTI = 'enable_actuator_delay_breakpoints_multi'
+STEER_ACTUATOR_DELAY_BP_MULTI = 'steer_actuator_delay_bp_multi'
+STEER_ACTUATOR_DELAY_V_MULTI = 'steer_actuator_delay_v_multi'
+STEER_DELAY_MULTI_BP_SOURCE = 'steer_actuator_delay_multi_bp_source'
 
 SHOW_LAT_PID_PARAMS = 'show_lat_pid_params'
 LAT_PID_KP_BP = 'lat_pid_kp_bp'
@@ -379,6 +511,11 @@ SHOW_EXPERIMENTAL_OPTS = 'show_experimental_options'
 
 SHOW_TOYOTA_OPTS = 'show_toyota_options'
 COROLLA_BODY_TYPE = 'corolla_body_type'
+ENABLE_ACCEL_HYST_GAP = 'enable_accel_hyst_gap'
+ACCEL_HYST_GAP = 'accel_hyst_gap'
+ENABLE_ACCEL_HYST_GAP_BPS = 'enable_accel_hyst_gap_breakpoints'
+ACCEL_HYST_GAP_BP = 'accel_hyst_gap_bp'
+ACCEL_HYST_GAP_V = 'accel_hyst_gap_v'
 
 ENABLE_MANAGER_PARAMS = 'enable_manager_params'
 DISABLED_PROCESSES = 'disabled_processes'
@@ -390,3 +527,5 @@ TOYOTA_PERMIT_BRAKING = 'toyota_permit_braking'
 
 ENABLE_PLANNER_PARAMS = 'enable_planner_params'
 ENABLE_PLNR_ACCEL_LIMITS = 'enable_accel_limits_planner'
+ENABLE_STEER_RATE_COST = 'enable_steer_rate_cost'
+STEER_RATE_COST = 'steer_rate_cost'
