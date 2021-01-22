@@ -27,12 +27,20 @@ def interp_2d(x, bp, v):
 
   is_x_iter = hasattr(x, '__iter__')
   is_y_iter = hasattr(y, '__iter__')
+
+  len_x = len(x) if is_x_iter else 0
+  len_y = len(y) if is_y_iter else 0
+
   is_x_multi_iter = is_multi_iter(x)
   is_bp_multi_iter = is_multi_iter(bp)
   is_v_multi_iter = is_multi_iter(v)
 
-  len_x = len(x) if is_x_iter else 0
-  len_y = len(y) if is_y_iter else 0
+  if not is_bp_multi_iter:
+    bp = [bp, bp]
+
+  if not is_v_multi_iter:
+    v = [v, v]
+
   N_x = len(bp[0])
   N_y = len(bp[1])
 

@@ -88,29 +88,29 @@ class InterpTest(unittest.TestCase):
         # np.testing.assert_equal(actual, expected[i])
         # i += 1
 
-  # def test_interp_2d_fuzzing(self):
-  #   bp_args = \
-  #             [
-  #               [0, 10],
-  #               [[0, 10], [0]]
-  #             ]
-  #   v_args = \
-  #           [
-  #             [5, 5.75],
-  #           ]
-  #   x_args = \
-  #             [
-  #               [
-  #                 [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 6, 7, 10, 11], # desired steer angle
-  #                 [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41] # vego
-  #               ],
-  #             ]
+  def test_interp_2d_fuzzing(self):
+    bp_args = \
+              [
+                [0, 10],
+                [[0, 10], [0]]
+              ]
+    v_args = \
+            [
+              [5, 5.75],
+            ]
+    x_args = \
+              [
+                [
+                  [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 6, 7, 10, 11], # desired steer angle
+                  [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41] # vego
+                ],
+              ]
 
-  #   for bp in bp_args:
-  #     for v in v_args:
-  #       for x in x_args:
-  #         out = interp_2d(x, bp, v)
-  #         assert out
+    for bp in bp_args:
+      for v in v_args:
+        for x in x_args:
+          out = interp_2d(x, bp, v)
+          assert out
 
 if __name__ == "__main__":
   unittest.main()
