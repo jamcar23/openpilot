@@ -24,6 +24,15 @@ def interp(x, xp, fp):
 def interp_2d(x, bp, v):
   y = x[-1]
   x = x[0]
+
+  is_x_iter = hasattr(x, '__iter__')
+  is_y_iter = hasattr(y, '__iter__')
+  is_x_multi_iter = is_multi_iter(x)
+  is_bp_multi_iter = is_multi_iter(bp)
+  is_v_multi_iter = is_multi_iter(v)
+
+  len_x = len(x) if is_x_iter else 0
+  len_y = len(y) if is_y_iter else 0
   N_x = len(bp[0])
   N_y = len(bp[1])
 
@@ -37,23 +46,32 @@ def interp_2d(x, bp, v):
     low_x = hi_x - 1
     low_y = hi_y - 1
 
-    if ((hi_x == N_x or hi_y == N_y) and xv > bp[0][low_x] and yv > bp[1][low_y]) or hi_x == 0 or hi_y == 0:
+    if ((hi_x >= N_x or hi_y >= N_y) and xv > bp[0][low_x] and yv > bp[1][low_y]) or hi_x <= 0 or hi_y <= 0:
       # This branch is taken if either x or y is at top or bottom of their respective BPs
-      if hi_x == N_x and hi_y == N_y:  # both top
+      if hi_x >= N_x and hi_y >= N_y:  # both top
         return v[-1][-1]
-      elif hi_x == 0 and hi_y == 0:  # both bottom
+      elif hi_x <= 0 and hi_y <= 0:  # both bottom
         return v[0][0]
       # Since we know either x or y is at top or bottom we figure out which is what and then just do one interpolation
       # (These two variables use the same if check, it's not as complicated as it looks; this is just shorthand)
       bp_idx = 1 if hi_x in [N_x, 0] else 0
-      new_v = v[-1 if hi_x == N_x else 0] if hi_x in [N_x, 0] else [_v[-1 if hi_y == N_y else 0] for _v in v]
+      new_v = v[-1 if hi_x >= N_x else 0] if hi_x in [N_x, 0] else [_v[-1 if hi_y >= N_y else 0] for _v in v]
       return interp(yv if bp_idx == 1 else xv, bp[bp_idx], new_v)
     else:  # This branch is taken if both x and y are in between BPs
       # Iterates through zipped low and high x values, then interpolates with x to get a new value list we can interpolate y with
-      new_v = [interp(xv, [bp[0][low_x], bp[0][hi_x]], [low_xv, hi_xv]) for low_xv, hi_xv in zip(v[low_x], v[hi_x])]
-      return interp(yv, [bp[1][low_y], bp[1][hi_y]], new_v)
+      len_v_low = len(v[low_x])
+      len_v_hi = len(v[hi_x])
+      new_v = [
+                interp(xv, [bp[0][low_x], bp[0][hi_x]],
+                      [v[low_x][min(len_v_low - 1, i)], v[hi_x][min(len_v_hi - 1, i)]])
+                for i in range(max(len_v_low, len_v_hi))
+              ]
+      # print(f'new_v: {new_v}')
+      new_bp = [bp[1][low_y], bp[1][hi_y]]
+      # print(f'new_bp: {new_bp}')
+      return interp(yv, new_bp, new_v)
 
-  return [get_interp(v1, v2) for v1, v2 in zip(x, y)] if hasattr(x, '__iter__') else get_interp(x, y)
+  return [get_interp(x[min(len_x - 1, i)], y[min(len_y - 1, i)]) for i in range(max(len_x, len_y))] if is_x_iter else get_interp(x, y)
 
 def mean(x):
   return sum(x) / len(x)

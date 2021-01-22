@@ -2,7 +2,7 @@ import numpy as np
 import unittest
 
 from common.numpy_fast import interp, interp_2d
-# from common.op_params import interp_multi_bp
+from common.op_params import interp_multi_bp
 
 
 class InterpTest(unittest.TestCase):
@@ -64,10 +64,11 @@ class InterpTest(unittest.TestCase):
     v = [[5, 5.75], [7.25, 7.5]]
     steer_vego_arr = \
                     [
-                      [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 6, 7, 10, 11], # desired steer angle
+                      [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 7, 10, 11], # desired steer angle
                       [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41] # vego
                     ]
-    expected = [5, 5, 5, 5, 5, 5, 5, 5, 5.000000000000225, 5.45, 5.9, 6.25, 6.8, 6.975, 7.5, 7.5]
+    expected = [5, 5, 5, 5, 5, 5, 5, 5, 5.000000000000225, 5.45, 5.9, 6.25, 6.975, 7.5, 7.5, 7.5]
+
 
     actual = interp_2d(steer_vego_arr, bps, v)
     # print(f'actual: {actual}')
@@ -76,11 +77,40 @@ class InterpTest(unittest.TestCase):
     np.testing.assert_equal(actual, expected)
 
     # i = 0
-    # for desired_steer in steer_vego_arr[0]:
-    #   for v_ego in steer_vego_arr[1]:
-    #     actual = interp_2d([desired_steer, v_ego], bps, v)
-    #     np.testing.assert_equal(actual, expected[i])
-    #     i += 1
+    for desired_steer in steer_vego_arr[0]:
+      for v_ego in steer_vego_arr[1]:
+        x = [desired_steer, v_ego]
+        actual = interp_2d(x, bps, v)
+        # print(f'actual: {actual}')
+        # print(f'expected: {expected}')
+        # assert actual in expected, f'Actual value not in expected values:\nActual: {actual}\nX: {x}'
+        assert not hasattr(actual, '__iter__'), f'Actual should not be an iter:\nActual: {actual}'
+        # np.testing.assert_equal(actual, expected[i])
+        # i += 1
+
+  # def test_interp_2d_fuzzing(self):
+  #   bp_args = \
+  #             [
+  #               [0, 10],
+  #               [[0, 10], [0]]
+  #             ]
+  #   v_args = \
+  #           [
+  #             [5, 5.75],
+  #           ]
+  #   x_args = \
+  #             [
+  #               [
+  #                 [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 6, 7, 10, 11], # desired steer angle
+  #                 [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41] # vego
+  #               ],
+  #             ]
+
+  #   for bp in bp_args:
+  #     for v in v_args:
+  #       for x in x_args:
+  #         out = interp_2d(x, bp, v)
+  #         assert out
 
 if __name__ == "__main__":
   unittest.main()
