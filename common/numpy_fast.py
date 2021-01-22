@@ -21,7 +21,9 @@ def interp(x, xp, fp):
 
   return [get_interp(v) for v in x] if hasattr(x, '__iter__') else get_interp(x)
 
-def interp_2d(x, y, bp, v):
+def interp_2d(x, bp, v):
+  y = x[-1]
+  x = x[0]
   N_x = len(bp[0])
   N_y = len(bp[1])
 

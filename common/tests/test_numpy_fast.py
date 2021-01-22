@@ -1,7 +1,8 @@
 import numpy as np
 import unittest
 
-from common.numpy_fast import interp
+from common.numpy_fast import interp, interp_2d
+# from common.op_params import interp_multi_bp
 
 
 class InterpTest(unittest.TestCase):
@@ -13,14 +14,14 @@ class InterpTest(unittest.TestCase):
 
     expected = np.interp(v_ego_arr, _A_CRUISE_MIN_BP, _A_CRUISE_MIN_V)
     actual = interp(v_ego_arr, _A_CRUISE_MIN_BP, _A_CRUISE_MIN_V)
-    
+
     np.testing.assert_equal(actual, expected)
 
     for v_ego in v_ego_arr:
       expected = np.interp(v_ego, _A_CRUISE_MIN_BP, _A_CRUISE_MIN_V)
       actual = interp(v_ego, _A_CRUISE_MIN_BP, _A_CRUISE_MIN_V)
       np.testing.assert_equal(actual, expected)
-  
+
   def test_short_bp_long_v(self):
     bp_test_cases = ([0], [0, 5], [0., 5., 10.], [0., 5., 10., 20], [-1., 2., 13., 16])
     bp_expected_cases = ([0, 0, 0, 0, 0], [0, 5, 5, 5, 5], [0., 5., 10., 10., 10.], [0., 5., 10., 20., 20.], [-1., 2., 13., 16, 16.])
@@ -39,7 +40,7 @@ class InterpTest(unittest.TestCase):
           expected = np.interp(v_ego, bp_e, _A_CRUISE_MIN_V)
           actual = interp(v_ego, bp_a, _A_CRUISE_MIN_V)
           np.testing.assert_equal(actual, expected)
-  
+
   def test_long_bp_short_v(self):
     _A_CRUISE_MIN_BP = np.asarray([0., 5., 10., 20., 40.])
     v_test_cases = ([-1.0], [-1.0, -.8], [-1.0, -.8, -.67], [-1.0, -.8, -.67, -.5])
@@ -58,6 +59,28 @@ class InterpTest(unittest.TestCase):
           actual = interp(v_ego, _A_CRUISE_MIN_BP, v_a)
           np.testing.assert_equal(actual, expected)
 
+  def test_correctness_controls_2d(self):
+    bps = [[0, 10], [20, 24, 30]]
+    v = [[5, 5.75], [7.25, 7.5]]
+    steer_vego_arr = \
+                    [
+                      [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 6, 7, 10, 11], # desired steer angle
+                      [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41] # vego
+                    ]
+    expected = [5, 5, 5, 5, 5, 5, 5, 5, 5.000000000000225, 5.45, 5.9, 6.25, 6.8, 6.975, 7.5, 7.5]
+
+    actual = interp_2d(steer_vego_arr, bps, v)
+    # print(f'actual: {actual}')
+    # print(f'interped: {interp_multi_bp(steer_vego_arr, bps, v)}')
+    # np.interp(steer_vego_arr, bps, v)
+    np.testing.assert_equal(actual, expected)
+
+    # i = 0
+    # for desired_steer in steer_vego_arr[0]:
+    #   for v_ego in steer_vego_arr[1]:
+    #     actual = interp_2d([desired_steer, v_ego], bps, v)
+    #     np.testing.assert_equal(actual, expected[i])
+    #     i += 1
 
 if __name__ == "__main__":
   unittest.main()
