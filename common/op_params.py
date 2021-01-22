@@ -55,6 +55,9 @@ def interp_multi_bp(x, bp, v):
   is_bp_multi_iter = is_multi_iter(bp)
   is_v_multi_iter = is_multi_iter(v)
 
+  if not hasattr(x, '__iter__'):
+    x = [x]
+
   if not is_bp_multi_iter:
     bp = [bp, bp]
 
