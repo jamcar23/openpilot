@@ -3,7 +3,8 @@ import os
 import json
 import math
 import time
-from common.numpy_fast import find_nearest_index, interp, is_multi_iter
+from common.multi_breakpoint import correct_multi_breakpoint_points, is_multi_iter
+from common.numpy_fast import find_nearest_index, interp
 from common.colors import opParams_error as error
 from common.colors import opParams_warning as warning
 from selfdrive.hardware import PC
@@ -45,13 +46,6 @@ def eval_breakpoint_source(sources, CS, lateral_plan):
   return [eval_source(source) for source in sources]
 
 def interp_multi_bp(x, bp, v):
-  def correct_multi_bp(idx):
-    if not is_multi_iter(bp[idx]):
-      bp[idx] = [bp[idx], bp[idx]]
-
-      if len(bp) <= 1:
-        bp.insert(0, bp[idx][0])
-
   is_bp_multi_iter = is_multi_iter(bp)
   is_v_multi_iter = is_multi_iter(v)
 
@@ -62,7 +56,7 @@ def interp_multi_bp(x, bp, v):
     bp = [bp, bp]
 
   # correct_multi_bp(0)
-  correct_multi_bp(-1)
+  correct_multi_breakpoint_points(bp, -1)
 
   if not is_v_multi_iter:
     v = [v, v]
