@@ -2,8 +2,7 @@ import numpy as np
 import unittest
 
 from common.numpy_fast import interp, interp_2d
-from common.op_params import interp_multi_bp
-
+from common.multi_breakpoint import is_multi_iter
 
 class InterpTest(unittest.TestCase):
   def test_correctness_controls(self):
@@ -91,8 +90,9 @@ class InterpTest(unittest.TestCase):
   def test_interp_2d_fuzzing(self):
     bp_args = \
               [
-                [0, 10],
-                [[0, 10], [0]]
+                # [0, 10],
+                # [[0, 10], [0]],
+                [[0, 10], [[20, 24], [20, 24, 30]]],
               ]
     v_args = \
             [

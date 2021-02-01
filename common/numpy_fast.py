@@ -1,4 +1,5 @@
 import sys
+from common.multi_breakpoint import correct_multi_breakpoint_points, is_multi_iter
 
 def int_rnd(x):
   return int(round(x))
@@ -38,11 +39,14 @@ def interp_2d(x, bp, v):
   if not is_bp_multi_iter:
     bp = [bp, bp]
 
+  correct_multi_breakpoint_points(bp)
+
   if not is_v_multi_iter:
     v = [v, v]
 
   N_x = len(bp[0])
   N_y = len(bp[1])
+  print(bp)
 
   def get_interp(xv, yv):
     hi_x = 0
@@ -116,13 +120,4 @@ def find_nearest_index(x, y):
 
   return idxs
 
-def is_multi_iter(x):
-  multi_iter = False
 
-  if hasattr(x, '__iter__'):
-    for i in x:
-      if hasattr(i, '__iter__'):
-        multi_iter = True
-        break
-
-  return multi_iter
