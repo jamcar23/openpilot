@@ -32,7 +32,7 @@ REPEAT_COUNTER = 5
 PRINT_DECIMATION = 100
 STEER_RATIO = 15.
 
-pm = messaging.PubMaster(['frame', 'sensorEvents', 'can'])
+pm = messaging.PubMaster(['roadCameraState', 'sensorEvents', 'can'])
 sm = messaging.SubMaster(['carControl','controlsState'])
 
 class VehicleState:
@@ -59,13 +59,13 @@ def cam_callback(image):
   img = np.reshape(img, (H, W, 4))
   img = img[:, :, [0, 1, 2]].copy()
 
-  dat = messaging.new_message('frame')
-  dat.frame = {
-    "frameId": frame_id, # TODO: can we get frame ID from the CARLA camera?
+  dat = messaging.new_message('roadCameraState')
+  dat.roadCameraState = {
+    "frameId": image.frame,
     "image": img.tostring(),
     "transform": [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
   }
-  pm.send('frame', dat)
+  pm.send('roadCameraState', dat)
   frame_id += 1
 
 def imu_callback(imu):
@@ -81,17 +81,18 @@ def imu_callback(imu):
   dat.sensorEvents[1].gyroUncalibrated.v = [imu.gyroscope.x, imu.gyroscope.y, imu.gyroscope.z]
   pm.send('sensorEvents', dat)
 
-def health_function():
-  pm = messaging.PubMaster(['health'])
+def panda_state_function():
+  pm = messaging.PubMaster(['pandaState'])
   while 1:
-    dat = messaging.new_message('health')
+    dat = messaging.new_message('pandaState')
     dat.valid = True
-    dat.health = {
+    dat.pandaState = {
       'ignitionLine': True,
-      'hwType': "blackPanda",
-      'controlsAllowed': True
+      'pandaType': "blackPanda",
+      'controlsAllowed': True,
+      'safetyModel': 'hondaNidec'
     }
-    pm.send('health', dat)
+    pm.send('pandaState', dat)
     time.sleep(0.5)
 
 def fake_gps():
@@ -103,7 +104,7 @@ def fake_gps():
     time.sleep(0.01)
 
 def fake_driver_monitoring():
-  pm = messaging.PubMaster(['driverState','dMonitoringState'])
+  pm = messaging.PubMaster(['driverState','driverMonitoringState'])
   while 1:
 
     # dmonitoringmodeld output
@@ -112,14 +113,14 @@ def fake_driver_monitoring():
     pm.send('driverState', dat)
 
     # dmonitoringd output
-    dat = messaging.new_message('dMonitoringState')
-    dat.dMonitoringState = {
+    dat = messaging.new_message('driverMonitoringState')
+    dat.driverMonitoringState = {
       "faceDetected": True,
       "isDistracted": False,
       "awarenessStatus": 1.,
       "isRHD": False,
     }
-    pm.send('dMonitoringState', dat)
+    pm.send('driverMonitoringState', dat)
 
     time.sleep(DT_DMON)
 
@@ -196,7 +197,7 @@ def go(q):
   vehicle_state = VehicleState()
 
   # launch fake car threads
-  threading.Thread(target=health_function).start()
+  threading.Thread(target=panda_state_function).start()
   threading.Thread(target=fake_driver_monitoring).start()
   threading.Thread(target=fake_gps).start()
   threading.Thread(target=can_function_runner, args=(vehicle_state,)).start()

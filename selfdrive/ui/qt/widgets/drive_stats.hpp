@@ -1,20 +1,21 @@
 #pragma once
 
-#include <QWidget>
-#include <QButtonGroup>
-#include <QVBoxLayout>
-#include <QStackedWidget>
-#include <QTimer>
 #include <QNetworkReply>
+#include <QVBoxLayout>
+#include <QWidget>
 
+#include "api.hpp"
 
 class DriveStats : public QWidget {
   Q_OBJECT
 
 public:
-  explicit DriveStats(QWidget *parent = 0);
+  explicit DriveStats(QWidget* parent = 0);
 
 private:
-  QFrame *f;
-  void replyFinished(QNetworkReply *l);
+  QVBoxLayout* vlayout;
+
+private slots:
+  void parseError(QString response);
+  void parseResponse(QString response);
 };

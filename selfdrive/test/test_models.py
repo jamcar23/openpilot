@@ -16,7 +16,7 @@ from tools.lib.logreader import LogReader
 from panda.tests.safety import libpandasafety_py
 from panda.tests.safety.common import package_can_msg
 
-HwType = log.HealthData.HwType
+PandaType = log.PandaState.PandaType
 
 ROUTES = {v['carFingerprint']: k for k, v in routes.items() if v['enableCamera']}
 
@@ -91,7 +91,7 @@ class TestCarModel(unittest.TestCase):
     elif tuning == 'lqr':
       self.assertTrue(len(self.CP.lateralTuning.lqr.a))
     elif tuning == 'indi':
-      self.assertGreater(self.CP.lateralTuning.indi.outerLoopGain, 1e-3)
+      self.assertTrue(len(self.CP.lateralTuning.indi.outerLoopGainV))
 
     self.assertTrue(self.CP.enableCamera)
 

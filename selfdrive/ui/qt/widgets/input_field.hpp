@@ -3,28 +3,37 @@
 #include <QLabel>
 #include <QString>
 #include <QWidget>
+#include <QDialog>
 #include <QLineEdit>
-#include <QGridLayout>
+#include <QVBoxLayout>
 
 #include "keyboard.hpp"
 
-class InputField : public QWidget {
+class InputDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit InputField(QWidget* parent = 0);
-  void setPromptText(QString text);
+  explicit InputDialog(QString prompt_text, QWidget* parent = 0);
+  static QString getText(QString prompt, int minLength = -1);
+  QString text();
+  void show();
+  void setMessage(QString message, bool clearInputField=true);
+  void setMinLength(int length);
 
 private:
+  int minLength;
   QLineEdit *line;
   Keyboard *k;
   QLabel *label;
-  QGridLayout *layout;
+  QVBoxLayout *layout;
 
 public slots:
-  void emitEmpty();
-  void getText(QString s);
+  int exec() override;
+
+private slots:
+  void handleInput(QString s);
 
 signals:
-  void emitText(QString s);
+  void cancel();
+  void emitText(QString text);
 };
