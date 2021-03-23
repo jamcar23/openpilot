@@ -3,7 +3,9 @@
 # Script that sets various environmental variables for the rest of the CI pipeline.
 # Common vars used to make bigger, exported env vars.
 # EDIT THESE VARS HERE if you're a fork maintainer.
-REPO="jamcar23/openpilot"
+REPO_OWNER="jamcar23"
+REPO_NAME="openpilot"
+REPO="$REPO_OWNER/$REPO_NAME"
 REGISTRY_BASE="ghcr.io"
 MAIN_BRANCH="src"
 TEMP_IMAGE="tmppilotci"
@@ -14,6 +16,7 @@ BASE_IMAGE="$CONTAINER_URI-base:latest"
 CI_IMAGE="${CONTAINER_URI}ci:latest"
 FAT_IMAGE="$CONTAINER_URI-fat:latest"
 
+LOGIN="docker login $REGISTRY_BASE -u $REPO_OWNER -p"
 RUN_CMD_BASE="docker run --shm-size 1G -e PYTHONPATH=/tmp/openpilot -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v /tmp/comma_download_cache:/tmp/comma_download_cache"
 
 # Local vars, generally don't change these.
@@ -55,13 +58,19 @@ fi
 RUN_CMD="$RUN_CMD $MAIN_IMAGE /bin/sh -c"
 
 # Export Environment
-echo "IS_DEFAULT=$IS_DEFAULT" >> $GITHUB_ENV
-echo "IS_MAIN=$IS_MAIN" >> $GITHUB_ENV
-echo "URI=$CONTAINER_URI" >> $GITHUB_ENV
+echo "IS_DEFAULT_REPO=$IS_DEFAULT" >> $GITHUB_ENV
+echo "IS_MAIN_BRANCH=$IS_MAIN" >> $GITHUB_ENV
+echo "MAIN_BRANCH=$MAIN_BRANCH" >> $GITHUB_ENV
+
+echo "CONTAINER_URI=$CONTAINER_URI" >> $GITHUB_ENV
+
 echo "BASE_IMAGE=$BASE_IMAGE" >> $GITHUB_ENV
 echo "CI_IMAGE=$CI_IMAGE" >> $GITHUB_ENV
 echo "FAT_IMAGE=$FAT_IMAGE" >> $GITHUB_ENV
 echo "MAIN_IMAGE=$MAIN_IMAGE" >> $GITHUB_ENV
+
 echo "BUILD_CMD=$BUILD_CMD" >> $GITHUB_ENV
 echo "RUN_CMD=$RUN_CMD" >> $GITHUB_ENV
+
 echo "SHOULD_BUILD_DOCKER=$SHOULD_BUILD_DOCKER" >> $GITHUB_ENV
+echo "DOCKER_LOGIN=$LOGIN" >> $GITHUB_ENV

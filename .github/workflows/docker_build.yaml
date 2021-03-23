@@ -1,0 +1,44 @@
+name: docker
+on:
+  push:
+    branches-ignore:
+      - 'testing-closet*'
+    paths-ignore:
+      - '**.md'
+      - 'README*'
+
+jobs:
+  docker_push:
+    name: docker push
+    runs-on: ubuntu-20.04
+    timeout-minutes: 50
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+        lfs: true
+    - name: Prepare CI Env Vars
+      run: |
+        chmod +x ./.github/scripts/ci_env_vars.sh
+        source ./.github/scripts/ci_env_vars.sh
+    - name: Wait For Passing Tests
+      uses: lewagon/wait-on-check-action@v0.2
+      with:
+        ref: ${{ env.MAIN_BRANCH }}
+        wait-interval: 30
+        running-workflow-name: 'tests'
+    - name: Stop job from running
+      if: ${{ (!env.IS_DEFAULT_REPO || !env.IS_MAIN_BRANCH) && true || '' }}
+      run: echo "::error Docker images should only be built when pushing to the main branch of the default repo."
+    - name: Build Docker image
+      run: eval "$BUILD_CMD"
+    - name: Push to container registry
+      run: |
+        eval "$DOCKER_LOGIN ${{ secrets.PACKAGE_PAT }}"
+        docker push ${{ env.BASE_IMAGE }}
+        docker push ${{ env.CI_IMAGE }}
+        docker push ${{ env.FAT_IMAGE }}
+    - name: Docker Logout
+      if: always()
+      continue-on-error: true
+      run: docker logout
