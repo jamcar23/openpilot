@@ -39,7 +39,7 @@ jobs:
       with:
         ref: ${{ github.sha }}
         wait-interval: 30
-        running-workflow-name: 'selfdrive'
+        check-name: 'finish selfdrive'
     - name: Prepare release files
       if: steps.wait_for_tests.outcome == 'success'
       run: |

@@ -248,3 +248,11 @@ jobs:
                         coverage combine"
     # - name: Upload coverage to Codecov
     #   run: bash <(curl -s https://codecov.io/bash) -v -F test_car_models
+  finish_selfdrive:
+    name: finish selfdrive
+    runs-on: ubuntu-20.04
+    timeout-minutes: 60
+    needs: [build_release, static_analysis, valgrind, unit_tests, process_replay, test_longitudinal, test_car_models]
+    steps:
+    - name: finish
+      run: echo "Finished Selfdrive tests."
