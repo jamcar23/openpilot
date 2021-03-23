@@ -42,36 +42,36 @@ jobs:
       #   # non-empty strings are always true
       #   run: |
       #     echo "IS_DEFAULT=${{ github.repository == env.REPO && true || '' }}" >> $GITHUB_ENV
-      - name: Set main branch
-        run: |
-          echo "IS_MAIN=${{ github.ref == format('refs/heads/{0}', env.MAIN_BRANCH) && true || '' }}" >> $GITHUB_ENV
-      - name: Set container uri
-        run: |
-          echo "URI=${{ env.REGISTRY_BASE }}/${{ env.REPO }}/openpilot" >> $GITHUB_ENV
-      - name: Set image uris
-        run: |
-          echo "BASE_IMAGE=${{ env.URI }}-base:latest" >> $GITHUB_ENV
-          echo "CI_IMAGE=${{ env.URI }}ci:latest" >> $GITHUB_ENV
-          echo "FAT_IMAGE=${{ env.URI }}-fat:latest" >> $GITHUB_ENV
-      - name: Set should build docker
-        run: |
-          echo "SHOULD_BUILD_DOCKER=${{ github.event_name == 'push' && env.IS_DEFAULT && env.IS_MAIN && true || '' }}" >> $GITHUB_ENV
-      - name: Create docker commands main branch
-        id: docker_main_branch
-        if: env.SHOULD_BUILD_DOCKER
-        run: |
-          echo "MAIN_IMAGE=${{ env.FAT_IMAGE }}" >> $GITHUB_ENV
-          echo "BUILD_CMD=docker build -t ${{ env.BASE_IMAGE }} -f Dockerfile.openpilot_base . && docker build -t ${{ env.CI_IMAGE }} -f Dockerfile.openpilotci . && docker build -t ${{ env.FAT_IMAGE }} -f Dockerfile.openpilot_fat ." >> $GITHUB_ENV
-          echo "RUN_CMD=${{ env.RUN_CMD_BASE }} --name ${{ env.TEMP_IMAGE }}" >> $GITHUB_ENV
-      - name: Create docker commands other branch
-        if: steps.docker_main_branch.outcome != 'success'
-        run: |
-          echo "MAIN_IMAGE=${{ env.CI_IMAGE }}" >> $GITHUB_ENV
-          echo "BUILD_CMD=docker pull \$IMAGE" >> $GITHUB_ENV
-          echo "RUN_CMD=${{ env.RUN_CMD_BASE }} -v $PWD:/tmp/openpilot --rm" >> $GITHUB_ENV
-      - name: Finalize docker commands
-        run: |
-          echo "RUN_CMD=${{ env.RUN_CMD }} \$IMAGE /bin/sh -c" >> $GITHUB_ENV
+      # - name: Set main branch
+      #   run: |
+      #     echo "IS_MAIN=${{ github.ref == format('refs/heads/{0}', env.MAIN_BRANCH) && true || '' }}" >> $GITHUB_ENV
+      # - name: Set container uri
+      #   run: |
+      #     echo "URI=${{ env.REGISTRY_BASE }}/${{ env.REPO }}/openpilot" >> $GITHUB_ENV
+      # - name: Set image uris
+      #   run: |
+      #     echo "BASE_IMAGE=${{ env.URI }}-base:latest" >> $GITHUB_ENV
+      #     echo "CI_IMAGE=${{ env.URI }}ci:latest" >> $GITHUB_ENV
+      #     echo "FAT_IMAGE=${{ env.URI }}-fat:latest" >> $GITHUB_ENV
+      # - name: Set should build docker
+      #   run: |
+      #     echo "SHOULD_BUILD_DOCKER=${{ github.event_name == 'push' && env.IS_DEFAULT && env.IS_MAIN && true || '' }}" >> $GITHUB_ENV
+      # - name: Create docker commands main branch
+      #   id: docker_main_branch
+      #   if: env.SHOULD_BUILD_DOCKER
+      #   run: |
+      #     echo "MAIN_IMAGE=${{ env.FAT_IMAGE }}" >> $GITHUB_ENV
+      #     echo "BUILD_CMD=docker build -t ${{ env.BASE_IMAGE }} -f Dockerfile.openpilot_base . && docker build -t ${{ env.CI_IMAGE }} -f Dockerfile.openpilotci . && docker build -t ${{ env.FAT_IMAGE }} -f Dockerfile.openpilot_fat ." >> $GITHUB_ENV
+      #     echo "RUN_CMD=${{ env.RUN_CMD_BASE }} --name ${{ env.TEMP_IMAGE }}" >> $GITHUB_ENV
+      # - name: Create docker commands other branch
+      #   if: steps.docker_main_branch.outcome != 'success'
+      #   run: |
+      #     echo "MAIN_IMAGE=${{ env.CI_IMAGE }}" >> $GITHUB_ENV
+      #     echo "BUILD_CMD=docker pull \$IMAGE" >> $GITHUB_ENV
+      #     echo "RUN_CMD=${{ env.RUN_CMD_BASE }} -v $PWD:/tmp/openpilot --rm" >> $GITHUB_ENV
+      # - name: Finalize docker commands
+      #   run: |
+      #     echo "RUN_CMD=${{ env.RUN_CMD }} \$IMAGE /bin/sh -c" >> $GITHUB_ENV
       - name: Finish setup # At least one step is needed so just log that we're done
         run: echo "Finished workflow setup"
 
