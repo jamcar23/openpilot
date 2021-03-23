@@ -18,8 +18,6 @@ jobs:
     name: setup workflow
     runs-on: ubuntu-20.04
     timeout-minutes: 10
-    env:
-
     outputs:
       is_default_repo: ${{ env.IS_DEFAULT }}
       is_main_branch: ${{ env.IS_MAIN }}
