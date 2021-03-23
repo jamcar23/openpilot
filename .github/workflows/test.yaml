@@ -31,6 +31,7 @@ jobs:
       docker_run: ${{ env.RUN_CMD }}
       docker_login: docker login ${{ env.REGISTRY_BASE }} -u jamcar23 -p
     steps:
+      - uses: actions/checkout@v2
       - name: Prepare CI Env Vars
         run: |
           chmod +x ./.github/scripts/ci_env_vars.sh
