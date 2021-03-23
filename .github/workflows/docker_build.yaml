@@ -28,7 +28,7 @@ jobs:
         wait-interval: 30
         running-workflow-name: 'tests'
     - name: Stop job from running
-      if: ${{ (!env.IS_DEFAULT_REPO || !env.IS_MAIN_BRANCH) && true || '' }}
+      if: ${{ !env.IS_DEFAULT_REPO || !env.IS_MAIN_BRANCH }}
       run: |
         echo "::error file=docker_build.yaml::Docker images should only be built when pushing to the main branch of the default repo."
         exit 1
