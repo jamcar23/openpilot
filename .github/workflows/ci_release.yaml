@@ -31,13 +31,13 @@ jobs:
         if [[ $IS_MAIN_BRANCH ]]; then
           echo "BRANCH=r2++" >> $GITHUB_ENV
         else
-          echo "BRANCH=${{ github.head_ref }}-ci" >> $GITHUB_ENV
+          echo "BRANCH=${{ env.HEAD_BRANCH }}-ci" >> $GITHUB_ENV
         fi
     - name: Wait For Passing Tests
       id: wait_for_tests
       uses: lewagon/wait-on-check-action@v0.2
       with:
-        ref: ${{ env.BRANCH }}
+        ref: ${{ github.sha }}
         wait-interval: 30
         running-workflow-name: 'tests'
     - name: Prepare release files

@@ -24,7 +24,7 @@ jobs:
     - name: Wait For Passing Tests
       uses: lewagon/wait-on-check-action@v0.2
       with:
-        ref: ${{ env.MAIN_BRANCH }}
+        ref: ${{ github.sha }}
         wait-interval: 30
         running-workflow-name: 'tests'
     - name: Stop job from running

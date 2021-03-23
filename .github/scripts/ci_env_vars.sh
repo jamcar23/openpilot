@@ -22,6 +22,7 @@ RUN_CMD_BASE="docker run --shm-size 1G -e PYTHONPATH=/tmp/openpilot -e GITHUB_AC
 # Local vars, generally don't change these.
 __eval_true='true'
 __eval_false='' # Empty string because non-empty string are always true (at least for github actions / workflows)
+__ref_prefix="refs/heads/"
 
 # Functions
 function eval_var()
@@ -39,7 +40,7 @@ function eval_var()
 
 # Evaluate Environment
 eval_var IS_DEFAULT $GITHUB_REPOSITORY $REPO
-eval_var IS_MAIN $GITHUB_REF "refs/heads/$MAIN_BRANCH"
+eval_var IS_MAIN $GITHUB_REF "$__ref_prefix$MAIN_BRANCH"
 
 if [[ $GITHUB_EVENT_NAME = 'push' && $IS_DEFAULT = $__eval_true && $IS_MAIN = $__eval_true ]]; then
     MAIN_IMAGE="$FAT_IMAGE"
@@ -56,10 +57,13 @@ else
 fi
 
 RUN_CMD="$RUN_CMD $MAIN_IMAGE /bin/sh -c"
+HEAD_BRANCH="${$GITHUB_REF:${#__ref_prefix}}"
 
 # Export Environment
 echo "IS_DEFAULT_REPO=$IS_DEFAULT" >> $GITHUB_ENV
 echo "IS_MAIN_BRANCH=$IS_MAIN" >> $GITHUB_ENV
+
+echo "HEAD_BRANCH=$HEAD_BRANCH" >> $GITHUB_ENV
 echo "MAIN_BRANCH=$MAIN_BRANCH" >> $GITHUB_ENV
 
 echo "CONTAINER_URI=$CONTAINER_URI" >> $GITHUB_ENV
