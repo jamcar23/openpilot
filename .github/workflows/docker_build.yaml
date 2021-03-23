@@ -29,7 +29,9 @@ jobs:
         running-workflow-name: 'tests'
     - name: Stop job from running
       if: ${{ (!env.IS_DEFAULT_REPO || !env.IS_MAIN_BRANCH) && true || '' }}
-      run: echo "::error file=docker_build.yaml::Docker images should only be built when pushing to the main branch of the default repo."
+      run: |
+        echo "::error file=docker_build.yaml::Docker images should only be built when pushing to the main branch of the default repo."
+        exit 1
     - name: Build Docker image
       run: eval "$BUILD_CMD"
     - name: Push to container registry
