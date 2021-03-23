@@ -47,23 +47,21 @@ if [[ $GITHUB_EVENT_NAME = 'push' && $IS_DEFAULT = $__eval_true && $IS_MAIN = $_
     BUILD_CMD="docker build -t $BASE_IMAGE -f Dockerfile.openpilot_base . && docker build -t $CI_IMAGE -f Dockerfile.openpilotci --cached-from $BASE_IMAGE . && docker build -t $FAT_IMAGE -f Dockerfile.openpilot_fat --cached-from $CI_IMAGE $BASE_IMAGE ."
     RUN_CMD="$RUN_CMD_BASE --name $TEMP_IMAGE"
     SHOULD_BUILD_DOCKER='true'
-    echo 'true'
 else
     MAIN_IMAGE="$CI_IMAGE"
     BUILD_CMD="docker pull $CI_IMAGE"
     RUN_CMD="$RUN_CMD_BASE -v $PWD:/tmp/openpilot --rm"
     SHOULD_BUILD_DOCKER=''
-    echo 'false'
 fi
 
 RUN_CMD="$RUN_CMD $MAIN_IMAGE /bin/sh -c"
-HEAD_BRANCH="${$GITHUB_REF:${#__ref_prefix}}"
+HEAD_BRANCH=$(basename $GITHUB_REF)
 
 # Export Environment
 echo "IS_DEFAULT_REPO=$IS_DEFAULT" >> $GITHUB_ENV
 echo "IS_MAIN_BRANCH=$IS_MAIN" >> $GITHUB_ENV
 
-echo "HEAD_BRANCH=$HEAD_BRANCH" >> $GITHUB_ENV
+echo "HEAD_BRANCH=$HEAD_BRANCH" >> GITHUB_ENV
 echo "MAIN_BRANCH=$MAIN_BRANCH" >> $GITHUB_ENV
 
 echo "CONTAINER_URI=$CONTAINER_URI" >> $GITHUB_ENV
