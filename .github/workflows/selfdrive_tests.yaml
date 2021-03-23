@@ -23,9 +23,9 @@ jobs:
       with:
         submodules: true
     - name: Prepare CI Env Vars
-        run: |
-          chmod +x ./.github/scripts/ci_env_vars.sh
-          source ./.github/scripts/ci_env_vars.sh
+      run: |
+        chmod +x ./.github/scripts/ci_env_vars.sh
+        source ./.github/scripts/ci_env_vars.sh
     - name: Strip non-release files
       run: |
         mkdir $STRIPPED_DIR
@@ -128,9 +128,9 @@ jobs:
       with:
         submodules: true
     - name: Prepare CI Env Vars
-        run: |
-          chmod +x ./.github/scripts/ci_env_vars.sh
-          source ./.github/scripts/ci_env_vars.sh
+      run: |
+        chmod +x ./.github/scripts/ci_env_vars.sh
+        source ./.github/scripts/ci_env_vars.sh
     - name: Build Docker image
       run: eval "$BUILD_CMD"
     - name: Push to container registry
@@ -153,9 +153,9 @@ jobs:
       with:
         submodules: true
     - name: Prepare CI Env Vars
-        run: |
-          chmod +x ./.github/scripts/ci_env_vars.sh
-          source ./.github/scripts/ci_env_vars.sh
+      run: |
+        chmod +x ./.github/scripts/ci_env_vars.sh
+        source ./.github/scripts/ci_env_vars.sh
     - name: Build Docker image
       run: eval "$BUILD_CMD"
     - name: pre-commit
@@ -178,9 +178,9 @@ jobs:
         path: /tmp/comma_download_cache
         key: ${{ hashFiles('.github/workflows/selfdrive_tests.yaml', 'selfdrive/test/test_valgrind_replay.py') }}
     - name: Prepare CI Env Vars
-        run: |
-          chmod +x ./.github/scripts/ci_env_vars.sh
-          source ./.github/scripts/ci_env_vars.sh
+      run: |
+        chmod +x ./.github/scripts/ci_env_vars.sh
+        source ./.github/scripts/ci_env_vars.sh
     - name: Build Docker image
       run: eval "$BUILD_CMD"
     - name: Run valgrind
@@ -212,9 +212,9 @@ jobs:
       with:
         submodules: true
     - name: Prepare CI Env Vars
-        run: |
-          chmod +x ./.github/scripts/ci_env_vars.sh
-          source ./.github/scripts/ci_env_vars.sh
+      run: |
+        chmod +x ./.github/scripts/ci_env_vars.sh
+        source ./.github/scripts/ci_env_vars.sh
     - name: Build Docker image
       run: eval "$BUILD_CMD"
     - name: Run unit tests
@@ -253,9 +253,9 @@ jobs:
         path: /tmp/comma_download_cache
         key: ${{ hashFiles('.github/workflows/selfdrive_tests.yaml', 'selfdrive/test/process_replay/test_processes.py') }}
     - name: Prepare CI Env Vars
-        run: |
-          chmod +x ./.github/scripts/ci_env_vars.sh
-          source ./.github/scripts/ci_env_vars.sh
+      run: |
+        chmod +x ./.github/scripts/ci_env_vars.sh
+        source ./.github/scripts/ci_env_vars.sh
     - name: Build Docker image
       run: eval "$BUILD_CMD"
     - name: Run replay
@@ -291,9 +291,9 @@ jobs:
       with:
         submodules: true
     - name: Prepare CI Env Vars
-        run: |
-          chmod +x ./.github/scripts/ci_env_vars.sh
-          source ./.github/scripts/ci_env_vars.sh
+      run: |
+        chmod +x ./.github/scripts/ci_env_vars.sh
+        source ./.github/scripts/ci_env_vars.sh
     - name: Build Docker image
       run: eval "$BUILD_CMD"
     - name: Test longitudinal
@@ -330,9 +330,9 @@ jobs:
         path: /tmp/comma_download_cache
         key: ${{ hashFiles('.github/workflows/selfdrive_tests.yaml', 'selfdrive/test/test_car_models.py') }}
     - name: Prepare CI Env Vars
-        run: |
-          chmod +x ./.github/scripts/ci_env_vars.sh
-          source ./.github/scripts/ci_env_vars.sh
+      run: |
+        chmod +x ./.github/scripts/ci_env_vars.sh
+        source ./.github/scripts/ci_env_vars.sh
     - name: Build Docker image
       run: eval "$BUILD_CMD"
     - name: Test car models
