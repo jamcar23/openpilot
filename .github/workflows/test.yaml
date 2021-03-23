@@ -11,12 +11,7 @@ on:
       - '**.md'
       - 'README*'
 
-env:
-  REPO: jamcar23/openpilot
-  REGISTRY_BASE: ghcr.io
-  MAIN_BRANCH: src
-  TEMP_IMAGE: tmppilotci
-  UNIT_TEST: coverage run --append -m unittest discover
+
 
 jobs:
   setup_workflow:
@@ -24,7 +19,7 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 10
     env:
-      RUN_CMD_BASE: docker run --shm-size 1G -e PYTHONPATH=/tmp/openpilot -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v /tmp/comma_download_cache:/tmp/comma_download_cache
+
     outputs:
       is_default_repo: ${{ env.IS_DEFAULT }}
       is_main_branch: ${{ env.IS_MAIN }}
@@ -36,14 +31,17 @@ jobs:
       docker_image: ${{ env.MAIN_IMAGE }}
       docker_build: ${{ env.BUILD_CMD }}
       docker_run: ${{ env.RUN_CMD }}
-      docker_login: docker login ${{ env.REGISTRY_BASE }} -u jamcar23 -p 
+      docker_login: docker login ${{ env.REGISTRY_BASE }} -u jamcar23 -p
     steps:
-      - name: Set default repo
-        # `&& true || ''` is a fake ternary op that actually evals to true and false
-        # Needed because env vars are always strings (i.e. 'true' and 'false') and
-        # non-empty strings are always true
+      - name: Prepare CI Env Vars
         run: |
-          echo "IS_DEFAULT=${{ github.repository == env.REPO && true || '' }}" >> $GITHUB_ENV
+          source ./.github/scripts/ci_env_vars.sh
+      # - name: Set default repo
+      #   # `&& true || ''` is a fake ternary op that actually evals to true and false
+      #   # Needed because env vars are always strings (i.e. 'true' and 'false') and
+      #   # non-empty strings are always true
+      #   run: |
+      #     echo "IS_DEFAULT=${{ github.repository == env.REPO && true || '' }}" >> $GITHUB_ENV
       - name: Set main branch
         run: |
           echo "IS_MAIN=${{ github.ref == format('refs/heads/{0}', env.MAIN_BRANCH) && true || '' }}" >> $GITHUB_ENV
