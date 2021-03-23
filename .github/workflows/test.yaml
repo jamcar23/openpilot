@@ -33,6 +33,7 @@ jobs:
     steps:
       - name: Prepare CI Env Vars
         run: |
+          chmod +x ./.github/scripts/ci_env_vars.sh
           source ./.github/scripts/ci_env_vars.sh
       # - name: Set default repo
       #   # `&& true || ''` is a fake ternary op that actually evals to true and false
