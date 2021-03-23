@@ -17,7 +17,7 @@ jobs:
   build_prebuilt:
     name: build prebuilt
     runs-on: ubuntu-20.04
-    timeout-minutes: 60
+    timeout-minutes: 90
     if: github.repository == 'commaai/openpilot'
     env:
       IMAGE_NAME: openpilot-prebuilt

@@ -11,7 +11,7 @@ jobs:
   ci_release:
     name: github ci release
     runs-on: ubuntu-20.04
-    timeout-minutes: 50
+    timeout-minutes: 90
     steps:
     - uses: actions/checkout@v2
       with:
@@ -21,7 +21,7 @@ jobs:
       run: |
         chmod +x ./.github/scripts/ci_env_vars.sh
         source ./.github/scripts/ci_env_vars.sh
-    - name: Check For Default Repo
+    - name: Stop for non-default repo
       if: ${{ !env.IS_DEFAULT_REPO }}
       run: |
         echo "::error file=prebuilt.yaml::Prebuilts are only release from the default repo."
