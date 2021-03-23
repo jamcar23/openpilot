@@ -3,20 +3,13 @@ on:
   push:
     branches-ignore:
       - 'testing-closet*'
+    paths-ignore:
+      - '**.md'
+      - 'README*'
   pull_request:
-
-env:
-  BASE_IMAGE: openpilot-base
-  DOCKER_REGISTRY: ghcr.io/commaai
-
-  DOCKER_LOGIN: docker login ghcr.io -u adeebshihadeh -p ${{ secrets.CONTAINER_TOKEN }}
-  BUILD: |
-      docker pull $(grep -iohP '(?<=^from)\s+\S+' Dockerfile.openpilot_base) || true
-      docker pull $DOCKER_REGISTRY/$BASE_IMAGE:latest || true
-      docker build --cache-from $DOCKER_REGISTRY/$BASE_IMAGE:latest -t $DOCKER_REGISTRY/$BASE_IMAGE:latest -t $BASE_IMAGE:latest -f Dockerfile.openpilot_base .
-
-  RUN: docker run --shm-size 1G -v $PWD:/tmp/openpilot -e PYTHONPATH=/tmp/openpilot -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v /tmp/comma_download_cache:/tmp/comma_download_cache $BASE_IMAGE /bin/sh -c
-  UNIT_TEST: coverage run --append -m unittest discover
+    paths-ignore:
+      - '**.md'
+      - 'README*'
 
 jobs:
   build_release:
@@ -29,20 +22,28 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: true
+    - name: Prepare CI Env Vars
+        run: |
+          chmod +x ./.github/scripts/ci_env_vars.sh
+          source ./.github/scripts/ci_env_vars.sh
     - name: Strip non-release files
       run: |
         mkdir $STRIPPED_DIR
         cp -pR --parents $(cat release/files_common) $STRIPPED_DIR
-        cp Dockerfile.openpilot_base $STRIPPED_DIR
+        cp Dockerfile.openpilot_base Dockerfile.openpilotci $STRIPPED_DIR
 
         # need this to build on x86
         cp -pR --parents phonelibs/libyuv phonelibs/snpe selfdrive/modeld/runners $STRIPPED_DIR
+        # need for CI build
+        cd $STRIPPED_DIR
+        mkdir laika laika_repo tools
+        cd ..
     - name: Build Docker image
-      run: eval "$BUILD"
+      run: eval "$BUILD_CMD"
     - name: Build openpilot and run checks
       run: |
           cd $STRIPPED_DIR
-          ${{ env.RUN }} "cd /tmp/openpilot && \
+          ${{ env.RUN_CMD }} "cd /tmp/openpilot && \
                           scons -j$(nproc) && \
                           python -m unittest discover selfdrive/car"
 
@@ -126,12 +127,22 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: true
+    - name: Prepare CI Env Vars
+        run: |
+          chmod +x ./.github/scripts/ci_env_vars.sh
+          source ./.github/scripts/ci_env_vars.sh
     - name: Build Docker image
-      run: eval "$BUILD"
+      run: eval "$BUILD_CMD"
     - name: Push to container registry
       run: |
-        $DOCKER_LOGIN
-        docker push $DOCKER_REGISTRY/$BASE_IMAGE:latest
+        eval "$DOCKER_LOGIN ${{ secrets.PACKAGE_PAT }}"
+        docker push ${{ env.BASE_IMAGE }}
+        docker push ${{ env.CI_IMAGE }}
+        docker push ${{ env.FAT_IMAGE }}
+    - name: Docker Logout
+        if: always()
+        continue-on-error: true
+        run: docker logout
 
   static_analysis:
     name: static analysis
@@ -141,15 +152,21 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: true
+    - name: Prepare CI Env Vars
+        run: |
+          chmod +x ./.github/scripts/ci_env_vars.sh
+          source ./.github/scripts/ci_env_vars.sh
     - name: Build Docker image
-      run: eval "$BUILD"
+      run: eval "$BUILD_CMD"
     - name: pre-commit
-      run: ${{ env.RUN }} "cd /tmp/openpilot/ && git init && git add -A && pre-commit run --all"
+      run: ${{ env.RUN_CMD }} "cd /tmp/openpilot/ && git init && git add -A && pre-commit run --all"
 
   valgrind:
     name: valgrind
     runs-on: ubuntu-20.04
     timeout-minutes: 50
+    env:
+      LOG_FILE_PATH: selfdrive/test/valgrind_logs.txt
     steps:
     - uses: actions/checkout@v2
       with:
@@ -159,17 +176,32 @@ jobs:
       uses: actions/cache@v2
       with:
         path: /tmp/comma_download_cache
-        key: ${{ hashFiles('.github/workflows/test.yaml', 'selfdrive/test/test_valgrind_replay.py') }}
+        key: ${{ hashFiles('.github/workflows/selfdrive_tests.yaml', 'selfdrive/test/test_valgrind_replay.py') }}
+    - name: Prepare CI Env Vars
+        run: |
+          chmod +x ./.github/scripts/ci_env_vars.sh
+          source ./.github/scripts/ci_env_vars.sh
     - name: Build Docker image
-      run: eval "$BUILD"
+      run: eval "$BUILD_CMD"
     - name: Run valgrind
       run: |
-        ${{ env.RUN }} "cd /tmp/openpilot && \
+        ${{ env.RUN_CMD }} "cd /tmp/openpilot && \
                         scons -j$(nproc) && \
                         FILEREADER_CACHE=1 python selfdrive/test/test_valgrind_replay.py"
-    - name: Print logs
-      if: always()
-      run: cat selfdrive/test/valgrind_logs.txt
+    - name: Copy logs
+        if: ${{ env.SHOULD_BUILD_DOCKER }}
+        run: |
+          docker cp ${{ env.TEMP_IMAGE }}:/tmp/openpilot/${{ env.LOG_FILE_PATH }} ${{ env.LOG_FILE_PATH }}
+      - name: Print logs
+        if: always()
+        run: |
+          cat ${{ env.LOG_FILE_PATH }}
+      - uses: actions/upload-artifact@v2
+        if: always()
+        continue-on-error: true
+        with:
+          name: valgrind_logs.txt
+          path: ${{ env.LOG_FILE_PATH }}
 
   unit_tests:
     name: unit tests
@@ -179,11 +211,15 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: true
+    - name: Prepare CI Env Vars
+        run: |
+          chmod +x ./.github/scripts/ci_env_vars.sh
+          source ./.github/scripts/ci_env_vars.sh
     - name: Build Docker image
-      run: eval "$BUILD"
+      run: eval "$BUILD_CMD"
     - name: Run unit tests
       run: |
-        ${{ env.RUN }} "cd /tmp/openpilot && \
+        ${{ env.RUN_CMD }} "cd /tmp/openpilot && \
                         scons -j$(nproc) && \
                         coverage run selfdrive/test/test_fingerprints.py && \
                         $UNIT_TEST common && \
@@ -197,13 +233,15 @@ jobs:
                         $UNIT_TEST selfdrive/athena && \
                         $UNIT_TEST selfdrive/thermald && \
                         $UNIT_TEST tools/lib/tests"
-    - name: Upload coverage to Codecov
-      run: bash <(curl -s https://codecov.io/bash) -v -F unit_tests
+    # - name: Upload coverage to Codecov
+    #   run: bash <(curl -s https://codecov.io/bash) -v -F unit_tests
 
   process_replay:
     name: process replay
     runs-on: ubuntu-20.04
     timeout-minutes: 50
+    env:
+      LOG_FILE_PATH: selfdrive/test/process_replay/diff.txt
     steps:
     - uses: actions/checkout@v2
       with:
@@ -213,49 +251,69 @@ jobs:
       uses: actions/cache@v2
       with:
         path: /tmp/comma_download_cache
-        key: ${{ hashFiles('.github/workflows/test.yaml', 'selfdrive/test/process_replay/test_processes.py') }}
+        key: ${{ hashFiles('.github/workflows/selfdrive_tests.yaml', 'selfdrive/test/process_replay/test_processes.py') }}
+    - name: Prepare CI Env Vars
+        run: |
+          chmod +x ./.github/scripts/ci_env_vars.sh
+          source ./.github/scripts/ci_env_vars.sh
     - name: Build Docker image
-      run: eval "$BUILD"
+      run: eval "$BUILD_CMD"
     - name: Run replay
       run: |
-        ${{ env.RUN }} "cd /tmp/openpilot && \
+        ${{ env.RUN_CMD }} "cd /tmp/openpilot && \
                         scons -j$(nproc) && \
-                        FILEREADER_CACHE=1 CI=1 coverage run selfdrive/test/process_replay/test_processes.py"
-    - name: Upload coverage to Codecov
-      run: bash <(curl -s https://codecov.io/bash) -v -F process_replay
-    - name: Print diff
-      if: always()
-      run: cat selfdrive/test/process_replay/diff.txt
-    - uses: actions/upload-artifact@v2
-      if: always()
-      continue-on-error: true
-      with:
-        name: process_replay_diff.txt
-        path: selfdrive/test/process_replay/diff.txt
+                        FILEREADER_CACHE=1 CI=1 coverage run selfdrive/test/process_replay/test_processes.py --local"
+    # - name: Upload coverage to Codecov
+    #   run: bash <(curl -s https://codecov.io/bash) -v -F process_replay
+    - name: Copy logs
+        if: ${{ env.SHOULD_BUILD_DOCKER }}
+        run: |
+          docker cp ${{ env.TEMP_IMAGE }}:/tmp/openpilot/${{ env.LOG_FILE_PATH }} ${{ env.LOG_FILE_PATH }}
+      - name: Print diff
+        if: always()
+        run: |
+          cat ${{ env.LOG_FILE_PATH }}
+      - uses: actions/upload-artifact@v2
+        if: always()
+        continue-on-error: true
+        with:
+          name: process_replay_diff.txt
+          path: ${{ env.LOG_FILE_PATH }}
 
   test_longitudinal:
     name: longitudinal
     runs-on: ubuntu-20.04
     timeout-minutes: 50
+    env:
+      LOG_PATH: selfdrive/test/longitudinal_maneuvers/out/longitudinal/
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
+    - name: Prepare CI Env Vars
+        run: |
+          chmod +x ./.github/scripts/ci_env_vars.sh
+          source ./.github/scripts/ci_env_vars.sh
     - name: Build Docker image
-      run: eval "$BUILD"
+      run: eval "$BUILD_CMD"
     - name: Test longitudinal
       run: |
-        ${{ env.RUN }} "mkdir -p /tmp/openpilot/selfdrive/test/out && \
+        ${{ env.RUN_CMD }} "mkdir -p /tmp/openpilot/selfdrive/test/out && \
                         cd /tmp/openpilot/ && \
                         scons -j$(nproc) && \
                         cd selfdrive/test/longitudinal_maneuvers && \
                         ./test_longitudinal.py"
-    - uses: actions/upload-artifact@v2
-      if: always()
-      continue-on-error: true
-      with:
-        name: longitudinal
-        path: selfdrive/test/longitudinal_maneuvers/out/longitudinal/
+    - name: Copy artifacts
+        if: ${{ env.SHOULD_BUILD_DOCKER }}
+        run: |
+          mkdir -p ${{ env.LOG_PATH }}
+          docker cp ${{ env.TEMP_IMAGE }}:/tmp/openpilot/${{ env.LOG_PATH }} ${{ env.LOG_PATH }}
+      - uses: actions/upload-artifact@v2
+        if: always()
+        continue-on-error: true
+        with:
+          name: longitudinal
+          path: ${{ env.LOG_PATH }}
 
   test_car_models:
     name: car models
@@ -270,15 +328,19 @@ jobs:
       uses: actions/cache@v2
       with:
         path: /tmp/comma_download_cache
-        key: ${{ hashFiles('.github/workflows/test.yaml', 'selfdrive/test/test_car_models.py') }}
+        key: ${{ hashFiles('.github/workflows/selfdrive_tests.yaml', 'selfdrive/test/test_car_models.py') }}
+    - name: Prepare CI Env Vars
+        run: |
+          chmod +x ./.github/scripts/ci_env_vars.sh
+          source ./.github/scripts/ci_env_vars.sh
     - name: Build Docker image
-      run: eval "$BUILD"
+      run: eval "$BUILD_CMD"
     - name: Test car models
       run: |
-        ${{ env.RUN }} "cd /tmp/openpilot && \
+        ${{ env.RUN_CMD }} "cd /tmp/openpilot && \
                         scons -j$(nproc) && \
                         FILEREADER_CACHE=1 coverage run --parallel-mode -m nose --processes=4 --process-timeout=60 \
                                            selfdrive/test/test_models.py && \
                         coverage combine"
-    - name: Upload coverage to Codecov
-      run: bash <(curl -s https://codecov.io/bash) -v -F test_car_models
+    # - name: Upload coverage to Codecov
+    #   run: bash <(curl -s https://codecov.io/bash) -v -F test_car_models
