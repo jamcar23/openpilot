@@ -9,8 +9,10 @@ import time
 import glob
 
 from selfdrive.sentryd.sentryd import create_client
+from common.file_helpers import mkdirs_exists_ok
+from selfdrive.hardware import TICI
+from selfdrive.loggerd.config import ROOT
 from selfdrive.swaglog import cloudlog
-from selfdrive.version import branch, commit, dirty, origin, version
 
 MAX_SIZE = 100000 * 10  # mal size is 40-100k, allow up to 1M
 if TICI:
