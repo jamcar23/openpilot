@@ -252,6 +252,7 @@ jobs:
     name: wait for selfdrive
     runs-on: ubuntu-20.04
     timeout-minutes: 60
+    if: github.event_name = 'push'
     steps:
     - name: Wait For Static Analysis
       uses: lewagon/wait-on-check-action@v0.2
