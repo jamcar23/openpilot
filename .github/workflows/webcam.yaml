@@ -3,10 +3,13 @@ on:
   push:
     branches-ignore:
       - 'testing-closet*'
+      - '*'
     paths-ignore:
       - '**.md'
       - 'README*'
   pull_request:
+    branches-ignore:
+      - '*'
     paths-ignore:
       - '**.md'
       - 'README*'
