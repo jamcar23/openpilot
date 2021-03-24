@@ -25,7 +25,7 @@ jobs:
       uses: lewagon/wait-on-check-action@v0.2
       with:
         ref: ${{ github.sha }}
-        wait-interval: 30
+        wait-interval: 60
         check-name: 'wait for selfdrive'
     - name: Stop job from running
       if: ${{ !env.IS_DEFAULT_REPO || !env.IS_MAIN_BRANCH }}
