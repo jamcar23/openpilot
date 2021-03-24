@@ -51,8 +51,7 @@ typedef struct Rect {
 } Rect;
 
 const int sbr_w = 300;
-const int bdr_s = 10;
-const int bdr_is = 30;
+const int bdr_s = 30;
 const int header_h = 420;
 const int footer_h = 280;
 const Rect settings_btn = {50, 35, 200, 117};
@@ -103,31 +102,12 @@ typedef struct UIScene {
   bool is_rhd;
   bool frontview;
 
-  int lead_status;
-  float lead_d_rel, lead_v_rel;
-
   std::string alert_text1;
   std::string alert_text2;
   std::string alert_type;
   float alert_blinking_rate;
   cereal::ControlsState::AlertSize alert_size;
 
-  float angleSteers;
-  bool brakeLights;
-  float angleSteersDes;
-  bool recording;
-  float gpsAccuracyUblox;
-  float altitudeUblox;
-  int engineRPM;
-  bool steerOverride;
-  float output_scale;
-  float steeringTorqueEps;
-  float aEgo;
-  float cpuTemp;
-  int cpuPerc;
-
-  cereal::HealthData::HwType hwType;
-  int satelliteCount;
   cereal::PandaState::PandaType pandaType;
   NetStatus athenaStatus;
 

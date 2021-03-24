@@ -161,10 +161,6 @@ static void update_sockets(UIState *s) {
     s->active_app = data.getActiveApp();
     s->sidebar_collapsed = data.getSidebarCollapsed();
   }
-  if (sm.updated("thermal")) {
-    scene.thermal = sm["thermal"].getThermal();
-    s->scene.cpuTemp = scene.thermal.getCpu()[0];
-    s->scene.cpuPerc = scene.thermal.getCpuPerc();
   if (sm.updated("deviceState")) {
     scene.deviceState = sm["deviceState"].getDeviceState();
   }
@@ -179,11 +175,7 @@ static void update_sockets(UIState *s) {
     auto data = sm["ubloxGnss"].getUbloxGnss();
     if (data.which() == cereal::UbloxGnss::MEASUREMENT_REPORT) {
       scene.satelliteCount = data.getMeasurementReport().getNumMeas();
-      s->scene.satelliteCount = scene.satelliteCount;
     }
-    auto data2 = sm["gpsLocationExternal"].getGpsLocationExternal();
-    s->scene.gpsAccuracyUblox = data2.getAccuracy();
-    s->scene.altitudeUblox = data2.getAltitude();
   }
   if (sm.updated("liveLocationKalman")) {
     scene.gpsOK = sm["liveLocationKalman"].getLiveLocationKalman().getGpsOK();
@@ -202,14 +194,6 @@ static void update_sockets(UIState *s) {
   } else if ((sm.frame - sm.rcv_frame("driverMonitoringState")) > UI_FREQ/2) {
     scene.frontview = false;
   }
-  if (sm.updated("carState")) {
-    auto data = sm["carState"].getCarState();
-    s->scene.brakeLights = data.getBrakeLights();
-    s->scene.engineRPM = data.getEngineRPM();
-    s->scene.aEgo = data.getAEgo();
-    s->scene.steeringTorqueEps = data.getSteeringTorqueEps();
-  }
-
   if (sm.updated("sensorEvents")) {
     for (auto sensor : sm["sensorEvents"].getSensorEvents()) {
       if (sensor.which() == cereal::SensorEventData::LIGHT) {
