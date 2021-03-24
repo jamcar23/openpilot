@@ -160,7 +160,7 @@ def fingerprint(msgs, fsm, can_sock):
   can_sock.recv_ready.set()
   can_sock.wait = False
 
-  # we know fingerprinting is done when controlsd sets sm['pathPlan'].sensorValid
+  # we know fingerprinting is done when controlsd sets sm['lateralPlan'].sensorValid
   wait_for_event(fsm.update_called)
   fsm.update_called.clear()
 
@@ -221,8 +221,8 @@ CONFIGS = [
     proc_name="controlsd",
     pub_sub={
       "can": ["controlsState", "carState", "carControl", "sendcan", "carEvents", "carParams"],
-      "thermal": [], "health": [], "liveCalibration": [], "dMonitoringState": [], "plan": [], "pathPlan": [], "gpsLocation": [], "liveLocationKalman": [],
-      "model": [], "frontFrame": [],
+      "deviceState": [], "pandaState": [], "liveCalibration": [], "driverMonitoringState": [], "longitudinalPlan": [], "lateralPlan": [], "liveLocationKalman": [], "liveParameters": [], "radarState": [],
+      "modelV2": [], "driverCameraState": [], "roadCameraState": [], "ubloxRaw": [], "managerState": [],
     },
     ignore=["logMonoTime", "valid", "controlsState.startMonoTime", "controlsState.cumLagMs"],
     init_callback=fingerprint,
@@ -233,7 +233,7 @@ CONFIGS = [
     proc_name="radard",
     pub_sub={
       "can": ["radarState", "liveTracks"],
-      "liveParameters":  [], "controlsState":  [], "model":  [],
+      "liveParameters":  [], "carState":  [], "modelV2":  [],
     },
     ignore=["logMonoTime", "valid", "radarState.cumLagMs"],
     init_callback=get_car_params,
@@ -243,10 +243,10 @@ CONFIGS = [
   ProcessConfig(
     proc_name="plannerd",
     pub_sub={
-      "model": ["pathPlan"], "radarState": ["plan"],
-      "carState": [], "controlsState": [], "liveParameters": [], "carControl": [], "modelV2": [],
+      "modelV2": ["lateralPlan"], "radarState": ["longitudinalPlan"],
+      "carState": [], "controlsState": [], "liveParameters": [],
     },
-    ignore=["logMonoTime", "valid", "plan.processingDelay"],
+    ignore=["logMonoTime", "valid", "longitudinalPlan.processingDelay"],
     init_callback=get_car_params,
     should_recv_callback=None,
     tolerance=None,
@@ -265,8 +265,8 @@ CONFIGS = [
   ProcessConfig(
     proc_name="dmonitoringd",
     pub_sub={
-      "driverState": ["dMonitoringState"],
-      "liveCalibration": [], "carState": [], "model": [], "controlsState": [],
+      "driverState": ["driverMonitoringState"],
+      "liveCalibration": [], "carState": [], "modelV2": [], "controlsState": [],
     },
     ignore=["logMonoTime", "valid"],
     init_callback=get_car_params,
@@ -342,11 +342,13 @@ def python_replay_process(cfg, lr):
   for msg in lr:
     if msg.which() == 'carParams':
       # TODO: get a stock VW route
-      if "Generic Volkswagen" not in msg.carParams.carFingerprint:
+      if "Generic Volkswagen" in msg.carParams.carFingerprint:
+        os.environ['FINGERPRINT'] = "VOLKSWAGEN GOLF"
+      else:
         os.environ['FINGERPRINT'] = msg.carParams.carFingerprint
       break
 
-  manager.prepare_managed_process(cfg.proc_name)
+  manager.prepare_managed_process(cfg.proc_name, build=True)
   mod = importlib.import_module(manager.managed_processes[cfg.proc_name])
   thread = threading.Thread(target=mod.main, args=args)
   thread.daemon = True

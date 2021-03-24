@@ -5,7 +5,7 @@ from raven.transport.http import HTTPTransport
 
 from common.op_params import opParams
 from selfdrive.version import version, dirty
-from selfdrive.version import origin, branch, get_git_commit
+from selfdrive.version import origin, branch, commit
 
 _USERNAME = None
 
@@ -22,7 +22,7 @@ def get_username():
     return _USERNAME
 
 def create_standard_tags():
-    return {'dirty': dirty, 'origin': origin, 'branch': branch, 'commit': get_git_commit()}
+    return {'dirty': dirty, 'origin': origin, 'branch': branch, 'commit': commit}
 
 def create_client(*args, tags=None, **kwargs):
     if not tags:

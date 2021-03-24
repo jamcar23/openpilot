@@ -12,11 +12,11 @@ def create_car_state(vego=0.):
 
   return CS
 
-def create_path_plan(desired_steer=0.):
-  path_plan = log.PathPlan.new_message()
-  path_plan.angleSteers = desired_steer
+def create_lateral_plan(desired_steer=0.):
+  lateral_plan = log.LateralPlan.new_message()
+  lateral_plan.steeringAngleDeg = desired_steer
 
-  return path_plan
+  return lateral_plan
 
 class OpParamsTest(unittest.TestCase):
   def test_correctness_multi_breakpoint(self):
@@ -70,7 +70,7 @@ class OpParamsTest(unittest.TestCase):
       for vego in steer_vego_arr[1]:
         # print(f'i: {i}, steer: {desired_steer}, vego: {vego}')
 
-        x = eval_breakpoint_source(op.get(INDI_MULTI_BREAKPOINT_SOURCE), create_car_state(vego=vego), create_path_plan(desired_steer=desired_steer))
+        x = eval_breakpoint_source(op.get(INDI_MULTI_BREAKPOINT_SOURCE), create_car_state(vego=vego), create_lateral_plan(desired_steer=desired_steer))
         # print(f'x: {x}')
 
         interped = interp_multi_bp(x, op.get(INDI_INNER_GAIN_BP_MULTI), op.get(INDI_INNER_GAIN_V_MULTI))

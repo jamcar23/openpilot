@@ -27,7 +27,7 @@ def parse_param_modifiers(src, value):
   else:
     return value
 
-def eval_breakpoint_source(sources, CS, path_plan):
+def eval_breakpoint_source(sources, CS, lateral_plan):
   '''
   Maps a breakpoint source array to actual values
   '''
@@ -38,7 +38,7 @@ def eval_breakpoint_source(sources, CS, path_plan):
     elif BreakPointSourceKeys.AEGO in src:
       return parse_param_modifiers(src.replace(BreakPointSourceKeys.AEGO, ''), CS.aEgo)
     elif BreakPointSourceKeys.DESIRED_STEER in src:
-      return parse_param_modifiers(src.replace(BreakPointSourceKeys.DESIRED_STEER, ''), path_plan.angleSteers)
+      return parse_param_modifiers(src.replace(BreakPointSourceKeys.DESIRED_STEER, ''), lateral_plan.steeringAngleDeg)
     else:
       raise ValueError(f'Unknown value option: {src}')
 
