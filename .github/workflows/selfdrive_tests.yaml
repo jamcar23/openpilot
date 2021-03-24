@@ -11,6 +11,9 @@ on:
       - '**.md'
       - 'README*'
 
+env:
+  UNIT_TEST: coverage run --append -m unittest discover
+
 jobs:
   build_release:
     name: build release
