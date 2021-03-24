@@ -2,7 +2,7 @@
 from cereal import car
 from common.params import Params
 from common.realtime import Priority, config_realtime_process
-from common.op_params import opParams, ENABLE_COASTING
+from common.op_params import opParams
 from selfdrive.swaglog import cloudlog
 from selfdrive.controls.lib.longitudinal_planner import Planner
 from selfdrive.controls.lib.vehicle_model import VehicleModel
