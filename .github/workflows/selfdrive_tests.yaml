@@ -248,11 +248,12 @@ jobs:
                         coverage combine"
     # - name: Upload coverage to Codecov
     #   run: bash <(curl -s https://codecov.io/bash) -v -F test_car_models
+
   wait_for_selfdrive:
     name: wait for selfdrive
     runs-on: ubuntu-20.04
     timeout-minutes: 60
-    if: github.event_name = 'push'
+    if: github.event_name == 'push'
     steps:
     - name: Wait For Static Analysis
       uses: lewagon/wait-on-check-action@v0.2
