@@ -18,7 +18,7 @@ CAMERA_OFFSET = STANDARD_CAMERA_OFFSET
 
 
 class LanePlanner:
-  def __init__(self):
+  def __init__(self, OP=None):
     self.ll_t = np.zeros((TRAJECTORY_SIZE,))
     self.ll_x = np.zeros((TRAJECTORY_SIZE,))
     self.lll_y = np.zeros((TRAJECTORY_SIZE,))
@@ -37,8 +37,9 @@ class LanePlanner:
     self.l_lane_change_prob = 0.
     self.r_lane_change_prob = 0.
 
-
-    self.op_params = opParams()
+    if not OP:
+      OP = opParams()
+    self.op_params = OP
 
   def parse_model(self, md):
     if len(md.laneLines) == 4 and len(md.laneLines[0].t) == TRAJECTORY_SIZE:

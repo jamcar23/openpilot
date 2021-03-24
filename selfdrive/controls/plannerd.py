@@ -20,7 +20,7 @@ def plannerd_thread(sm=None, pm=None):
 
   OP = opParams()
   PL = Planner(CP, OP=OP)
-  PP = LateralPlanner(CP)
+  PP = LateralPlanner(CP, OP=OP)
 
   VM = VehicleModel(CP)
 
