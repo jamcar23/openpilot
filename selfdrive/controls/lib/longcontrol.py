@@ -8,7 +8,7 @@ from common.op_params import opParams, ENABLE_COASTING, EVAL_COAST_LONG, ENABLE_
                               ENABLE_START_STOP_PARAMS, STOP_BRAKE_RATE_BP, STOP_BRAKE_RATE_V, START_BRAKE_RATE_BP, START_BRAKE_RATE_V
 
 LongCtrlState = log.ControlsState.LongControlState
-Source = log.Plan.LongitudinalPlanSource
+Source = log.LongitudinalPlan.LongitudinalPlanSource
 
 STOPPING_EGO_SPEED = 0.5
 STOPPING_TARGET_SPEED_OFFSET = 0.01
