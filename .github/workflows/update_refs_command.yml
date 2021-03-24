@@ -16,17 +16,19 @@ jobs:
           lfs: true
           ref: ${{ env.BRANCH }}
           token: ${{ secrets.REPO_PAT }}
+      - name: Prepare CI Env Vars
+        run: |
+          chmod +x ./.github/scripts/ci_env_vars.sh
+          source ./.github/scripts/ci_env_vars.sh
       - name: Remove old refs
         run: |
           rm selfdrive/test/process_replay/*.bz2
       - name: Build Docker Image
         run: |
-          docker build -t commaai/openpilot-base:latest -f Dockerfile.openpilot_base .
-          docker build -t tmppilot -f Dockerfile.openpilotci .
+          eval "$BUILD_CMD"
       - name: Build OP and update refs
         run: |
-          docker run -v $(pwd):/tmp/openpilot --shm-size 1G --rm tmppilot /bin/sh -c \
-          "cd /tmp/openpilot && \
+          ${{ env.RUN_CMD }} "cd /tmp/openpilot && \
           scons -j$(nproc) && \
           python selfdrive/test/process_replay/update_refs.py --no-upload"
       - name: Commit New Refs
