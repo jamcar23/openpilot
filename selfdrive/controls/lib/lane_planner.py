@@ -46,6 +46,7 @@ class LanePlanner:
       # left and right ll x is the same
       self.ll_x = md.laneLines[1].x
       # only offset left and right lane lines; offsetting path does not make sense
+      CAMERA_OFFSET = self.op_params.get(CAM_OFFSET)
       self.lll_y = np.array(md.laneLines[1].y) - CAMERA_OFFSET
       self.rll_y = np.array(md.laneLines[2].y) - CAMERA_OFFSET
       self.lll_prob = md.laneLineProbs[1]

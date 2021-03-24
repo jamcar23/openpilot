@@ -16,7 +16,6 @@ from common.op_params import opParams, ENABLE_LAT_PARAMS, ENABLE_ACTUATOR_DELAY_
                             ENABLE_STEER_RATE_COST, STEER_RATE_COST, ENABLE_PLANNER_PARAMS, ENABLE_ACTUATOR_DELAY_BPS_MULTI, \
                             STEER_ACTUATOR_DELAY_BP_MULTI, STEER_ACTUATOR_DELAY_V_MULTI, STEER_DELAY_MULTI_BP_SOURCE, \
                             eval_breakpoint_source, interp_multi_bp
-from common.numpy_fast import interp
 
 LaneChangeState = log.LateralPlan.LaneChangeState
 LaneChangeDirection = log.LateralPlan.LaneChangeDirection
@@ -137,7 +136,7 @@ class LateralPlanner():
       self.lane_change_state = LaneChangeState.off
       self.lane_change_direction = LaneChangeDirection.none
     else:
-      torque_applied = not self.alca_nudge_required or (sm['carState'].steeringPressed and \
+      torque_applied = not self.alca_nudge_required or (sm['carState'].steeringPressed and
                        ((sm['carState'].steeringTorque > 0 and self.lane_change_direction == LaneChangeDirection.left) or
                         (sm['carState'].steeringTorque < 0 and self.lane_change_direction == LaneChangeDirection.right)))
 

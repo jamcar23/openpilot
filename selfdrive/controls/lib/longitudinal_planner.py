@@ -5,7 +5,7 @@ from common.params import Params
 from common.numpy_fast import interp, incremental_avg
 
 import cereal.messaging as messaging
-from cereal import car, log
+from cereal import log
 from common.realtime import sec_since_boot
 from common.op_params import opParams, ENABLE_COASTING, COAST_SPEED, DOWNHILL_INCLINE, ALWAYS_EVAL_COAST, ENABLE_PLANNER_PARAMS, ENABLE_PLNR_ACCEL_LIMITS
 from selfdrive.swaglog import cloudlog
