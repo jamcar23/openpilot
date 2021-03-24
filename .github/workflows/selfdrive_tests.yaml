@@ -251,17 +251,17 @@ jobs:
         ref: ${{ github.sha }}
         check-name: 'static analysis'
         wait-interval: 60
-    - name: Wait For Build Release
-      uses: lewagon/wait-on-check-action@v0.2
-      with:
-        ref: ${{ github.sha }}
-        check-name: 'build release'
-        wait-interval: 60
     - name: Wait For Valgrind
       uses: lewagon/wait-on-check-action@v0.2
       with:
         ref: ${{ github.sha }}
         check-name: 'valgrind'
+        wait-interval: 60
+    - name: Wait For Build Release
+      uses: lewagon/wait-on-check-action@v0.2
+      with:
+        ref: ${{ github.sha }}
+        check-name: 'build release'
         wait-interval: 60
     - name: Wait For Unit Tests
       uses: lewagon/wait-on-check-action@v0.2
@@ -269,11 +269,11 @@ jobs:
         ref: ${{ github.sha }}
         check-name: 'unit tests'
         wait-interval: 60
-    - name: Wait For Process Replay
+    - name: Wait For Car Models Tests
       uses: lewagon/wait-on-check-action@v0.2
       with:
         ref: ${{ github.sha }}
-        check-name: 'process replay'
+        check-name: 'car models'
         wait-interval: 60
     - name: Wait For Longitudinal Tests
       uses: lewagon/wait-on-check-action@v0.2
@@ -281,9 +281,9 @@ jobs:
         ref: ${{ github.sha }}
         check-name: 'longitudinal'
         wait-interval: 60
-    - name: Wait For Car Models Tests
+    - name: Wait For Process Replay
       uses: lewagon/wait-on-check-action@v0.2
       with:
         ref: ${{ github.sha }}
-        check-name: 'car models'
+        check-name: 'process replay'
         wait-interval: 60
