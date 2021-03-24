@@ -34,7 +34,7 @@ _A_CRUISE_MAX_BP = [0.,  6.4, 22.5, 40.]
 _A_TOTAL_MAX_V = [1.7, 3.2]
 _A_TOTAL_MAX_BP = [20., 40.]
 
-Source = log.Plan.LongitudinalPlanSource
+Source = log.LongitudinalPlan.LongitudinalPlanSource
 
 
 def calc_cruise_accel_limits(v_ego, following, op_params):
