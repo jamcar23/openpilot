@@ -26,7 +26,7 @@ jobs:
       with:
         ref: ${{ github.sha }}
         wait-interval: 30
-        check-name: 'finish selfdrive'
+        check-name: 'wait for selfdrive'
     - name: Stop job from running
       if: ${{ !env.IS_DEFAULT_REPO || !env.IS_MAIN_BRANCH }}
       run: |

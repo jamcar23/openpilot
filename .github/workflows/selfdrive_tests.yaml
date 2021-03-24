@@ -248,11 +248,43 @@ jobs:
                         coverage combine"
     # - name: Upload coverage to Codecov
     #   run: bash <(curl -s https://codecov.io/bash) -v -F test_car_models
-  finish_selfdrive:
-    name: finish selfdrive
+  wait_for_selfdrive:
+    name: wait for selfdrive
     runs-on: ubuntu-20.04
     timeout-minutes: 60
-    needs: [build_release, static_analysis, valgrind, unit_tests, process_replay, test_longitudinal, test_car_models]
     steps:
-    - name: finish
-      run: echo "Finished Selfdrive tests."
+    - name: Wait For Static Analysis
+      uses: lewagon/wait-on-check-action@v0.2
+      with:
+        ref: ${{ github.sha }}
+        check-name: 'static analysis'
+    - name: Wait For Build Release
+      uses: lewagon/wait-on-check-action@v0.2
+      with:
+        ref: ${{ github.sha }}
+        check-name: 'build release'
+    - name: Wait For Valgrind
+      uses: lewagon/wait-on-check-action@v0.2
+      with:
+        ref: ${{ github.sha }}
+        check-name: 'valgrind'
+    - name: Wait For Unit Tests
+      uses: lewagon/wait-on-check-action@v0.2
+      with:
+        ref: ${{ github.sha }}
+        check-name: 'unit tests'
+    - name: Wait For Process Replay
+      uses: lewagon/wait-on-check-action@v0.2
+      with:
+        ref: ${{ github.sha }}
+        check-name: 'process replay'
+    - name: Wait For Longitudinal Tests
+      uses: lewagon/wait-on-check-action@v0.2
+      with:
+        ref: ${{ github.sha }}
+        check-name: 'longitudinal'
+    - name: Wait For Car Models Tests
+      uses: lewagon/wait-on-check-action@v0.2
+      with:
+        ref: ${{ github.sha }}
+        check-name: 'car models'
