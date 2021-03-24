@@ -94,10 +94,10 @@ class LatControlINDI():
         self.inner_loop_gain = self.op_params.get('indi_inner_gain')
         self.RC = self.op_params.get('indi_time_constant')
     elif CP.lateralTuning.which() == 'indi':
-      self.RC = CP.lateralTuning.indi.timeConstant
-      self.G = CP.lateralTuning.indi.actuatorEffectiveness
-      self.outer_loop_gain = CP.lateralTuning.indi.outerLoopGain
-      self.inner_loop_gain = CP.lateralTuning.indi.innerLoopGain
+      self.RC = interp(CS.vEgo, CP.lateralTuning.indi.timeConstantBP, CP.lateralTuning.indi.timeConstantV)
+      self.G = interp(CS.vEgo, CP.lateralTuning.indi.actuatorEffectivenessBP, CP.lateralTuning.indi.actuatorEffectivenessV)
+      self.outer_loop_gain = interp(CS.vEgo, CP.lateralTuning.indi.outerLoopGainBP, CP.lateralTuning.indi.outerLoopGainV)
+      self.inner_loop_gain = interp(CS.vEgo, CP.lateralTuning.indi.innerLoopGainBP, CP.lateralTuning.indi.innerLoopGainV)
       self.sat_limit = CP.steerLimitTimer
 
     self.alpha = 1. - DT_CTRL / (self.RC + DT_CTRL)
