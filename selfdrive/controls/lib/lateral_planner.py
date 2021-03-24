@@ -99,8 +99,8 @@ class LateralPlanner():
   def update(self, sm, CP, VM):
     self.update_params(CP)
 
-    plan_send = messaging.new_message('pathPlan')
-    plan_send.pathPlan.angleSteers = float(self.angle_steers_des_mpc)
+    plan_send = messaging.new_message('lateralPlan')
+    plan_send.lateralPlan.steeringAngleDeg = float(self.desired_steering_wheel_angle_deg)
 
     v_ego = sm['carState'].vEgo
     active = sm['controlsState'].active
@@ -208,7 +208,7 @@ class LateralPlanner():
     # TODO this needs more thought, use .2s extra for now to estimate other delays
     if self.op_params.get(ENABLE_LAT_PARAMS):
       if self.op_params.get(ENABLE_ACTUATOR_DELAY_BPS_MULTI):
-        delay = interp_multi_bp(eval_breakpoint_source(self.op_params.get(STEER_DELAY_MULTI_BP_SOURCE), sm['carState'], plan_send.pathPlan),
+        delay = interp_multi_bp(eval_breakpoint_source(self.op_params.get(STEER_DELAY_MULTI_BP_SOURCE), sm['carState'], plan_send.lateralPlan),
                                 self.op_params.get(STEER_ACTUATOR_DELAY_BP_MULTI),
                                 self.op_params.get(STEER_ACTUATOR_DELAY_V_MULTI))
       elif self.op_params.get(ENABLE_ACTUATOR_DELAY_BPS):
