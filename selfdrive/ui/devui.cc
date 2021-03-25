@@ -11,67 +11,76 @@
 #include "devui.hpp"
 #include "sidebar.hpp"
 
+const int lr_w = 180;
+const int lr_h = 5;
+const int value_fontSize=30;
+const int label_fontSize=15;
+const int uom_fontSize = 15;
+const int bb_uom_dx =  (int)(lr_w/2 - uom_fontSize*2.5);
+
 //DEV START: functions added for the display of various items
-static int dev_ui_draw_measure(UIState *s,  const char* bb_value, const char* bb_uom, const char* bb_label,
-    int bb_x, int bb_y, int bb_uom_dx,
-    NVGcolor bb_valueColor, NVGcolor bb_labelColor, NVGcolor bb_uomColor,
-    int bb_valueFontSize, int bb_labelFontSize, int bb_uomFontSize )  {
+static void dev_ui_draw_measure(UIState *s,  const char* bb_value, const char* bb_uom, const char* bb_label,
+    Rect *rel_rect, const Rect &rect, NVGcolor bb_valueColor)  {
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
   int dx = 0;
   if (strlen(bb_uom) > 0) {
-    dx = (int)(bb_uomFontSize*2.5/2);
-   }
+    dx = (int)(uom_fontSize*2.5/2);
+  }
+
   //print value
   nvgFontFace(s->vg, "sans-semibold");
-  nvgFontSize(s->vg, bb_valueFontSize*2.5);
+  nvgFontSize(s->vg, value_fontSize*2.5);
   nvgFillColor(s->vg, bb_valueColor);
-  nvgText(s->vg, bb_x-dx/2, bb_y+ (int)(bb_valueFontSize*2.5)+5, bb_value, NULL);
+  nvgText(s->vg, rel_rect->x-dx/2, rel_rect->y+ (int)(value_fontSize*2.5)+5, bb_value, NULL);
+
   //print label
   nvgFontFace(s->vg, "sans-regular");
-  nvgFontSize(s->vg, bb_labelFontSize*2.5);
-  nvgFillColor(s->vg, bb_labelColor);
-  nvgText(s->vg, bb_x, bb_y + (int)(bb_valueFontSize*2.5)+5 + (int)(bb_labelFontSize*2.5)+5, bb_label, NULL);
+  nvgFontSize(s->vg, label_fontSize*2.5);
+  nvgFillColor(s->vg, COLOR_WHITE);
+  nvgText(s->vg, rel_rect->x, rel_rect->y + (int)(value_fontSize*2.5)+5 + (int)(label_fontSize*2.5)+5, bb_label, NULL);
+
   //print uom
   if (strlen(bb_uom) > 0) {
       nvgSave(s->vg);
-    int rx =bb_x + bb_uom_dx + bb_valueFontSize -3;
-    int ry = bb_y + (int)(bb_valueFontSize*2.5/2)+25;
+    int rx = rel_rect->x + bb_uom_dx + value_fontSize -3;
+    int ry = rel_rect->y + (int)(value_fontSize*2.5/2)+25;
     nvgTranslate(s->vg,rx,ry);
     nvgRotate(s->vg, -1.5708); //-90deg in radians
     nvgFontFace(s->vg, "sans-regular");
-    nvgFontSize(s->vg, (int)(bb_uomFontSize*2.5));
-    nvgFillColor(s->vg, bb_uomColor);
+    nvgFontSize(s->vg, (int)(uom_fontSize*2.5));
+    nvgFillColor(s->vg, COLOR_WHITE);
     nvgText(s->vg, 0, 0, bb_uom, NULL);
     nvgRestore(s->vg);
   }
-  return (int)((bb_valueFontSize + bb_labelFontSize)*2.5) + 5;
+
+  rel_rect->h += (int)((value_fontSize + label_fontSize)*2.5) + 5;
+  rel_rect->y = rect.y + rel_rect->h;
 }
 
-static void dev_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w ) {
-  const UIScene *scene = &s->scene;
-  int bb_rx = bb_x + (int)(bb_w/2);
-  int bb_ry = bb_y;
-  int bb_h = 5;
-  NVGcolor lab_color = nvgRGBA(255, 255, 255, 200);
-  NVGcolor uom_color = nvgRGBA(255, 255, 255, 200);
-  int value_fontSize=30;
-  int label_fontSize=15;
-  int uom_fontSize = 15;
-  int bb_uom_dx =  (int)(bb_w /2 - uom_fontSize*2.5) ;
+static void dev_ui_draw_frame(UIState *s, const Rect &rect) {
+  //finally draw the frame
+  nvgBeginPath(s->vg);
+  nvgRoundedRect(s->vg, rect.x, rect.y, rect.w, rect.h+20, 20);
+  nvgStrokeColor(s->vg, nvgRGBA(255,255,255,80));
+  nvgStrokeWidth(s->vg, 6);
+  nvgStroke(s->vg);
+}
+
+static void dev_ui_draw_cpu_temp(UIState *s, Rect *rel_rect, const Rect &rect) {
   //CPU TEMP
-    if (true) {
+  if (true) {
     char val_str[16];
     char uom_str[6];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
     snprintf(val_str, sizeof(val_str), "%.0f°C", (round((s->scene.deviceState.getCpuTempC()[0]))));
     snprintf(uom_str, sizeof(uom_str), "%d%%", (s->scene.deviceState.getCpuUsagePercent()));
-    bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "CPU TEMP",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
+    dev_ui_draw_measure(s,  val_str, uom_str, "CPU TEMP", rel_rect, rect, val_color);
   }
+}
+
+static void dev_ui_draw_gps_accuracy(UIState *s, Rect *rel_rect, const Rect &rect) {
   //add Ublox GPS accuracy
+  const UIScene *scene = &s->scene;
   if (scene->gps_external.getAccuracy() != 0.00) {
     char val_str[16];
     char uom_str[3];
@@ -93,38 +102,36 @@ static void dev_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w 
       snprintf(val_str, sizeof(val_str), "%.2f", (s->scene.gps_external.getAccuracy()));
     }
     snprintf(uom_str, sizeof(uom_str), "%d", (s->scene.satelliteCount));
-    bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "GPS PREC",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
+    dev_ui_draw_measure(s,  val_str, uom_str, "GPS PREC", rel_rect, rect, val_color);
   }
+}
+
+static void dev_ui_draw_gps_altitude(UIState *s, Rect *rel_rect, const Rect &rect) {
   //add altitude
+  const UIScene *scene = &s->scene;
   if (scene->gps_external.getAccuracy() != 0.00) {
     char val_str[16];
     char uom_str[3];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
     snprintf(val_str, sizeof(val_str), "%.1f", (s->scene.gps_external.getAltitude()));
     snprintf(uom_str, sizeof(uom_str), "m");
-    bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "ALTITUDE",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
+    dev_ui_draw_measure(s,  val_str, uom_str, "ALTITUDE", rel_rect, rect, val_color);
   }
-    //add EPS Motor Torque
+}
+
+static void dev_ui_draw_steering_torque(UIState *s, Rect *rel_rect, const Rect &rect) {
+  //add EPS Motor Torque
   if (true) {
     char val_str[16];
     char uom_str[3];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200); //TODO: Add orange/red color depending on torque intensity. <1x limit = white, btwn 1x-2x limit = orange, >2x limit = red
     snprintf(val_str, sizeof(val_str), "%.0f", (s->scene.car_state.getSteeringTorqueEps()));
     snprintf(uom_str, sizeof(uom_str), "Nm");
-    bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "EPS TRQ",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
+    dev_ui_draw_measure(s,  val_str, uom_str, "EPS TRQ", rel_rect, rect, val_color);
   }
+}
+
+static void dev_ui_draw_aego(UIState *s, Rect *rel_rect, const Rect &rect) {
   //add aEgo
   if (true) {
     char val_str[16];
@@ -132,33 +139,11 @@ static void dev_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w 
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
     snprintf(val_str, sizeof(val_str), "%.1f", (s->scene.car_state.getSteeringTorqueEps()));
     snprintf(uom_str, sizeof(uom_str), "m/s²");
-    bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "ACCEL",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
+    dev_ui_draw_measure(s,  val_str, uom_str, "ACCEL", rel_rect, rect, val_color);
   }
-  //finally draw the frame
-  bb_h += 20;
-  nvgBeginPath(s->vg);
-    nvgRoundedRect(s->vg, bb_x, bb_y, bb_w, bb_h, 20);
-    nvgStrokeColor(s->vg, nvgRGBA(255,255,255,80));
-    nvgStrokeWidth(s->vg, 6);
-    nvgStroke(s->vg);
 }
 
-static void dev_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) {
-  const UIScene *scene = &s->scene;
-  int bb_rx = bb_x + (int)(bb_w/2);
-  int bb_ry = bb_y;
-  int bb_h = 5;
-  NVGcolor lab_color = nvgRGBA(255, 255, 255, 200);
-  NVGcolor uom_color = nvgRGBA(255, 255, 255, 200);
-  int value_fontSize=30;
-  int label_fontSize=15;
-  int uom_fontSize = 15;
-  int bb_uom_dx =  (int)(bb_w /2 - uom_fontSize*2.5) ;
-
+static void dev_ui_draw_radar_distance(UIState *s, Rect *rel_rect, const Rect &rect) {
   //add visual radar relative distance
   if (true) {
     char val_str[16];
@@ -179,13 +164,11 @@ static void dev_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w )
        snprintf(val_str, sizeof(val_str), "-");
     }
     snprintf(uom_str, sizeof(uom_str), "m");
-    bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "REL DIST",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
+    dev_ui_draw_measure(s,  val_str, uom_str, "REL DIST", rel_rect, rect, val_color);
   }
+}
 
+static void dev_ui_draw_radar_speed(UIState *s, Rect *rel_rect, const Rect &rect) {
   //add visual radar relative speed
   if (true) {
     char val_str[16];
@@ -214,43 +197,39 @@ static void dev_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w )
     } else {
       snprintf(uom_str, sizeof(uom_str), "mph");
     }
-    bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "REL SPEED",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
+    dev_ui_draw_measure(s,  val_str, uom_str, "REL SPEED", rel_rect, rect, val_color);
   }
+}
 
+static void dev_ui_draw_steering_angle(UIState *s, Rect *rel_rect, const Rect &rect) {
   //add steering angle
   if (true) {
     char val_str[16];
     char uom_str[6];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
-      //show Orange if more than 6 degrees
-      //show red if  more than 12 degrees
-      if(((int)(s->scene.car_state.getSteeringAngleDeg()) < -6) || ((int)(s->scene.car_state.getSteeringAngleDeg()) > 6)) {
-        val_color = nvgRGBA(255, 188, 3, 200);
-      }
-      if(((int)(s->scene.car_state.getSteeringAngleDeg()) < -12) || ((int)(s->scene.car_state.getSteeringAngleDeg()) > 12)) {
-        val_color = nvgRGBA(255, 0, 0, 200);
-      }
-      // steering is in degrees
-      snprintf(val_str, sizeof(val_str), "%.0f°",(s->scene.car_state.getSteeringAngleDeg()));
+    //show Orange if more than 6 degrees
+    //show red if  more than 12 degrees
+    if(((int)(s->scene.car_state.getSteeringAngleDeg()) < -6) || ((int)(s->scene.car_state.getSteeringAngleDeg()) > 6)) {
+      val_color = nvgRGBA(255, 188, 3, 200);
+    }
+    if(((int)(s->scene.car_state.getSteeringAngleDeg()) < -12) || ((int)(s->scene.car_state.getSteeringAngleDeg()) > 12)) {
+      val_color = nvgRGBA(255, 0, 0, 200);
+    }
+    // steering is in degrees
+    snprintf(val_str, sizeof(val_str), "%.0f°",(s->scene.car_state.getSteeringAngleDeg()));
 
-      snprintf(uom_str, sizeof(uom_str), "");
-    bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "REAL STEER",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
+    snprintf(uom_str, sizeof(uom_str), "");
+    dev_ui_draw_measure(s,  val_str, uom_str, "REAL STEER", rel_rect, rect, val_color);
   }
+}
 
+static void dev_ui_draw_desired_steering_angle(UIState *s, Rect *rel_rect, const Rect &rect) {
   //add desired steering angle
   if (true) {
     char val_str[16];
     char uom_str[6];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
-    if (scene->controls_state.getEnabled()) {
+    if (s->scene.controls_state.getEnabled()) {
       //show Orange if more than 6 degrees
       //show red if  more than 12 degrees
       if(((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) < -6) || ((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) > 6)) {
@@ -265,13 +244,12 @@ static void dev_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w )
        snprintf(val_str, sizeof(val_str), "-");
     }
       snprintf(uom_str, sizeof(uom_str), "");
-    bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "DESIR STEER",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
+      dev_ui_draw_measure(s,  val_str, uom_str, "DESIR STEER", rel_rect, rect, val_color);
   }
-    //engineRPM
+}
+
+static void dev_ui_draw_engine_rpm(UIState *s, Rect *rel_rect, const Rect &rect) {
+  //engineRPM
   if (true) {
     char val_str[16];
     char uom_str[4];
@@ -282,35 +260,39 @@ static void dev_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w )
       snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.car_state.getEngineRPM()));
     }
     snprintf(uom_str, sizeof(uom_str), "");
-    bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "ENG RPM",
-        bb_rx, bb_ry, bb_uom_dx,
-        val_color, lab_color, uom_color,
-        value_fontSize, label_fontSize, uom_fontSize );
-    bb_ry = bb_y + bb_h;
+    dev_ui_draw_measure(s,  val_str, uom_str, "ENG RPM", rel_rect, rect, val_color);
   }
+}
 
-  //finally draw the frame
-  bb_h += 20;
-  nvgBeginPath(s->vg);
-    nvgRoundedRect(s->vg, bb_x, bb_y, bb_w, bb_h, 20);
-    nvgStrokeColor(s->vg, nvgRGBA(255,255,255,80));
-    nvgStrokeWidth(s->vg, 6);
-    nvgStroke(s->vg);
+static void dev_ui_draw_measures_right(UIState *s, const Rect &rect) {
+  Rect rel_rect = {rect.x + (int)(rect.w/2), rect.y, rect.w, rect.h};
+
+  dev_ui_draw_cpu_temp(s, &rel_rect, rect);
+  dev_ui_draw_gps_accuracy(s, &rel_rect, rect);
+  dev_ui_draw_gps_altitude(s, &rel_rect, rect);
+  dev_ui_draw_steering_torque(s, &rel_rect, rect);
+  dev_ui_draw_aego(s, &rel_rect, rect);
+  dev_ui_draw_frame(s, rect);
+}
+
+static void dev_ui_draw_measures_left(UIState *s, const Rect &rect) {
+  Rect rel_rect = {rect.x + (int)(rect.w/2), rect.y, rect.w, rect.h};
+
+  dev_ui_draw_radar_distance(s, &rel_rect, rect);
+  dev_ui_draw_radar_speed(s, &rel_rect, rect);
+  dev_ui_draw_steering_angle(s, &rel_rect, rect);
+  dev_ui_draw_desired_steering_angle(s, &rel_rect, rect);
+  dev_ui_draw_engine_rpm(s, &rel_rect, rect);
+  dev_ui_draw_frame(s, rect);
 }
 
 void dev_ui_draw_ui(UIState *s)
 {
-  //const UIScene *scene = &s->scene;
-  const int bb_dml_w = 180;
-  const int bb_dml_x = (s->viz_rect.x + (bdr_is * 2));
-  const int bb_dml_y = (s->viz_rect.y  + (bdr_is * 1.5)) + 220;
+  const Rect l_rect = {(s->viz_rect.x + (bdr_is * 2)), (s->viz_rect.y  + (int)(bdr_is * 1.5)) + 220, lr_w, lr_h};
+  const Rect r_rect = {s->viz_rect.x + s->viz_rect.w - lr_w - (bdr_is * 2), (s->viz_rect.y + (int)(bdr_is * 1.5)) + 220, lr_w, lr_h};
 
-  const int bb_dmr_w = 180;
-  const int bb_dmr_x = s->viz_rect.x + s->viz_rect.w - bb_dmr_w - (bdr_is * 2);
-  const int bb_dmr_y = (s->viz_rect.y + (bdr_is * 1.5)) + 220;
-
-  dev_ui_draw_measures_left(s, bb_dml_x, bb_dml_y, bb_dml_w);
-  dev_ui_draw_measures_right(s, bb_dmr_x, bb_dmr_y-20, bb_dmr_w);
+  dev_ui_draw_measures_left(s, l_rect);
+  dev_ui_draw_measures_right(s, r_rect);
 }
 
 //DEV END: functions added for the display of various items
