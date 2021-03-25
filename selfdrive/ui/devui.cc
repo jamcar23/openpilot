@@ -47,7 +47,7 @@ static int dev_ui_draw_measure(UIState *s,  const char* bb_value, const char* bb
   return (int)((bb_valueFontSize + bb_labelFontSize)*2.5) + 5;
 }
 
-static void dev_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) {
+static void dev_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w ) {
   const UIScene *scene = &s->scene;
   int bb_rx = bb_x + (int)(bb_w/2);
   int bb_ry = bb_y;
@@ -147,7 +147,7 @@ static void dev_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w )
     nvgStroke(s->vg);
 }
 
-static void dev_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w ) {
+static void dev_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) {
   const UIScene *scene = &s->scene;
   int bb_rx = bb_x + (int)(bb_w/2);
   int bb_ry = bb_y;
@@ -309,8 +309,8 @@ void dev_ui_draw_ui(UIState *s)
   const int bb_dmr_x = s->viz_rect.x + s->viz_rect.w - bb_dmr_w - (bdr_is * 2);
   const int bb_dmr_y = (s->viz_rect.y + (bdr_is * 1.5)) + 220;
 
-  dev_ui_draw_measures_right(s, bb_dml_x, bb_dml_y, bb_dml_w);
-  dev_ui_draw_measures_left(s, bb_dmr_x, bb_dmr_y-20, bb_dmr_w);
+  dev_ui_draw_measures_left(s, bb_dml_x, bb_dml_y, bb_dml_w);
+  dev_ui_draw_measures_right(s, bb_dmr_x, bb_dmr_y-20, bb_dmr_w);
 }
 
 //DEV END: functions added for the display of various items
