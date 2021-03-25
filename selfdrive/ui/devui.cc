@@ -256,14 +256,14 @@ static void dev_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w 
     if (scene->controls_state.getEnabled()) {
       //show Orange if more than 6 degrees
       //show red if  more than 12 degrees
-      if(((int)(s->scene.angleSteersDes) < -6) || ((int)(s->scene.angleSteersDes) > 6)) {
+      if(((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) < -6) || ((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) > 6)) {
         val_color = nvgRGBA(255, 188, 3, 200);
       }
-      if(((int)(s->scene.angleSteersDes) < -12) || ((int)(s->scene.angleSteersDes) > 12)) {
+      if(((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) < -12) || ((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) > 12)) {
         val_color = nvgRGBA(255, 0, 0, 200);
       }
       // steering is in degrees
-      snprintf(val_str, sizeof(val_str), "%.0f°",(s->scene.angleSteersDes));
+      snprintf(val_str, sizeof(val_str), "%.0f°",(s->scene.controls_state.getSteeringAngleDesiredDeg()));
     } else {
        snprintf(val_str, sizeof(val_str), "-");
     }
