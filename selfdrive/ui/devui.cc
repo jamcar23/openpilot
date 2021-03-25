@@ -120,7 +120,7 @@ static void dev_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w )
     char val_str[16];
     char uom_str[3];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200); //TODO: Add orange/red color depending on torque intensity. <1x limit = white, btwn 1x-2x limit = orange, >2x limit = red
-    snprintf(val_str, sizeof(val_str), "%.0f", (s->scene.steeringTorqueEps));
+    snprintf(val_str, sizeof(val_str), "%.0f", (s->scene.car_state.getSteeringTorqueEps()));
     snprintf(uom_str, sizeof(uom_str), "Nm");
     bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "EPS TRQ",
         bb_rx, bb_ry, bb_uom_dx,
@@ -133,7 +133,7 @@ static void dev_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w )
     char val_str[16];
     char uom_str[6];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
-    snprintf(val_str, sizeof(val_str), "%.1f", (s->scene.aEgo));
+    snprintf(val_str, sizeof(val_str), "%.1f", (s->scene.car_state.getSteeringTorqueEps()));
     snprintf(uom_str, sizeof(uom_str), "m/s²");
     bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "ACCEL",
         bb_rx, bb_ry, bb_uom_dx,
