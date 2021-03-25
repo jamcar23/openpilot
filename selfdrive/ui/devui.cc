@@ -281,8 +281,9 @@ static void dev_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w 
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
     if(((int)(s->scene.car_state.getEngineRPM())) == 0) {
       snprintf(val_str, sizeof(val_str), "OFF");
+    } else {
+      snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.car_state.getEngineRPM()));
     }
-    else {snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.car_state.getEngineRPM()));}
     snprintf(uom_str, sizeof(uom_str), "");
     bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "ENG RPM",
         bb_rx, bb_ry, bb_uom_dx,
