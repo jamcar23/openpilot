@@ -8,9 +8,6 @@
 #include "common/timing.h"
 #include <algorithm>
 
-#define NANOVG_GLES3_IMPLEMENTATION
-#include "nanovg_gl.h"
-#include "nanovg_gl_utils.h"
 #include "devui.hpp"
 #include "sidebar.hpp"
 
@@ -301,7 +298,7 @@ static void dev_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w 
     nvgStroke(s->vg);
 }
 
-static void dev_ui_draw_ui(UIState *s)
+void dev_ui_draw_ui(UIState *s)
 {
   //const UIScene *scene = &s->scene;
   const int bb_dml_w = 180;
