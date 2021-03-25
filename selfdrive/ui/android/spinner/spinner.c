@@ -17,6 +17,7 @@
 
 #include "framebuffer.h"
 #include "spinner.h"
+#include "selfdrive/common/version.h"
 
 #define SPINTEXT_LENGTH 128
 
@@ -82,6 +83,11 @@ int main(int argc, char** argv) {
   double color_hue = 108;  // start at green
   double hue_rate = 10;  // start at 10 * DT_SPIN
   double max_hue_rate = 300;
+
+  const char *version = COMMA_VERSION;
+  const char *op_version = OPENPILOT_VERSION;
+  const char *flexpilot_text = "Loading Flexpilot v" + version;
+  const char *openpilot_text = "(openpilot v" + op_version + ")";
 
   for (int cnt = 0; ; cnt++) {
     // Check stdin for new text
@@ -180,7 +186,11 @@ int main(int argc, char** argv) {
       nvgFillColor(vg, nvgHSLA(color_hue / 360., .80, .57, 255));
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgFontSize(vg, 94.0f);
-      nvgText(vg, fb_w/2, (fb_h*4/5), "Loading Flexpilot...", NULL);
+      nvgText(vg, fb_w/2, (fb_h*0.8), flexpilot_text, NULL);
+
+      nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
+      nvgFontSize(vg, 80.0f);
+      nvgText(vg, fb_w/2, (fb_h*0.9), openpilot_text, NULL);
     } else {
       // message
       nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
