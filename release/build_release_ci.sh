@@ -13,9 +13,12 @@ mkdir -p panda/board/obj
 touch panda/board/obj/.placeholder
 
 echo "!board/obj/.placeholder" >> panda/.gitignore
-OP_VERSION=$(head -1 selfdrive/common/version.h | cut -d '"' -f 2)
+
+SELFDRIVE_VERSION_FILE = selfdrive/common/version.h
+OP_VERSION=$(head -1 $SELFDRIVE_VERSION_FILE | cut -d '"' -f 2)
 VERSION="$(date +%y.%m.%d.%H%M)"
-echo "#define COMMA_VERSION \"$VERSION\"\n#define OPENPILOT_VERSION \"$OP_VERSION\"" > selfdrive/common/version.h
+echo "#define COMMA_VERSION \"$VERSION\"" > $SELFDRIVE_VERSION_FILE
+echo "#define OPENPILOT_VERSION \"$OP_VERSION\"" >> $SELFDRIVE_VERSION_FILE
 
 git init
 git config user.name "github-actions[bot]"
