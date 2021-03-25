@@ -6,6 +6,7 @@ on:
     paths-ignore:
       - '**.md'
       - 'README*'
+  workflow_dispatch:
 
 jobs:
   ci_release:
@@ -38,17 +39,18 @@ jobs:
     - name: Wait For Passing Tests
       id: wait_for_tests
       uses: lewagon/wait-on-check-action@v0.2
+      if: ${{ github.event_name == 'push' }}
       with:
         ref: ${{ github.sha }}
         wait-interval: 60
         check-name: 'wait for selfdrive'
     - name: Prepare release files
-      if: steps.wait_for_tests.outcome == 'success'
+      if: ${{ github.event_name == 'workflow_dispatch' || steps.wait_for_tests.outcome == 'success'}}
       run: |
         chmod +x release/build_release_ci.sh
         ./release/build_release_ci.sh
     - name: Push changes
-      if: steps.wait_for_tests.outcome == 'success'
+      if: ${{ github.event_name == 'workflow_dispatch' || steps.wait_for_tests.outcome == 'success'}}
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
