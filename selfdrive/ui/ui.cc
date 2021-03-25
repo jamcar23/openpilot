@@ -42,7 +42,7 @@ static void ui_init_vision(UIState *s) {
 
 void ui_init(UIState *s) {
   s->sm = new SubMaster({"modelV2", "controlsState", "uiLayoutState", "liveCalibration", "radarState", "deviceState", "roadCameraState", "liveLocationKalman",
-                         "pandaState", "carParams", "driverState", "driverMonitoringState", "sensorEvents", "carState", "ubloxGnss"});
+                         "pandaState", "carParams", "driverState", "driverMonitoringState", "sensorEvents", "carState", "ubloxGnss", "gpsLocationExternal"});
 
   s->started = false;
   s->status = STATUS_OFFROAD;
@@ -176,6 +176,9 @@ static void update_sockets(UIState *s) {
     if (data.which() == cereal::UbloxGnss::MEASUREMENT_REPORT) {
       scene.satelliteCount = data.getMeasurementReport().getNumMeas();
     }
+  }
+  if (sm.updated("gpsLocationExternal")) {
+    scene.gps_external = sm["gpsLocationExternal"].getGpsLocationExternal();
   }
   if (sm.updated("liveLocationKalman")) {
     scene.gpsOK = sm["liveLocationKalman"].getLiveLocationKalman().getGpsOK();

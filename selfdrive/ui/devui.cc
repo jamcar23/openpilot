@@ -75,25 +75,25 @@ static void dev_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w )
     bb_ry = bb_y + bb_h;
   }
   //add Ublox GPS accuracy
-  if (scene->gpsAccuracyUblox != 0.00) {
+  if (scene->gps_external.getAccuracy() != 0.00) {
     char val_str[16];
     char uom_str[3];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
     //show red/orange if gps accuracy is low
-      if(scene->gpsAccuracyUblox > 0.85) {
+      if(scene->gps_external.getAccuracy() > 0.85) {
          val_color = nvgRGBA(255, 188, 3, 200);
       }
-      if(scene->gpsAccuracyUblox > 1.3) {
+      if(scene->gps_external.getAccuracy() > 1.3) {
          val_color = nvgRGBA(255, 0, 0, 200);
       }
     // gps accuracy is always in meters
-    if(scene->gpsAccuracyUblox > 99 || scene->gpsAccuracyUblox == 0) {
+    if(scene->gps_external.getAccuracy() > 99 || scene->gps_external.getAccuracy() == 0) {
        snprintf(val_str, sizeof(val_str), "None");
-    }else if(scene->gpsAccuracyUblox > 9.99) {
-      snprintf(val_str, sizeof(val_str), "%.1f", (s->scene.gpsAccuracyUblox));
+    }else if(scene->gps_external.getAccuracy() > 9.99) {
+      snprintf(val_str, sizeof(val_str), "%.1f", (s->scene.gps_external.getAccuracy()));
     }
     else {
-      snprintf(val_str, sizeof(val_str), "%.2f", (s->scene.gpsAccuracyUblox));
+      snprintf(val_str, sizeof(val_str), "%.2f", (s->scene.gps_external.getAccuracy()));
     }
     snprintf(uom_str, sizeof(uom_str), "%d", (s->scene.satelliteCount));
     bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "GPS PREC",
@@ -103,11 +103,11 @@ static void dev_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w )
     bb_ry = bb_y + bb_h;
   }
   //add altitude
-  if (scene->gpsAccuracyUblox != 0.00) {
+  if (scene->gps_external.getAccuracy() != 0.00) {
     char val_str[16];
     char uom_str[3];
     NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
-    snprintf(val_str, sizeof(val_str), "%.1f", (s->scene.altitudeUblox));
+    snprintf(val_str, sizeof(val_str), "%.1f", (s->scene.gps_external.getAltitude()));
     snprintf(uom_str, sizeof(uom_str), "m");
     bb_h +=dev_ui_draw_measure(s,  val_str, uom_str, "ALTITUDE",
         bb_rx, bb_ry, bb_uom_dx,
