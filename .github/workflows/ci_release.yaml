@@ -12,6 +12,8 @@ jobs:
     name: github ci release
     runs-on: ubuntu-20.04
     timeout-minutes: 90
+    env:
+      TARGET_DIR: tmp_op_ci
     steps:
     - uses: actions/checkout@v2
       with:
