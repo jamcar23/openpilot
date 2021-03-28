@@ -57,10 +57,10 @@ static void dev_ui_draw_measure(UIState *s,  const char* bb_value, const char* b
   rel_rect->y = rect.y + rel_rect->h;
 }
 
-static void dev_ui_draw_frame(UIState *s, Rect *rect) {
+static void dev_ui_draw_frame(UIState *s, Rect *rel_rect, const Rect &rect) {
   //finally draw the frame
   nvgBeginPath(s->vg);
-  nvgRoundedRect(s->vg, rect->x, rect->y, rect->w, rect->h+20, 20);
+  nvgRoundedRect(s->vg, rect.x, rect.y, rect.w, rel_rect->h+20, 20);
   nvgStrokeColor(s->vg, nvgRGBA(255,255,255,80));
   nvgStrokeWidth(s->vg, 6);
   nvgStroke(s->vg);
@@ -272,7 +272,7 @@ static void dev_ui_draw_measures_right(UIState *s, const Rect &rect) {
   dev_ui_draw_gps_altitude(s, &rel_rect, rect);
   dev_ui_draw_steering_torque(s, &rel_rect, rect);
   dev_ui_draw_aego(s, &rel_rect, rect);
-  dev_ui_draw_frame(s, &rel_rect);
+  dev_ui_draw_frame(s, &rel_rect, rect);
 }
 
 static void dev_ui_draw_measures_left(UIState *s, const Rect &rect) {
@@ -283,7 +283,7 @@ static void dev_ui_draw_measures_left(UIState *s, const Rect &rect) {
   dev_ui_draw_steering_angle(s, &rel_rect, rect);
   dev_ui_draw_desired_steering_angle(s, &rel_rect, rect);
   dev_ui_draw_engine_rpm(s, &rel_rect, rect);
-  dev_ui_draw_frame(s, &rel_rect);
+  dev_ui_draw_frame(s, &rel_rect, rect);
 }
 
 void dev_ui_draw_ui(UIState *s)
