@@ -60,8 +60,8 @@ static void dev_ui_draw_measure(UIState *s,  const char* bb_value, const char* b
 
 static void dev_ui_draw_frame(UIState *s, Rect *rel_rect, const Rect &rect) {
   const Rect r = {rect.x, rect.y, rect.w, rel_rect->h+20};
-  ui_fill_rect(s->vg, rect, COLOR_BLACK_ALPHA(100), 30.);
-  ui_draw_rect(s->vg, rect, COLOR_WHITE_ALPHA(100), 10, 20.);
+  ui_fill_rect(s->vg, r, COLOR_BLACK_ALPHA(100), 30.);
+  ui_draw_rect(s->vg, r, COLOR_WHITE_ALPHA(100), 10, 20.);
 }
 
 static void dev_ui_draw_cpu_temp(UIState *s, Rect *rel_rect, const Rect &rect) {
