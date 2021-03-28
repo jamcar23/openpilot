@@ -71,7 +71,7 @@ static void dev_ui_draw_cpu_temp(UIState *s, Rect *rel_rect, const Rect &rect) {
   if (true) {
     char val_str[16];
     char uom_str[6];
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    NVGcolor val_color = COLOR_WHITE;
     snprintf(val_str, sizeof(val_str), "%.0f°C", (round((s->scene.deviceState.getCpuTempC()[0]))));
     snprintf(uom_str, sizeof(uom_str), "%d%%", (s->scene.deviceState.getCpuUsagePercent()));
     dev_ui_draw_measure(s,  val_str, uom_str, "CPU TEMP", rel_rect, rect, val_color);
@@ -84,13 +84,13 @@ static void dev_ui_draw_gps_accuracy(UIState *s, Rect *rel_rect, const Rect &rec
   if (scene->gps_external.getAccuracy() != 0.00) {
     char val_str[16];
     char uom_str[3];
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    NVGcolor val_color = COLOR_WHITE;
     //show red/orange if gps accuracy is low
       if(scene->gps_external.getAccuracy() > 0.85) {
-         val_color = nvgRGBA(255, 188, 3, 200);
+         val_color = COLOR_YELLOW;
       }
       if(scene->gps_external.getAccuracy() > 1.3) {
-         val_color = nvgRGBA(255, 0, 0, 200);
+         val_color = COLOR_RED;
       }
     // gps accuracy is always in meters
     if(scene->gps_external.getAccuracy() > 99 || scene->gps_external.getAccuracy() == 0) {
@@ -112,7 +112,7 @@ static void dev_ui_draw_gps_altitude(UIState *s, Rect *rel_rect, const Rect &rec
   if (scene->gps_external.getAccuracy() != 0.00) {
     char val_str[16];
     char uom_str[3];
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    NVGcolor val_color = COLOR_WHITE;
     snprintf(val_str, sizeof(val_str), "%.1f", (s->scene.gps_external.getAltitude()));
     snprintf(uom_str, sizeof(uom_str), "m");
     dev_ui_draw_measure(s,  val_str, uom_str, "ALTITUDE", rel_rect, rect, val_color);
@@ -124,7 +124,7 @@ static void dev_ui_draw_steering_torque(UIState *s, Rect *rel_rect, const Rect &
   if (true) {
     char val_str[16];
     char uom_str[3];
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200); //TODO: Add orange/red color depending on torque intensity. <1x limit = white, btwn 1x-2x limit = orange, >2x limit = red
+    NVGcolor val_color = COLOR_WHITE; //TODO: Add orange/red color depending on torque intensity. <1x limit = white, btwn 1x-2x limit = orange, >2x limit = red
     snprintf(val_str, sizeof(val_str), "%.0f", (s->scene.car_state.getSteeringTorqueEps()));
     snprintf(uom_str, sizeof(uom_str), "Nm");
     dev_ui_draw_measure(s,  val_str, uom_str, "EPS TRQ", rel_rect, rect, val_color);
@@ -136,7 +136,7 @@ static void dev_ui_draw_aego(UIState *s, Rect *rel_rect, const Rect &rect) {
   if (true) {
     char val_str[16];
     char uom_str[6];
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    NVGcolor val_color = COLOR_WHITE;
     snprintf(val_str, sizeof(val_str), "%.1f", (s->scene.car_state.getSteeringTorqueEps()));
     snprintf(uom_str, sizeof(uom_str), "m/s²");
     dev_ui_draw_measure(s,  val_str, uom_str, "ACCEL", rel_rect, rect, val_color);
@@ -148,15 +148,15 @@ static void dev_ui_draw_radar_distance(UIState *s, Rect *rel_rect, const Rect &r
   if (true) {
     char val_str[16];
     char uom_str[6];
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    NVGcolor val_color = COLOR_WHITE;
     if (s->scene.lead_data[0].getStatus()) {
       //show RED if less than 5 meters
       //show orange if less than 15 meters
       if((int)(s->scene.lead_data[0].getDRel()) < 15) {
-        val_color = nvgRGBA(255, 188, 3, 200);
+        val_color = COLOR_YELLOW;
       }
       if((int)(s->scene.lead_data[0].getDRel()) < 5) {
-        val_color = nvgRGBA(255, 0, 0, 200);
+        val_color = COLOR_RED;
       }
       // lead car relative distance is always in meters
       snprintf(val_str, sizeof(val_str), "%d", (int)s->scene.lead_data[0].getDRel());
@@ -173,15 +173,15 @@ static void dev_ui_draw_radar_speed(UIState *s, Rect *rel_rect, const Rect &rect
   if (true) {
     char val_str[16];
     char uom_str[6];
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    NVGcolor val_color = COLOR_WHITE;
     if (s->scene.lead_data[0].getStatus()) {
       //show Orange if negative speed (approaching)
       //show Orange if negative speed faster than 5mph (approaching fast)
       if((int)(s->scene.lead_data[0].getVRel()) < 0) {
-        val_color = nvgRGBA(255, 188, 3, 200);
+        val_color = COLOR_YELLOW;
       }
       if((int)(s->scene.lead_data[0].getVRel()) < -5) {
-        val_color = nvgRGBA(255, 0, 0, 200);
+        val_color = COLOR_RED;
       }
       // lead car relative speed is always in meters
       if (s->is_metric) {
@@ -206,14 +206,14 @@ static void dev_ui_draw_steering_angle(UIState *s, Rect *rel_rect, const Rect &r
   if (true) {
     char val_str[16];
     char uom_str[6];
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    NVGcolor val_color = COLOR_WHITE;
     //show Orange if more than 6 degrees
     //show red if  more than 12 degrees
     if(((int)(s->scene.car_state.getSteeringAngleDeg()) < -6) || ((int)(s->scene.car_state.getSteeringAngleDeg()) > 6)) {
-      val_color = nvgRGBA(255, 188, 3, 200);
+      val_color = COLOR_YELLOW;
     }
     if(((int)(s->scene.car_state.getSteeringAngleDeg()) < -12) || ((int)(s->scene.car_state.getSteeringAngleDeg()) > 12)) {
-      val_color = nvgRGBA(255, 0, 0, 200);
+      val_color = COLOR_RED;
     }
     // steering is in degrees
     snprintf(val_str, sizeof(val_str), "%.0f°",(s->scene.car_state.getSteeringAngleDeg()));
@@ -228,15 +228,15 @@ static void dev_ui_draw_desired_steering_angle(UIState *s, Rect *rel_rect, const
   if (true) {
     char val_str[16];
     char uom_str[6];
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    NVGcolor val_color = COLOR_WHITE;
     if (s->scene.controls_state.getEnabled()) {
       //show Orange if more than 6 degrees
       //show red if  more than 12 degrees
       if(((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) < -6) || ((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) > 6)) {
-        val_color = nvgRGBA(255, 188, 3, 200);
+        val_color = COLOR_YELLOW;
       }
       if(((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) < -12) || ((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) > 12)) {
-        val_color = nvgRGBA(255, 0, 0, 200);
+        val_color = COLOR_RED;
       }
       // steering is in degrees
       snprintf(val_str, sizeof(val_str), "%.0f°",(s->scene.controls_state.getSteeringAngleDesiredDeg()));
@@ -253,7 +253,7 @@ static void dev_ui_draw_engine_rpm(UIState *s, Rect *rel_rect, const Rect &rect)
   if (true) {
     char val_str[16];
     char uom_str[4];
-    NVGcolor val_color = nvgRGBA(255, 255, 255, 200);
+    NVGcolor val_color = COLOR_WHITE;
     if(((int)(s->scene.car_state.getEngineRPM())) == 0) {
       snprintf(val_str, sizeof(val_str), "OFF");
     } else {
