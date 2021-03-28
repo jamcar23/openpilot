@@ -10,6 +10,7 @@
 
 #include "devui.hpp"
 #include "sidebar.hpp"
+#include "paint.hpp"
 
 const int lr_w = 180;
 const int lr_h = 5;
@@ -58,12 +59,9 @@ static void dev_ui_draw_measure(UIState *s,  const char* bb_value, const char* b
 }
 
 static void dev_ui_draw_frame(UIState *s, Rect *rel_rect, const Rect &rect) {
-  //finally draw the frame
-  nvgBeginPath(s->vg);
-  nvgRoundedRect(s->vg, rect.x, rect.y, rect.w, rel_rect->h+20, 20);
-  nvgStrokeColor(s->vg, nvgRGBA(255,255,255,80));
-  nvgStrokeWidth(s->vg, 6);
-  nvgStroke(s->vg);
+  const Rect r = {rect.x, rect.y, rect.w, rel_rect->h+20};
+  ui_fill_rect(s->vg, rect, COLOR_BLACK_ALPHA(100), 30.);
+  ui_draw_rect(s->vg, rect, COLOR_WHITE_ALPHA(100), 10, 20.);
 }
 
 static void dev_ui_draw_cpu_temp(UIState *s, Rect *rel_rect, const Rect &rect) {
