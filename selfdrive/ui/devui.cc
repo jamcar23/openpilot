@@ -267,21 +267,21 @@ static void dev_ui_draw_measures_right(UIState *s, const Rect &rect) {
 
   dev_ui_draw_frame(s, &rel_rect, rect);
   dev_ui_draw_cpu_temp(s, &rel_rect, rect);
-  dev_ui_draw_gps_accuracy(s, &rel_rect, rect);
-  dev_ui_draw_gps_altitude(s, &rel_rect, rect);
-  dev_ui_draw_steering_torque(s, &rel_rect, rect);
+  dev_ui_draw_radar_distance(s, &rel_rect, rect);
+  dev_ui_draw_radar_speed(s, &rel_rect, rect);
   dev_ui_draw_aego(s, &rel_rect, rect);
+  dev_ui_draw_engine_rpm(s, &rel_rect, rect);
 }
 
 static void dev_ui_draw_measures_left(UIState *s, const Rect &rect) {
   Rect rel_rect = {rect.x + (int)(rect.w/2), rect.y, rect.w, rect.h};
 
   dev_ui_draw_frame(s, &rel_rect, rect);
-  dev_ui_draw_radar_distance(s, &rel_rect, rect);
-  dev_ui_draw_radar_speed(s, &rel_rect, rect);
+  dev_ui_draw_gps_accuracy(s, &rel_rect, rect);
+  dev_ui_draw_gps_altitude(s, &rel_rect, rect);
   dev_ui_draw_steering_angle(s, &rel_rect, rect);
   dev_ui_draw_desired_steering_angle(s, &rel_rect, rect);
-  dev_ui_draw_engine_rpm(s, &rel_rect, rect);
+  dev_ui_draw_steering_torque(s, &rel_rect, rect);
 }
 
 void dev_ui_draw_ui(UIState *s)
