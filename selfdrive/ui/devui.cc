@@ -59,7 +59,7 @@ static void dev_ui_draw_measure(UIState *s,  const char* bb_value, const char* b
 }
 
 static void dev_ui_draw_frame(UIState *s, Rect *rel_rect, const Rect &rect) {
-  const Rect r = {rect.x, rect.y, rect.w, rel_rect->h+20};
+  const Rect r = {rect.x, rect.y, rect.w, (((int)((value_fontSize + label_fontSize)*2.5) + 5) * 5) +20};
   ui_fill_rect(s->vg, r, COLOR_BLACK_ALPHA(100), 30.);
   ui_draw_rect(s->vg, r, COLOR_WHITE_ALPHA(100), 6, 20.);
 }
@@ -265,23 +265,23 @@ static void dev_ui_draw_engine_rpm(UIState *s, Rect *rel_rect, const Rect &rect)
 static void dev_ui_draw_measures_right(UIState *s, const Rect &rect) {
   Rect rel_rect = {rect.x + (int)(rect.w/2), rect.y, rect.w, rect.h};
 
+  dev_ui_draw_frame(s, &rel_rect, rect);
   dev_ui_draw_cpu_temp(s, &rel_rect, rect);
   dev_ui_draw_gps_accuracy(s, &rel_rect, rect);
   dev_ui_draw_gps_altitude(s, &rel_rect, rect);
   dev_ui_draw_steering_torque(s, &rel_rect, rect);
   dev_ui_draw_aego(s, &rel_rect, rect);
-  dev_ui_draw_frame(s, &rel_rect, rect);
 }
 
 static void dev_ui_draw_measures_left(UIState *s, const Rect &rect) {
   Rect rel_rect = {rect.x + (int)(rect.w/2), rect.y, rect.w, rect.h};
 
+  dev_ui_draw_frame(s, &rel_rect, rect);
   dev_ui_draw_radar_distance(s, &rel_rect, rect);
   dev_ui_draw_radar_speed(s, &rel_rect, rect);
   dev_ui_draw_steering_angle(s, &rel_rect, rect);
   dev_ui_draw_desired_steering_angle(s, &rel_rect, rect);
   dev_ui_draw_engine_rpm(s, &rel_rect, rect);
-  dev_ui_draw_frame(s, &rel_rect, rect);
 }
 
 void dev_ui_draw_ui(UIState *s)
