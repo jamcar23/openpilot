@@ -135,7 +135,7 @@ static void dev_ui_draw_aego(UIState *s, Rect *rel_rect, const Rect &rect) {
     char val_str[16];
     char uom_str[6];
     NVGcolor val_color = COLOR_WHITE;
-    snprintf(val_str, sizeof(val_str), "%.1f", (s->scene.car_state.getSteeringTorqueEps()));
+    snprintf(val_str, sizeof(val_str), "%.1f", (s->scene.car_state.getAEgo()));
     snprintf(uom_str, sizeof(uom_str), "m/s²");
     dev_ui_draw_measure(s,  val_str, uom_str, "ACCEL", rel_rect, rect, val_color);
   }
