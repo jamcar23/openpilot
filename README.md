@@ -1,5 +1,7 @@
 # Flexpilot
-[![openpilot tests](https://github.com/jamcar23/openpilot/workflows/openpilot%20tests/badge.svg?event=push)](https://github.com/jamcar23/openpilot/actions)
+[![selfdrive](https://github.com/jamcar23/openpilot/actions/workflows/selfdrive_tests.yaml/badge.svg)](https://github.com/jamcar23/openpilot/actions/workflows/selfdrive_tests.yaml)
+[![docker](https://github.com/jamcar23/openpilot/actions/workflows/docker_build.yaml/badge.svg)](https://github.com/jamcar23/openpilot/actions/workflows/docker_build.yaml)
+[![CI Release](https://github.com/jamcar23/openpilot/actions/workflows/ci_release.yaml/badge.svg)](https://github.com/jamcar23/openpilot/actions/workflows/ci_release.yaml)
 
 # Table of Contents
 
