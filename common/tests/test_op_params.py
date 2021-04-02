@@ -1,5 +1,6 @@
 import numpy as np
 import unittest
+import math
 
 from cereal import car, log
 from common.numpy_fast import interp, is_multi_iter, find_nearest_index
@@ -14,7 +15,7 @@ def create_car_state(vego=0.):
 
 def create_lateral_plan(desired_steer=0.):
   lateral_plan = log.LateralPlan.new_message()
-  lateral_plan.steeringAngleDeg = desired_steer
+  lateral_plan.curvature = math.radians(desired_steer)
 
   return lateral_plan
 
