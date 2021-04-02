@@ -58,7 +58,7 @@ class OpParamsTest(unittest.TestCase):
     v = [[5, 5.75], [6, 7.25, 7.5]]
     steer_vego_arr = \
                     [
-                      [-11, -10, -7, -6, -5, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5, 6, 7, 10, 11], # desired steer angle
+                      [-11, -10, -7, -6, -5.1, -4, -2 -1e-12, 0, 1e-12, 2, 4, 5.1, 6, 7, 10, 11], # desired steer angle
                       [-1, -1e-12, 0, 4, 5, 6, 7, 10, 11, 15.2, 20, 21, 39, 39.999999, 40, 41] # vego
                     ]
     source_bp = ['desired_steer_abs', 'vego']
@@ -77,6 +77,7 @@ class OpParamsTest(unittest.TestCase):
         interped = interp_multi_bp(x, op.get(INDI_INNER_GAIN_BP_MULTI), op.get(INDI_INNER_GAIN_V_MULTI))
         # print(f'interped: {interped}')
 
+        # print(f'bp: {bps[1][i]}, v: {v[1]}')
         expected = interp(vego, bps[1][i], v[i])
         np.testing.assert_equal(interped, expected)
 
