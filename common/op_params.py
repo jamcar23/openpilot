@@ -38,7 +38,7 @@ def eval_breakpoint_source(sources, CS, lateral_plan):
     elif BreakPointSourceKeys.AEGO in src:
       return parse_param_modifiers(src.replace(BreakPointSourceKeys.AEGO, ''), CS.aEgo)
     elif BreakPointSourceKeys.DESIRED_STEER in src:
-      return parse_param_modifiers(src.replace(BreakPointSourceKeys.DESIRED_STEER, ''), lateral_plan.steeringAngleDeg)
+      return parse_param_modifiers(src.replace(BreakPointSourceKeys.DESIRED_STEER, ''), math.degrees(lateral_plan.curvature))
     else:
       raise ValueError(f'Unknown value option: {src}')
 

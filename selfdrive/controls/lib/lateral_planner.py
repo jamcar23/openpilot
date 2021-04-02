@@ -81,8 +81,6 @@ class LateralPlanner():
     self.alca_nudge_required = self.op_params.get('alca_nudge_required')
     self.alca_min_speed = self.op_params.get('alca_min_speed') * CV.MPH_TO_MS
 
-    self.desired_steering_wheel_angle_deg = 0
-
   def update_params(self, CP):
     self.steer_rate_cost = CP.steerRateCost if not self.op_params.get(ENABLE_PLANNER_PARAMS) and not self.op_params.get(ENABLE_STEER_RATE_COST) else self.op_params.get(STEER_RATE_COST)
 
@@ -106,7 +104,7 @@ class LateralPlanner():
     self.update_params(CP)
 
     plan_send = messaging.new_message('lateralPlan')
-    plan_send.lateralPlan.steeringAngleDeg = float(self.desired_steering_wheel_angle_deg)
+    plan_send.lateralPlan.curvature = float(self.safe_desired_curvature)
 
     v_ego = sm['carState'].vEgo
     active = sm['controlsState'].active
