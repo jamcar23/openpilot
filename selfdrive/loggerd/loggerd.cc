@@ -369,7 +369,7 @@ int main(int argc, char** argv) {
   s.rotate_state[LOG_CAMERA_ID_FCAMERA].enabled = true;
 
 #if defined(QCOM) || defined(QCOM2)
-  bool record_front = Params().read_db_bool("RecordFront");
+  bool record_front = Params().getBool("RecordFront");
   if (record_front) {
     encoder_threads.push_back(std::thread(encoder_thread, LOG_CAMERA_ID_DCAMERA));
     s.rotate_state[LOG_CAMERA_ID_DCAMERA].enabled = true;
@@ -383,7 +383,7 @@ int main(int argc, char** argv) {
 
   uint64_t msg_count = 0;
   uint64_t bytes_count = 0;
-  kj::Array<capnp::word> buf = kj::heapArray<capnp::word>(1024);
+  AlignedBuffer aligned_buf;
 
   double start_ts = seconds_since_boot();
   double last_rotate_tms = millis_since_boot();
@@ -427,15 +427,7 @@ int main(int argc, char** argv) {
         if (fpkt_id >= 0) {
           // track camera frames to sync to encoder
           // only process last frame
-          const uint8_t* data = (uint8_t*)last_msg->getData();
-          const size_t len = last_msg->getSize();
-          const size_t size = len / sizeof(capnp::word) + 1;
-          if (buf.size() < size) {
-            buf = kj::heapArray<capnp::word>(size);
-          }
-          memcpy(buf.begin(), data, len);
-
-          capnp::FlatArrayMessageReader cmsg(buf);
+          capnp::FlatArrayMessageReader cmsg(aligned_buf.align(last_msg));
           cereal::Event::Reader event = cmsg.getRoot<cereal::Event>();
 
           if (fpkt_id == LOG_CAMERA_ID_FCAMERA) {

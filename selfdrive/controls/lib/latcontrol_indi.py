@@ -66,6 +66,7 @@ class LatControlINDI():
 
     return self.sat_count > self.sat_limit
 
+<<<<<<< HEAD
   def update(self, active, CS, CP, lat_plan):
     if self.op_params.get(ENABLE_LAT_PARAMS):
       self.sat_limit = self.op_params.get(STEER_LIMIT_TIMER)
@@ -102,6 +103,10 @@ class LatControlINDI():
 
     self.alpha = 1. - DT_CTRL / (self.RC + DT_CTRL)
 
+=======
+  def update(self, active, CS, CP, VM, params, lat_plan):
+    self.speed = CS.vEgo
+>>>>>>> master
     # Update Kalman filter
     y = np.array([[math.radians(CS.steeringAngleDeg)], [math.radians(CS.steeringRateDeg)]])
     self.x = np.dot(self.A_K, self.x) + np.dot(self.K, y)
@@ -116,11 +121,10 @@ class LatControlINDI():
       self.output_steer = 0.0
       self.delayed_output = 0.0
     else:
-      self.angle_steers_des = lat_plan.steeringAngleDeg
-      self.rate_steers_des = lat_plan.steeringRateDeg
+      steers_des = VM.get_steer_from_curvature(-lat_plan.curvature, CS.vEgo)
+      steers_des += math.radians(params.angleOffsetDeg)
 
-      steers_des = math.radians(self.angle_steers_des)
-      rate_des = math.radians(self.rate_steers_des)
+      rate_des = VM.get_steer_from_curvature(-lat_plan.curvatureRate, CS.vEgo)
 
       # Expected actuator value
       alpha = 1. - DT_CTRL / (self.RC + DT_CTRL)
@@ -163,4 +167,4 @@ class LatControlINDI():
       check_saturation = (CS.vEgo > 10.) and not CS.steeringRateLimited and not CS.steeringPressed
       indi_log.saturated = self._check_saturation(self.output_steer, check_saturation, steers_max)
 
-    return float(self.output_steer), float(self.angle_steers_des), indi_log
+    return float(self.output_steer), 0, indi_log

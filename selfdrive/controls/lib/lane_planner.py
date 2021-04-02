@@ -7,6 +7,7 @@ from cereal import log
 TRAJECTORY_SIZE = 33
 # camera offset is meters from center car to camera
 if EON:
+<<<<<<< HEAD
   STANDARD_CAMERA_OFFSET = 0.06
 elif TICI:
   STANDARD_CAMERA_OFFSET = -0.04
@@ -14,6 +15,16 @@ else:
   STANDARD_CAMERA_OFFSET = 0.0
 
 CAMERA_OFFSET = STANDARD_CAMERA_OFFSET
+=======
+  CAMERA_OFFSET = 0.06
+  PATH_OFFSET = 0.0
+elif TICI:
+  CAMERA_OFFSET = -0.04
+  PATH_OFFSET = -0.04
+else:
+  CAMERA_OFFSET = 0.0
+  PATH_OFFSET = 0.0
+>>>>>>> master
 
 
 
@@ -62,6 +73,7 @@ class LanePlanner:
   def get_d_path(self, v_ego, path_t, path_xyz):
     # Reduce reliance on lanelines that are too far apart or
     # will be in a few seconds
+    path_xyz[:,1] -= PATH_OFFSET
     l_prob, r_prob = self.lll_prob, self.rll_prob
     width_pts = self.rll_y - self.lll_y
     prob_mods = []
