@@ -50,6 +50,7 @@ void ui_init(UIState *s) {
   s->sm = new SubMaster({
     "modelV2", "controlsState", "liveCalibration", "radarState", "deviceState", "liveLocationKalman",
     "pandaState", "carParams", "driverState", "driverMonitoringState", "sensorEvents", "carState", "ubloxGnss",
+    "gpsLocationExternal",
 #ifdef QCOM2
     "roadCameraState",
 #endif
