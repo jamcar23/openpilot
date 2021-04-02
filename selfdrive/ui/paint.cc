@@ -12,11 +12,8 @@
 #include "sidebar.hpp"
 #include "devui.hpp"
 
-<<<<<<< HEAD
 const int border_shifter = 20;
 
-=======
->>>>>>> master
 // TODO: this is also hardcoded in common/transformations/camera.py
 // TODO: choose based on frame input size
 #ifdef QCOM2
