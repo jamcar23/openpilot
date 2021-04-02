@@ -30,13 +30,6 @@ jobs:
       run: |
         chmod +x ./.github/scripts/ci_env_vars.sh
         source ./.github/scripts/ci_env_vars.sh
-    - name: Cache dependencies
-      id: dependency-cache
-      uses: actions/cache@v2
-      with:
-        path: /tmp/scons_cache
-        key: scons-cache-${{ hashFiles('selfdrive/**') }}
-        restore-keys: scons-cache-
     - name: Strip non-release files
       run: |
         mkdir $STRIPPED_DIR
@@ -57,12 +50,6 @@ jobs:
           ${{ env.RUN_CMD }} "cd /tmp/openpilot && \
                           python selfdrive/manager/build.py && \
                           python -m unittest discover selfdrive/car"
-    - name: Cleanup scons cache
-      run: |
-          cd $STRIPPED_DIR
-          ${{ env.RUN }} "scons -j$(nproc) && \
-                          rm -rf /tmp/scons_cache/* && \
-                          scons -j$(nproc) --cache-populate"
 
   static_analysis:
     name: static analysis
