@@ -15,14 +15,7 @@ from selfdrive.car.car_helpers import get_car, get_startup_event, get_one_can
 from selfdrive.controls.lib.lane_planner import CAMERA_OFFSET
 from selfdrive.controls.lib.drive_helpers import update_v_cruise, initialize_v_cruise, offset_v_cruise, is_toyota
 from selfdrive.controls.lib.longcontrol import LongControl, STARTING_TARGET_SPEED
-<<<<<<< HEAD
 from selfdrive.controls.lib.latcontrol_live import LatControlLive
-=======
-from selfdrive.controls.lib.latcontrol_pid import LatControlPID
-from selfdrive.controls.lib.latcontrol_indi import LatControlINDI
-from selfdrive.controls.lib.latcontrol_lqr import LatControlLQR
-from selfdrive.controls.lib.latcontrol_angle import LatControlAngle
->>>>>>> master
 from selfdrive.controls.lib.events import Events, ET
 from selfdrive.controls.lib.alertmanager import AlertManager
 from selfdrive.controls.lib.vehicle_model import VehicleModel
@@ -112,18 +105,7 @@ class Controls:
     self.LoC = LongControl(self.CP, self.CI.compute_gb, OP=self.opParams)
     self.VM = VehicleModel(self.CP)
 
-<<<<<<< HEAD
     self.LaC = LatControlLive(self.CP, OP=self.opParams)
-=======
-    if self.CP.steerControlType == car.CarParams.SteerControlType.angle:
-      self.LaC = LatControlAngle(self.CP)
-    elif self.CP.lateralTuning.which() == 'pid':
-      self.LaC = LatControlPID(self.CP)
-    elif self.CP.lateralTuning.which() == 'indi':
-      self.LaC = LatControlINDI(self.CP)
-    elif self.CP.lateralTuning.which() == 'lqr':
-      self.LaC = LatControlLQR(self.CP)
->>>>>>> master
 
     self.state = State.disabled
     self.enabled = False
@@ -552,14 +534,9 @@ class Controls:
     controlsState.forceDecel = bool(force_decel)
     controlsState.canErrorCounter = self.can_error_counter
 
-<<<<<<< HEAD
-
-    if self.LaC.ctrl_type == 'pid':
-=======
-    if self.CP.steerControlType == car.CarParams.SteerControlType.angle:
+    if self.LaC.ctrl_type == 'angle':
       controlsState.lateralControlState.angleState = lac_log
-    elif self.CP.lateralTuning.which() == 'pid':
->>>>>>> master
+    elif self.LaC.ctrl_type == 'pid':
       controlsState.lateralControlState.pidState = lac_log
     elif self.LaC.ctrl_type == 'lqr':
       controlsState.lateralControlState.lqrState = lac_log
