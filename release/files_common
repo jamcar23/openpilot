@@ -7,7 +7,6 @@ selfdrive/sentryd/sentryd.py
 
 .gitignore
 LICENSE
-launch.sh
 launch_env.sh
 launch_chffrplus.sh
 launch_openpilot.sh
@@ -20,8 +19,6 @@ README.md
 RELEASES.md
 SAFETY.md
 site_scons/site_tools/cython.py
-
-apk/ai.comma*.apk
 
 common/.gitignore
 common/__init__.py
@@ -39,6 +36,7 @@ common/params_pyx.pyx
 common/xattr.py
 common/profiler.py
 common/basedir.py
+common/dict_helpers.py
 common/filter_simple.py
 common/stat_live.py
 common/spinner.py
@@ -76,8 +74,6 @@ selfdrive/__init__.py
 selfdrive/registration.py
 selfdrive/config.py
 selfdrive/crash.py
-selfdrive/launcher.py
-selfdrive/manager.py
 selfdrive/swaglog.py
 selfdrive/logmessaged.py
 selfdrive/tombstoned.py
@@ -205,6 +201,8 @@ selfdrive/common/clutil.cc
 selfdrive/common/clutil.h
 selfdrive/common/params.h
 selfdrive/common/params.cc
+selfdrive/common/watchdog.cc
+selfdrive/common/watchdog.h
 
 selfdrive/common/modeldata.h
 selfdrive/common/mat.h
@@ -231,6 +229,7 @@ selfdrive/controls/lib/drive_helpers.py
 selfdrive/controls/lib/latcontrol_pid.py
 selfdrive/controls/lib/latcontrol_indi.py
 selfdrive/controls/lib/latcontrol_lqr.py
+selfdrive/controls/lib/latcontrol_angle.py
 selfdrive/controls/lib/longcontrol.py
 selfdrive/controls/lib/lateral_planner.py
 selfdrive/controls/lib/lane_planner.py
@@ -270,11 +269,14 @@ selfdrive/controls/lib/longitudinal_mpc_model/libmpc_py.py
 selfdrive/controls/lib/longitudinal_mpc_model/longitudinal_mpc.c
 
 selfdrive/hardware/__init__.py
+selfdrive/hardware/base.h
 selfdrive/hardware/base.py
+selfdrive/hardware/hw.h
 selfdrive/hardware/eon/__init__.py
-selfdrive/hardware/eon/apk.py
+selfdrive/hardware/eon/hardware.h
 selfdrive/hardware/eon/hardware.py
 selfdrive/hardware/tici/__init__.py
+selfdrive/hardware/tici/hardware.h
 selfdrive/hardware/tici/hardware.py
 selfdrive/hardware/tici/pins.py
 selfdrive/hardware/tici/agnos.py
@@ -340,8 +342,8 @@ selfdrive/test/__init__.py
 selfdrive/test/helpers.py
 selfdrive/test/setup_device_ci.sh
 selfdrive/test/test_fingerprints.py
-selfdrive/test/test_manager.py
 
+selfdrive/ui/.gitignore
 selfdrive/ui/SConscript
 selfdrive/ui/*.cc
 selfdrive/ui/*.hpp
@@ -349,23 +351,16 @@ selfdrive/ui/*.h
 selfdrive/ui/ui
 selfdrive/ui/text
 selfdrive/ui/spinner
-selfdrive/ui/android/spinner/Makefile
-selfdrive/ui/android/spinner/spinner
-selfdrive/ui/android/spinner/spinner.c
-
-selfdrive/ui/android/text/Makefile
-selfdrive/ui/android/text/text
-selfdrive/ui/android/text/text.cc
 
 selfdrive/ui/qt/*.cc
 selfdrive/ui/qt/*.hpp
 selfdrive/ui/qt/offroad/*.cc
 selfdrive/ui/qt/offroad/*.hpp
+selfdrive/ui/qt/offroad/*.qml
 selfdrive/ui/qt/widgets/*.cc
 selfdrive/ui/qt/widgets/*.hpp
-
-selfdrive/ui/android/*.cc
-selfdrive/ui/android/*.hpp
+selfdrive/ui/qt/spinner_aarch64
+selfdrive/ui/qt/text_aarch64
 
 selfdrive/camerad/SConscript
 selfdrive/camerad/main.cc
@@ -393,6 +388,15 @@ selfdrive/camerad/imgproc/conv.cl
 selfdrive/camerad/imgproc/pool.cl
 selfdrive/camerad/imgproc/utils.cc
 selfdrive/camerad/imgproc/utils.h
+
+selfdrive/manager/__init__.py
+selfdrive/manager/build.py
+selfdrive/manager/helpers.py
+selfdrive/manager/manager.py
+selfdrive/manager/process_config.py
+selfdrive/manager/process.py
+selfdrive/manager/test/__init__.py
+selfdrive/manager/test/test_manager.py
 
 selfdrive/modeld/SConscript
 selfdrive/modeld/modeld.cc
@@ -511,7 +515,6 @@ panda/__init__.py
 panda/VERSION
 panda/board/**
 panda/certs/**
-panda/common/**
 panda/crypto/**
 panda/python/**
 

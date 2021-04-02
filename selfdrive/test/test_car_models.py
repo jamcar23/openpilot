@@ -9,7 +9,7 @@ from typing import List, cast
 import requests
 
 import cereal.messaging as messaging
-import selfdrive.manager as manager
+from selfdrive.manager.process_config import managed_processes
 from cereal import car
 from common.basedir import BASEDIR
 from common.params import Params
@@ -197,8 +197,16 @@ routes = {
     'carFingerprint': HYUNDAI.SANTA_FE,
     'enableCamera': True,
   },
+  "e0e98335f3ebc58f|2021-03-07--16-38-29": {
+    'carFingerprint': HYUNDAI.KIA_CEED,
+    'enableCamera': True,
+  },
   "7653b2bce7bcfdaa|2020-03-04--15-34-32": {
     'carFingerprint': HYUNDAI.KIA_OPTIMA,
+    'enableCamera': True,
+  },
+  "c75a59efa0ecd502|2021-03-11--20-52-55": {
+    'carFingerprint': HYUNDAI.KIA_SELTOS,
     'enableCamera': True,
   },
   "5b7c365c50084530|2020-04-15--16-13-24": {
@@ -429,12 +437,40 @@ routes = {
     'enableCamera': True,
     'enableDsu': False,
   },
-  "76b83eb0245de90e|2019-10-20--15-42-29": {
-    'carFingerprint': VOLKSWAGEN.GOLF,
+  "cae14e88932eb364|2021-03-26--14-43-28": {
+    'carFingerprint': VOLKSWAGEN.GOLF_MK7,
+    'enableCamera': True,
+  },
+  "58a7d3b707987d65|2021-03-25--17-26-37": {
+    'carFingerprint': VOLKSWAGEN.JETTA_MK7,
+    'enableCamera': True,
+  },
+  "4d134e099430fba2|2021-03-26--00-26-06": {
+    'carFingerprint': VOLKSWAGEN.PASSAT_MK8,
+    'enableCamera': True,
+  },
+  "2cef8a0b898f331a|2021-03-25--20-13-57": {
+    'carFingerprint': VOLKSWAGEN.TIGUAN_MK2,
     'enableCamera': True,
   },
   "07667b885add75fd|2021-01-23--19-48-42": {
     'carFingerprint': VOLKSWAGEN.AUDI_A3,
+    'enableCamera': True,
+  },
+  "8f205bdd11bcbb65|2021-03-26--01-00-17": {
+    'carFingerprint': VOLKSWAGEN.SEAT_ATECA_MK1,
+    'enableCamera': True,
+  },
+  "90434ff5d7c8d603|2021-03-15--12-07-31": {
+    'carFingerprint': VOLKSWAGEN.SKODA_KODIAQ_MK1,
+    'enableCamera': True,
+  },
+  "026b6d18fba6417f|2021-03-26--09-17-04": {
+    'carFingerprint': VOLKSWAGEN.SKODA_SCALA_MK1,
+    'enableCamera': True,
+  },
+  "b2e9858e29db492b|2021-03-26--16-58-42": {
+    'carFingerprint': VOLKSWAGEN.SKODA_SUPERB_MK3,
     'enableCamera': True,
   },
   "3c8f0c502e119c1c|2020-06-30--12-58-02": {
@@ -497,7 +533,7 @@ routes = {
     'carFingerprint': MAZDA.Mazda3,
     'enableCamera': True,
   },
-    "b72d3ec617c0a90f|2020-12-11--15-38-17": {
+  "b72d3ec617c0a90f|2020-12-11--15-38-17": {
     'carFingerprint': NISSAN.ALTIMA,
     'enableCamera': True,
   },
@@ -547,7 +583,7 @@ non_tested_cars = [
 if __name__ == "__main__":
 
   tested_procs = ["controlsd", "radard", "plannerd"]
-  tested_socks = ["radarState", "controlsState", "carState", "plan"]
+  tested_socks = ["radarState", "controlsState", "carState", "longitudinalPlan"]
 
   tested_cars = [keys["carFingerprint"] for route, keys in routes.items()]
   for car_model in all_known_cars():
@@ -561,7 +597,7 @@ if __name__ == "__main__":
 
   print("Preparing processes")
   for p in tested_procs:
-    manager.prepare_managed_process(p)
+    managed_processes[p].prepare()
 
   results = {}
   for route, checks in routes.items():
@@ -583,7 +619,7 @@ if __name__ == "__main__":
     print("testing ", route, " ", checks['carFingerprint'])
     print("Starting processes")
     for p in tested_procs:
-      manager.start_managed_process(p)
+      managed_processes[p].start()
 
     # Start unlogger
     print("Start unlogger")
@@ -603,11 +639,11 @@ if __name__ == "__main__":
     failures = [s for s in tested_socks + extra_socks if s not in recvd_socks]
 
     print("Check if everything is running")
-    running = manager.get_running()
     for p in tested_procs:
-      if not running[p].is_alive:
+      proc = managed_processes[p].proc
+      if not proc or not proc.is_alive:
         failures.append(p)
-      manager.kill_managed_process(p)
+      managed_processes[p].stop()
     os.killpg(os.getpgid(unlogger.pid), signal.SIGTERM)
 
     sockets_ok = len(failures) == 0

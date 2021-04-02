@@ -264,20 +264,18 @@ Export('envCython')
 
 # Qt build environment
 qt_env = env.Clone()
-
-qt_modules = ["Widgets", "Gui", "Core", "Network", "Concurrent", "Multimedia"]
+qt_modules = ["Widgets", "Gui", "Core", "Network", "Concurrent", "Multimedia", "Quick", "Qml", "QuickWidgets"]
 if arch != "aarch64":
-  qt_modules += ["DBus", "WebEngine", "WebEngineWidgets"]
+  qt_modules += ["DBus"]
 
 qt_libs = []
 if arch == "Darwin":
-  qt_env['QTDIR'] = "/usr/local/opt/qt"
-  QT_BASE = "/usr/local/opt/qt/"
+  qt_env['QTDIR'] = "/usr/local/opt/qt@5"
   qt_dirs = [
-    QT_BASE + "include/",
+    os.path.join(qt_env['QTDIR'], "include"),
   ]
-  qt_dirs += [f"{QT_BASE}include/Qt{m}" for m in qt_modules]
-  qt_env["LINKFLAGS"] += ["-F" + QT_BASE + "lib"]
+  qt_dirs += [f"{qt_env['QTDIR']}/include/Qt{m}" for m in qt_modules]
+  qt_env["LINKFLAGS"] += ["-F" + os.path.join(qt_env['QTDIR'], "lib")]
   qt_env["FRAMEWORKS"] += [f"Qt{m}" for m in qt_modules] + ["OpenGL"]
 elif arch == "aarch64":
   qt_env['QTDIR'] = "/system/comma/usr"
@@ -292,7 +290,6 @@ else:
   qt_env['QTDIR'] = "/usr"
   qt_dirs = [
     f"/usr/include/{real_arch}-linux-gnu/qt5",
-    f"/usr/include/{real_arch}-linux-gnu/qt5/QtGui/5.5.1/QtGui",
     f"/usr/include/{real_arch}-linux-gnu/qt5/QtGui/5.12.8/QtGui",
   ]
   qt_dirs += [f"/usr/include/{real_arch}-linux-gnu/qt5/Qt{m}" for m in qt_modules]
@@ -310,6 +307,9 @@ qt_flags = [
   "-DQT_NO_DEBUG",
   "-DQT_WIDGETS_LIB",
   "-DQT_GUI_LIB",
+  "-DQT_QUICK_LIB",
+  "-DQT_QUICKWIDGETS_LIB",
+  "-DQT_QML_LIB",
   "-DQT_CORE_LIB"
 ]
 qt_env['CXXFLAGS'] += qt_flags
@@ -360,6 +360,7 @@ Export('common', 'gpucommon', 'visionipc')
 # Build openpilot
 
 SConscript(['cereal/SConscript'])
+SConscript(['panda/board/SConscript'])
 SConscript(['opendbc/can/SConscript'])
 
 SConscript(['phonelibs/SConscript'])
@@ -392,7 +393,6 @@ if arch != "Darwin":
 
 if real_arch == "x86_64":
   SConscript(['tools/nui/SConscript'])
-  SConscript(['tools/lib/index_log/SConscript'])
 
 external_sconscript = GetOption('external_sconscript')
 if external_sconscript:
