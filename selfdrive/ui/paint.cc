@@ -55,11 +55,7 @@ static void draw_chevron(UIState *s, float x, float y, float sz, NVGcolor fillCo
 
 static void ui_draw_circle_image(const UIState *s, int center_x, int center_y, int radius, const char *image, NVGcolor color, float img_alpha) {
   nvgBeginPath(s->vg);
-<<<<<<< HEAD
-  nvgCircle(s->vg, x, y + (bdr_is * 1.5), size);
-=======
   nvgCircle(s->vg, center_x, center_y, radius);
->>>>>>> master
   nvgFillColor(s->vg, color);
   nvgFill(s->vg);
   const int img_size = radius * 1.5;
