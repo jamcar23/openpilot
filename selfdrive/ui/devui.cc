@@ -182,7 +182,7 @@ static void dev_ui_draw_radar_speed(UIState *s, Rect *rel_rect, const Rect &rect
         val_color = COLOR_RED;
       }
       // lead car relative speed is always in meters
-      if (s->is_metric) {
+      if (s->scene.is_metric) {
          snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.lead_data[0].getVRel() * 3.6 + 0.5));
       } else {
          snprintf(val_str, sizeof(val_str), "%d", (int)(s->scene.lead_data[0].getVRel() * 2.2374144 + 0.5));
@@ -190,7 +190,7 @@ static void dev_ui_draw_radar_speed(UIState *s, Rect *rel_rect, const Rect &rect
     } else {
        snprintf(val_str, sizeof(val_str), "-");
     }
-    if (s->is_metric) {
+    if (s->scene.is_metric) {
       snprintf(uom_str, sizeof(uom_str), "km/h");;
     } else {
       snprintf(uom_str, sizeof(uom_str), "mph");
