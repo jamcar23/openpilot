@@ -66,8 +66,9 @@ class LatControlINDI():
 
     return self.sat_count > self.sat_limit
 
-<<<<<<< HEAD
-  def update(self, active, CS, CP, lat_plan):
+  def update(self, active, CS, CP, VM, params, lat_plan):
+    self.speed = CS.vEgo
+
     if self.op_params.get(ENABLE_LAT_PARAMS):
       self.sat_limit = self.op_params.get(STEER_LIMIT_TIMER)
 
@@ -103,10 +104,6 @@ class LatControlINDI():
 
     self.alpha = 1. - DT_CTRL / (self.RC + DT_CTRL)
 
-=======
-  def update(self, active, CS, CP, VM, params, lat_plan):
-    self.speed = CS.vEgo
->>>>>>> master
     # Update Kalman filter
     y = np.array([[math.radians(CS.steeringAngleDeg)], [math.radians(CS.steeringRateDeg)]])
     self.x = np.dot(self.A_K, self.x) + np.dot(self.K, y)
