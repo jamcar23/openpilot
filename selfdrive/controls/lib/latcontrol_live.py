@@ -1,3 +1,4 @@
+from cereal import car
 from common.op_params import opParams, ENABLE_LAT_PARAMS, WHICH_LAT_CTRL
 from selfdrive.controls.lib.latcontrol_angle import LatControlAngle
 from selfdrive.controls.lib.latcontrol_pid import LatControlPID
