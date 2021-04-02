@@ -112,7 +112,7 @@ def manager_thread():
     ignore += os.getenv("BLOCK").split(",")
 
   if op_params.get(ENABLE_MANAGER_PARAMS):
-    dis_proc = opParams.get(DISABLED_PROCESSES)
+    dis_proc = op_params.get(DISABLED_PROCESSES)
     if dis_proc:
       for n in dis_proc:
         if n:
