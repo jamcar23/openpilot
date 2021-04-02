@@ -11,6 +11,7 @@ import selfdrive.crash as crash
 from common.basedir import BASEDIR
 from common.params import Params
 from common.text_window import TextWindow
+from common.op_params import opParams, ENABLE_MANAGER_PARAMS, DISABLED_PROCESSES
 from selfdrive.hardware import HARDWARE
 from selfdrive.manager.helpers import unblock_stdout
 from selfdrive.manager.process import ensure_running
@@ -102,11 +103,20 @@ def manager_thread():
   # save boot log
   subprocess.call("./bootlog", cwd=os.path.join(BASEDIR, "selfdrive/loggerd"))
 
+  op_params = opParams()
+
   ignore = []
   if os.getenv("NOBOARD") is not None:
     ignore.append("pandad")
   if os.getenv("BLOCK") is not None:
     ignore += os.getenv("BLOCK").split(",")
+
+  if op_params.get(ENABLE_MANAGER_PARAMS):
+    dis_proc = opParams.get(DISABLED_PROCESSES)
+    if dis_proc:
+      for n in dis_proc:
+        if n:
+          ignore.append(n)
 
   ensure_running(managed_processes.values(), started=False, not_run=ignore)
 
