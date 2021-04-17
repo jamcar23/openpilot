@@ -259,6 +259,9 @@ void GLWindow::initializeGL() {
 }
 
 void GLWindow::backlightUpdate() {
+  #if ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS
+  int brightness = DAY_BRIGHTNESS;
+  #else
   // Update brightness
   float clipped_brightness = std::min(100.0f, (ui_state.scene.light_sensor * brightness_m) + brightness_b);
   if (!ui_state.scene.started) {
@@ -266,6 +269,8 @@ void GLWindow::backlightUpdate() {
   }
 
   int brightness = brightness_filter.update(clipped_brightness);
+  #endif
+
   if (!ui_state.awake) {
     brightness = 0;
     emit screen_shutoff();
