@@ -276,7 +276,11 @@ class opParams:
                         'a_cruise_max_v': Param([1.2, 1.2, 0.65, .4], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
                         'a_cruise_max_v_following': Param([1.6, 1.6, 0.65, .4], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
                         ENABLE_STEER_RATE_COST: Param(False, [bool], live=True, depends_on=ENABLE_PLANNER_PARAMS, description='Technically live but treat it like it\'s not.'),
-                        STEER_RATE_COST: Param(1., VT.number, live=True, depends_on=ENABLE_STEER_RATE_COST)}
+                        STEER_RATE_COST: Param(1., VT.number, live=True, depends_on=ENABLE_STEER_RATE_COST),
+                        SHOW_BUILD_OPTS: Param(False, [bool]),
+                        ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS: Param(True, [bool], depends_on=SHOW_BUILD_OPTS, description='When enabled the screen brightness will be brightness_m when head lights are off.'),
+                        DAY_BRIGHTNESS: Param(0.8, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS),
+                        NIGHT_BRIGHTNESS: Param(0.15, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS)}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
@@ -529,3 +533,8 @@ ENABLE_PLANNER_PARAMS = 'enable_planner_params'
 ENABLE_PLNR_ACCEL_LIMITS = 'enable_accel_limits_planner'
 ENABLE_STEER_RATE_COST = 'enable_steer_rate_cost'
 STEER_RATE_COST = 'steer_rate_cost'
+
+SHOW_BUILD_OPTS = 'show_build_options'
+ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS = 'enable_screen_brightness_head_lights'
+DAY_BRIGHTNESS = 'day_time_brightness'
+NIGHT_BRIGHTNESS = 'night_time_brightness'

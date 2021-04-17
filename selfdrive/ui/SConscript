@@ -1,4 +1,8 @@
 import os
+from common.op_params import opParams, ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS, DAY_BRIGHTNESS, NIGHT_BRIGHTNESS
+
+OP_PARAMS = opParams()
+
 Import('env', 'qt_env', 'arch', 'common', 'messaging', 'gpucommon', 'visionipc',
        'cereal', 'transformations')
 
@@ -30,9 +34,16 @@ qt_env.Program("qt/text", ["qt/text.cc"], LIBS=qt_base_libs)
 qt_env.Program("qt/spinner", ["qt/spinner.cc"], LIBS=qt_base_libs)
 
 # build main UI
+defines = {}
+
+if OP_PARAMS.get(ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS):
+  defines['ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS'] = True
+  defines['DAY_BRIGHTNESS'] = OP_PARAMS.get(DAY_BRIGHTNESS)
+  defines['NIGHT_BRIGHTNESS'] = OP_PARAMS.get(NIGHT_BRIGHTNESS)
+
 qt_src = ["qt/ui.cc", "qt/window.cc", "qt/home.cc", "qt/api.cc", "qt/offroad/settings.cc",
           "qt/offroad/onboarding.cc"] + src
-qt_env.Program("_ui", qt_src, LIBS=qt_libs)
+qt_env.Program("_ui", qt_src, LIBS=qt_libs, CPPDEFINES=defines)
 
 # setup, factory resetter, and installer
 if arch != 'aarch64' and "BUILD_SETUP" in os.environ:

@@ -7,6 +7,8 @@ from selfdrive.config import Conversions as CV
 from selfdrive.car.toyota.values import CAR, DBC, STEER_THRESHOLD, TSS2_CAR, NO_STOP_TIMER_CAR
 
 
+HeadLightType = car.CarState.HeadLightsState.HeadLightType
+
 class CarState(CarStateBase):
   def __init__(self, CP):
     super().__init__(CP)
@@ -106,6 +108,19 @@ class CarState(CarStateBase):
 
     ret.engineRPM = cp.vl["ENGINE_RPM"]['RPM']
 
+    if cp.vl["LIGHT_STALK"]['DASH_ICON']:
+      if cp.vl["LIGHT_STALK"]['HIGH_BEAM_ON']:
+        ret.headLights.active = HeadLightType.highBeams
+      elif cp.vl["LIGHT_STALK"]['LOW_BEAM_ON']:
+        ret.headLights.active = HeadLightType.nightTime
+      else:
+        ret.headLights.active = HeadLightType.unknown
+    else:
+      ret.headLights.active = HeadLightType.unknown
+
+    ret.headLights.autoHighBeams = bool(cp.vl["LIGHT_STALK"]['AUTO_HIGH_BEAM'] and cp.vl["LIGHT_STALK"]['AUTO_HIGH_BEAM_ON'])
+    ret.headLights.transitioning = bool(cp.vl["LIGHT_STALK"]['STATE_TRANSITION'])
+
     return ret
 
   @staticmethod
@@ -139,6 +154,12 @@ class CarState(CarStateBase):
       ("LKA_STATE", "EPS_STATUS", 0),
       ("BRAKE_LIGHTS_ACC", "ESP_CONTROL", 0),
       ("AUTO_HIGH_BEAM", "LIGHT_STALK", 0),
+      ("AUTO_HIGH_BEAM_ON", "LIGHT_STALK", 0),
+      ("HIGH_BEAM_ON", "LIGHT_STALK", 0),
+      ("LOW_BEAM_ON", "LIGHT_STALK", 0),
+      ("AUTO_LIGHTS", "LIGHT_STALK", 0),
+      ("DASH_ICON", "LIGHT_STALK", 0),
+      ("STATE_TRANSITION", "LIGHT_STALK", 0),
       ("RPM", "ENGINE_RPM", 0)
     ]
 

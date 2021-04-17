@@ -22,6 +22,10 @@
 #include "widgets/drive_stats.hpp"
 #include "widgets/setup.hpp"
 
+#if ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS
+#include "cereal/gen/cpp/car.capnp.h"
+#endif
+
 #define BACKLIGHT_DT 0.25
 #define BACKLIGHT_TS 2.00
 #define BACKLIGHT_OFFROAD 50
@@ -259,6 +263,11 @@ void GLWindow::initializeGL() {
 }
 
 void GLWindow::backlightUpdate() {
+  #ifdef ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS
+  auto active_lights = ui_state.scene.car_state.getHeadLights().getActive();
+  int brightness = (int)(active_lights == cereal::CarState::HeadLightsState::HeadLightType::NIGHT_TIME || active_lights == cereal::CarState::HeadLightsState::HeadLightType::HIGH_BEAMS ? NIGHT_BRIGHTNESS : DAY_BRIGHTNESS);
+  #else
+
   // Update brightness
   float clipped_brightness = std::min(100.0f, (ui_state.scene.light_sensor * brightness_m) + brightness_b);
   if (!ui_state.scene.started) {
@@ -266,12 +275,15 @@ void GLWindow::backlightUpdate() {
   }
 
   int brightness = brightness_filter.update(clipped_brightness);
+  #endif
+
   if (!ui_state.awake) {
     brightness = 0;
     emit screen_shutoff();
   }
 
   if (brightness != last_brightness) {
+    std::cout << "Setting screen brightness: " << brightness << std::endl;
     std::thread{Hardware::set_brightness, brightness}.detach();
   }
   last_brightness = brightness;
