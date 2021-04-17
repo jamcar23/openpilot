@@ -22,6 +22,10 @@
 #include "widgets/drive_stats.hpp"
 #include "widgets/setup.hpp"
 
+#if ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS
+#include "cereal/gen/cpp/car.capnp.h"
+#endif
+
 #define BACKLIGHT_DT 0.25
 #define BACKLIGHT_TS 2.00
 #define BACKLIGHT_OFFROAD 50
@@ -260,8 +264,9 @@ void GLWindow::initializeGL() {
 
 void GLWindow::backlightUpdate() {
   #if ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS
-  int brightness = DAY_BRIGHTNESS;
+  int brightness = ui_state.scene.car_state.getHeadLights().getActive() == cereal::CarState::HeadLightsState::Type::nightTime ? NIGHT_BRIGHTNESS : DAY_BRIGHTNESS;
   #else
+
   // Update brightness
   float clipped_brightness = std::min(100.0f, (ui_state.scene.light_sensor * brightness_m) + brightness_b);
   if (!ui_state.scene.started) {
