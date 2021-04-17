@@ -283,7 +283,7 @@ void GLWindow::backlightUpdate() {
   }
 
   if (brightness != last_brightness) {
-    LOG("Setting screen brightness: " + brightness);
+    std::cout << "Setting screen brightness: " << brightness << std::endl;
     std::thread{Hardware::set_brightness, brightness}.detach();
   }
   last_brightness = brightness;
