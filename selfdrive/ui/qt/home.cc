@@ -264,10 +264,8 @@ void GLWindow::initializeGL() {
 
 void GLWindow::backlightUpdate() {
   #ifdef ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS
-  std::cout << "Custom screen brightness" << std::endl;
   auto active_lights = ui_state.scene.car_state.getHeadLights().getActive();
-  std::cout << "Active lights: " << active_lights << std::endl;
-  int brightness = active_lights == cereal::CarState::HeadLightsState::Type::nightTime || active_lights == cereal::CarState::HeadLightsState::Type::highBeams ? NIGHT_BRIGHTNESS : DAY_BRIGHTNESS;
+  int brightness = (int)(active_lights == cereal::CarState::HeadLightsState::HeadLightType::NIGHTTIME || active_lights == cereal::CarState::HeadLightsState::HeadLightType::HIGHBEAMS ? NIGHT_BRIGHTNESS : DAY_BRIGHTNESS);
   #else
 
   // Update brightness

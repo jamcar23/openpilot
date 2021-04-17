@@ -7,7 +7,7 @@ from selfdrive.config import Conversions as CV
 from selfdrive.car.toyota.values import CAR, DBC, STEER_THRESHOLD, TSS2_CAR, NO_STOP_TIMER_CAR
 
 
-HeadLightType = car.CarState.HeadLightsState.Type
+HeadLightType = car.CarState.HeadLightsState.HeadLightType
 
 class CarState(CarStateBase):
   def __init__(self, CP):
