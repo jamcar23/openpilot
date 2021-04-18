@@ -281,7 +281,7 @@ class opParams:
                         ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS: Param(True, [bool], depends_on=SHOW_BUILD_OPTS, description='When enabled the screen brightness will be brightness_m when head lights are off.'),
                         DAY_BRIGHTNESS: Param(0.8, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS),
                         NIGHT_BRIGHTNESS: Param(0.15, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS),
-                        DISENGAGE_ON_GAS: Param(True, [bool], description='Whether you want openpilot to disengage on gas input or not.')}
+                        DISENGAGE_ON_GAS: Param(True, [bool], description='Whether you want openpilot to disengage on gas input or not.', live=True)}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
