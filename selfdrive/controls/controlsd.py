@@ -6,7 +6,7 @@ from common.numpy_fast import clip
 from common.realtime import sec_since_boot, config_realtime_process, Priority, Ratekeeper, DT_CTRL
 from common.profiler import Profiler
 from common.params import Params, put_nonblocking
-from common.op_params import opParams, SETPOINT_OFFSET, COAST_SPEED, ENABLE_COASTING
+from common.op_params import opParams, SETPOINT_OFFSET, COAST_SPEED, ENABLE_COASTING, ENABLE_ROAD_SIGNS
 import cereal.messaging as messaging
 from selfdrive.config import Conversions as CV
 from selfdrive.swaglog import cloudlog
@@ -299,6 +299,9 @@ class Controls:
       self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled)
     elif self.CP.enableCruise and CS.cruiseState.enabled:
       self.v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
+
+    if self.opParams.get(ENABLE_ROAD_SIGNS) and CS.speedLimitValid:
+      self.v_cruise_kph = CS.speedLimitKph
 
     self.setpoint_offset = self.opParams.get(SETPOINT_OFFSET) * CV.MPH_TO_KPH
 
