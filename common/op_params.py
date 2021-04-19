@@ -277,8 +277,8 @@ class opParams:
                         'a_cruise_max_v_following': Param([1.6, 1.6, 0.65, .4], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS),
                         ENABLE_STEER_RATE_COST: Param(False, [bool], live=True, depends_on=ENABLE_PLANNER_PARAMS, description='Technically live but treat it like it\'s not.'),
                         STEER_RATE_COST: Param(1., VT.number, live=True, depends_on=ENABLE_STEER_RATE_COST),
-                        SHOW_BUILD_OPTS: Param(False, [bool], live=True, description='Show options for compile time features.'),
-                        ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS: Param(True, [bool], depends_on=SHOW_BUILD_OPTS, description='When enabled the screen brightness will be brightness_m when head lights are off.'),
+                        SHOW_BUILD_OPTS: Param(False, [bool], live=False, description='Show options for compile time features.'),
+                        ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS: Param(False, [bool], depends_on=SHOW_BUILD_OPTS, description='When enabled, the screen brightness will adjust depending on the car headlights.'),
                         DAY_BRIGHTNESS: Param(0.8, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS),
                         NIGHT_BRIGHTNESS: Param(0.15, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS)}
 
