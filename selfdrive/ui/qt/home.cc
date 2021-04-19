@@ -264,8 +264,16 @@ void GLWindow::initializeGL() {
 
 void GLWindow::backlightUpdate() {
   #ifdef ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS
+  int brightness;
   auto active_lights = ui_state.scene.car_state.getHeadLights().getActive();
-  int brightness = (int)(active_lights == cereal::CarState::HeadLightsState::HeadLightType::NIGHT_TIME || active_lights == cereal::CarState::HeadLightsState::HeadLightType::HIGH_BEAMS ? NIGHT_BRIGHTNESS : DAY_BRIGHTNESS);
+
+  if (active_lights == cereal::CarState::HeadLightsState::HeadLightType::NIGHT_TIME) {
+    brightness = (int) NIGHT_BRIGHTNESS;
+  } else if (active_lights == cereal::CarState::HeadLightsState::HeadLightType::HIGH_BEAMS) {
+    brightness = (int) HIGH_BEAM_BRIGHTNESS;
+  } else {
+    brightness = (int) DAY_BRIGHTNESS;
+  }
   #else
 
   // Update brightness
