@@ -42,6 +42,15 @@ This serves as a general overview of notable changes made from other forks. Note
 ## Live Tuning
 Tuning is a huge feature in this fork, there are over 100 params in opParams, most of which are live. Please see [opParams](https://github.com/jamcar23/openpilot/blob/src/common/op_params.py#L161) for the latest list of parameters.
 
+Huge shout out to [Shane Smiskol](https://github.com/ShaneSmiskol/) for all the works he's done on opParams / opEdit and for the OP community as a whole. It wouldn't be the same without you man!
+
+To change any opParam: first, ssh in to your EON and make sure you're in `/data/openpilot`, then start `opEdit`:
+
+```
+cd /data/openpilot
+python op_edit.py  # or ./op_edit.py
+```
+
 **Warning: a `(live!)` param means that the changes will take affect ~2.5 seconds after making them without needing a reboot, it does *not* mean that you should change them while driving or that you should engage in other unsafe behavior.**
 
 **Further more, in some cases, it's possible to enter the incorrect data into opParams which, at worst, can lead to a process crashing. You do *not* want this happening while driving.** I've done my best to make sure you can only enter safe data and to handle potential errors however, there's always edge cases that may be missed.
@@ -60,6 +69,15 @@ I have made a few changes to opEdit and opParams, huge shout-out to [Shane](http
   - you can replace an entire list by typing out a valid python list
     - ex: if you have `[10, 42]` and you enter `[2, 5, 7]` you'll get `[2, 5, 7]`
 - **Multidimensional List support**: _the new list features in opEdit apply to multidimensional lists of lists too_
+
+Notable other params / features not apart of live tuning or another specifically mentioned feature:
+
+- **Screen Brightness via Head Lights**
+  - `show_build_options` -> `enable_screen_brightness_head_lights`
+  - Alternate method of controlling screen brightness.
+    - Select from 3 fixed brightness values depending on which type of head lights (daytime, nighttime, high beams) are on.
+      - For C2 the brightness range is 0 - 255, not sure about other devices.
+  - **Toyota Only** (PRs welcomed for head light CAN/DBC messages for other manufacturers.)
 
 ## UI
 I've made a few small changes to the UI as well.

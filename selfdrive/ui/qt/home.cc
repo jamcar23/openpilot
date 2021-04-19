@@ -92,7 +92,7 @@ OffroadHome::OffroadHome(QWidget* parent) : QWidget(parent) {
   QObject::connect(alert_notification, SIGNAL(released()), this, SLOT(openAlerts()));
   header_layout->addWidget(alert_notification, 0, Qt::AlignHCenter | Qt::AlignRight);
 
-  std::string brand = Params().getBool("Passive") ? "dashcam" : "openpilot";
+  std::string brand = Params().getBool("Passive") ? "dashcam" : "flexpilot";
   QLabel* version = new QLabel(QString::fromStdString(brand + " v" + Params().get("Version")));
   version->setStyleSheet(R"(font-size: 55px;)");
   header_layout->addWidget(version, 0, Qt::AlignHCenter | Qt::AlignRight);
@@ -264,8 +264,16 @@ void GLWindow::initializeGL() {
 
 void GLWindow::backlightUpdate() {
   #ifdef ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS
+  int brightness;
   auto active_lights = ui_state.scene.car_state.getHeadLights().getActive();
-  int brightness = (int)(active_lights == cereal::CarState::HeadLightsState::HeadLightType::NIGHT_TIME || active_lights == cereal::CarState::HeadLightsState::HeadLightType::HIGH_BEAMS ? NIGHT_BRIGHTNESS : DAY_BRIGHTNESS);
+
+  if (active_lights == cereal::CarState::HeadLightsState::HeadLightType::NIGHT_TIME) {
+    brightness = (int) NIGHT_BRIGHTNESS;
+  } else if (active_lights == cereal::CarState::HeadLightsState::HeadLightType::HIGH_BEAMS) {
+    brightness = (int) HIGH_BEAM_BRIGHTNESS;
+  } else {
+    brightness = (int) DAY_BRIGHTNESS;
+  }
   #else
 
   // Update brightness
