@@ -228,6 +228,9 @@ static void ui_draw_vision_maxspeed(UIState *s) {
 }
 
 static void ui_draw_vision_road_sign(UIState *s) {
+  #ifndef ENABLE_ROAD_SIGNS
+  return;
+  #endif
   const int SET_SPEED_NA = 255;
 
   float speed_limit = s->scene.car_state.getSpeedLimitKph();
@@ -327,11 +330,7 @@ static void ui_draw_vision_header(UIState *s) {
   ui_fill_rect(s->vg, {s->viz_rect.x, s->viz_rect.y, s->viz_rect.w, header_h}, gradient);
 
   ui_draw_vision_maxspeed(s);
-
-  #ifdef ENABLE_ROAD_SIGNS
   ui_draw_vision_road_sign(s);
-  #endif
-
   ui_draw_vision_speed(s);
   ui_draw_vision_event(s);
 }
