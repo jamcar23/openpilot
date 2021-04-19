@@ -17,7 +17,7 @@ def plannerd_thread(sm=None, pm=None):
   cloudlog.info("plannerd is waiting for CarParams")
   params = Params()
   CP = car.CarParams.from_bytes(params.get("CarParams", block=True))
-  use_lanelines = not params.get_bool('EndToEndToggle')
+  use_lanelines = params.get('EndToEndToggle') != b'1'
   wide_camera = (params.get('EnableWideCamera') == b'1') if TICI else False
   cloudlog.info("plannerd got CarParams: %s", CP.carName)
 
