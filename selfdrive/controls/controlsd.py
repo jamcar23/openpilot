@@ -300,7 +300,7 @@ class Controls:
     elif self.CP.enableCruise and CS.cruiseState.enabled:
       self.v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
 
-    if self.opParams.get(ENABLE_ROAD_SIGNS) and CS.speedLimitValid:
+    if self.opParams.get(ENABLE_ROAD_SIGNS) and CS.speedLimitValid and CS.speedLimitKph > 0:
       self.v_cruise_kph = CS.speedLimitKph
 
     self.setpoint_offset = self.opParams.get(SETPOINT_OFFSET) * CV.MPH_TO_KPH
