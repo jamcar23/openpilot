@@ -13,6 +13,7 @@
 - [Features](#features)
   - [Live Tuning](#live-tuning)
   - [Op Edit / Op Params](#op-edit--op-params)
+    - [Notable Params](#notable-params)
   - [UI](#ui)
   - [Multidimensional Breakpoints](#multidimensional-breakpoints)
     - [How they work](#how-they-work)
@@ -70,6 +71,7 @@ I have made a few changes to opEdit and opParams, huge shout-out to [Shane](http
     - ex: if you have `[10, 42]` and you enter `[2, 5, 7]` you'll get `[2, 5, 7]`
 - **Multidimensional List support**: _the new list features in opEdit apply to multidimensional lists of lists too_
 
+### Notable Params
 Notable other params / features not apart of live tuning or another specifically mentioned feature:
 
 - **Screen Brightness via Head Lights**
