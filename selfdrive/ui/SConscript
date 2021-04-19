@@ -1,5 +1,5 @@
 import os
-from common.op_params import opParams, ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS, DAY_BRIGHTNESS, NIGHT_BRIGHTNESS, HIGH_BEAM_BRIGHTNESS
+from common.op_params import opParams, ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS, DAY_BRIGHTNESS, NIGHT_BRIGHTNESS, HIGH_BEAM_BRIGHTNESS, ENABLE_ROAD_SIGNS
 
 OP_PARAMS = opParams()
 
@@ -41,6 +41,9 @@ if OP_PARAMS.get(ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS):
   defines['DAY_BRIGHTNESS'] = OP_PARAMS.get(DAY_BRIGHTNESS)
   defines['NIGHT_BRIGHTNESS'] = OP_PARAMS.get(NIGHT_BRIGHTNESS)
   defines['HIGH_BEAM_BRIGHTNESS'] = OP_PARAMS.get(HIGH_BEAM_BRIGHTNESS)
+
+if OP_PARAMS.get(ENABLE_ROAD_SIGNS):
+  defines['ENABLE_ROAD_SIGNS'] = 1
 
 qt_src = ["qt/ui.cc", "qt/window.cc", "qt/home.cc", "qt/api.cc", "qt/offroad/settings.cc",
           "qt/offroad/onboarding.cc"] + src
