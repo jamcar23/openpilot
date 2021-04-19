@@ -22,6 +22,8 @@ class CarState(CarStateBase):
     self.accurate_steer_angle_seen = False
     self.angle_offset = 0.
 
+    self.spdval1 = 0
+
   def update(self, cp, cp_cam):
     ret = car.CarState.new_message()
 
