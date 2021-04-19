@@ -55,7 +55,7 @@ class LateralPlanner():
     if not OP:
       OP = opParams()
     self.op_params = OP
-    self.LP = LanePlanner(wide_camera, OP=self.op_params)
+    self.LP = LanePlanner(OP=self.op_params)
 
     self.last_cloudlog_t = 0
     self.steer_rate_cost = CP.steerRateCost
