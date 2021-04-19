@@ -121,6 +121,37 @@ class CarState(CarStateBase):
     ret.headLights.autoHighBeams = bool(cp.vl["LIGHT_STALK"]['AUTO_HIGH_BEAM'] and cp.vl["LIGHT_STALK"]['AUTO_HIGH_BEAM_ON'])
     ret.headLights.transitioning = bool(cp.vl["LIGHT_STALK"]['STATE_TRANSITION'])
 
+    self.tsgn1 = cp_cam.vl["RSA1"]['TSGN1']
+    if self.spdval1 != cp_cam.vl["RSA1"]['SPDVAL1']:
+      self.rsa_ignored_speed = 0
+    self.spdval1 = cp_cam.vl["RSA1"]['SPDVAL1']
+
+    self.splsgn1 = cp_cam.vl["RSA1"]['SPLSGN1']
+    self.tsgnhlt1 = cp_cam.vl["RSA1"]['TSGNHLT1']
+    self.tsgn2 = cp_cam.vl["RSA1"]['TSGN2']
+    #self.spdval2 = cp_cam.vl["RSA1"]['SPDVAL2']
+
+    self.splsgn2 = cp_cam.vl["RSA1"]['SPLSGN2']
+    self.tsgn3 = cp_cam.vl["RSA2"]['TSGN3']
+    self.splsgn3 = cp_cam.vl["RSA2"]['SPLSGN3']
+    self.tsgn4 = cp_cam.vl["RSA2"]['TSGN4']
+    self.splsgn4 = cp_cam.vl["RSA2"]['SPLSGN4']
+    self.noovertake = self.tsgn1 == 65 or self.tsgn2 == 65 or self.tsgn3 == 65 or self.tsgn4 == 65 or self.tsgn1 == 66 or self.tsgn2 == 66 or self.tsgn3 == 66 or self.tsgn4 == 66
+
+    if (self.spdval1 > 0) and not (self.spdval1 == 35 and self.tsgn1 == 1) and self.rsa_ignored_speed != self.spdval1:
+      if self.spdval1 > 0:
+        ret.speedLimitValid = True
+
+        if self.tsgn1 == 36:
+          ret.speedLimitKph = self.spdval1 * CV.MPH_TO_KPH
+        elif self.tsgn1 == 1:
+          ret.speedLimitKph = self.spdval1
+        else:
+          ret.speedLimitKph = 0
+      else:
+        ret.speedLimitValid = False
+
+
     return ret
 
   @staticmethod
@@ -205,7 +236,18 @@ class CarState(CarStateBase):
 
     signals = [
       ("FORCE", "PRE_COLLISION", 0),
-      ("PRECOLLISION_ACTIVE", "PRE_COLLISION", 0)
+      ("PRECOLLISION_ACTIVE", "PRE_COLLISION", 0),
+      ("TSGN1", "RSA1", 0),
+      ("SPDVAL1", "RSA1", 0),
+      ("SPLSGN1", "RSA1", 0),
+      ("TSGNHLT1", "RSA1", 0),
+      ("TSGN2", "RSA1", 0),
+      #("SPDVAL2", "RSA1", 0),
+      ("SPLSGN2", "RSA1", 0),
+      ("TSGN3", "RSA2", 0),
+      ("SPLSGN3", "RSA2", 0),
+      ("TSGN4", "RSA2", 0),
+      ("SPLSGN4", "RSA2", 0)
     ]
 
     # use steering message to check if panda is connected to frc
