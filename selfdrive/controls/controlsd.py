@@ -149,6 +149,7 @@ class Controls:
     self.is_toyota = is_toyota(self.CP)
     self.start_cruise_kph = 0
     self.last_speed_limit_kph = 0
+    self.last_car_speed_at_sign_kph = 0
     self.speed_limit_offset_kph = 0
     self.has_seen_road_sign = False
 
@@ -301,24 +302,21 @@ class Controls:
     # if stock cruise is completely disabled, then we can use our own set speed logic
     if not self.CP.enableCruise:
       self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled)
-    elif self.opParams.get(ENABLE_ROAD_SIGNS):
-      if self.enabled:
-        for b in CS.buttonEvents:
-          if b.pressed:
-            if b.type == car.CarState.ButtonEvent.Type.accelCruise:
-              self.speed_limit_offset_kph += 1
-            elif b.type == car.CarState.ButtonEvent.Type.decelCruise:
-              self.speed_limit_offset_kph -= 1
-      if CS.speedLimitValid and CS.speedLimitKph > 0:
-        if self.last_speed_limit_kph != CS.speedLimitKph:
-          self.speed_limit_offset_kph = 0
-        self.v_cruise_kph = CS.speedLimitKph + self.speed_limit_offset_kph
-        self.last_speed_limit_kph = CS.speedLimitKph
-        self.has_seen_road_sign = True
-      else:
-        self.v_cruise_kph = self.v_cruise_kph_last if self.has_seen_road_sign else CS.cruiseState.speed * CV.MS_TO_KPH
     elif self.CP.enableCruise and CS.cruiseState.enabled:
-      self.v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
+      car_cruise_speed = CS.cruiseState.speed * CV.MS_TO_KPH
+
+      if self.opParams.get(ENABLE_ROAD_SIGNS):
+        if CS.speedLimitValid and CS.speedLimitKph > 0:
+          if self.last_speed_limit_kph != CS.speedLimitKph:
+            self.last_car_speed_at_sign_kph = car_cruise_speed
+          self.speed_limit_offset_kph = car_cruise_speed - self.last_car_speed_at_sign_kph
+          self.v_cruise_kph = CS.speedLimitKph + self.speed_limit_offset_kph
+          self.last_speed_limit_kph = CS.speedLimitKph
+          self.has_seen_road_sign = True
+        else:
+          self.v_cruise_kph = self.last_speed_limit_kph + self.speed_limit_offset_kph if self.has_seen_road_sign else car_cruise_speed
+      else:
+        self.v_cruise_kph = car_cruise_speed
 
     self.setpoint_offset = self.opParams.get(SETPOINT_OFFSET) * CV.MPH_TO_KPH
 
