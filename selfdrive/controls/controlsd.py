@@ -147,6 +147,9 @@ class Controls:
     self.prof = Profiler(False)  # off by default
 
     self.is_toyota = is_toyota(self.CP)
+    self.start_cruise_kph = 0
+    self.last_speed_limit_kph = 0
+    self.speed_limit_offset_kph = 0
 
   def update_events(self, CS):
     """Compute carEvents from carState"""
@@ -298,7 +301,20 @@ class Controls:
     if not self.CP.enableCruise:
       self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled)
     elif self.opParams.get(ENABLE_ROAD_SIGNS):
-      self.v_cruise_kph = update_v_cruise(CS.speedLimitKph if CS.speedLimitValid and CS.speedLimitKph > 0 else self.v_cruise_kph_last, CS.buttonEvents, self.enabled)
+      if self.enabled:
+        for b in CS.buttonEvents:
+          if b.pressed:
+            if b.type == car.CarState.ButtonEvent.Type.accelCruise:
+              self.speed_limit_offset_kph += 1
+            elif b.type == car.CarState.ButtonEvent.Type.decelCruise:
+              self.speed_limit_offset_kph -= 1
+      if CS.speedLimitValid and CS.speedLimitKph > 0:
+        if self.last_speed_limit_kph != CS.speedLimitKph:
+          self.speed_limit_offset_kph = 0
+        self.v_cruise_kph = CS.speedLimitKph + self.speed_limit_offset_kph
+        self.last_speed_limit_kph = CS.speedLimitKph
+      else:
+        self.v_cruise_kph = self.v_cruise_kph_last
     elif self.CP.enableCruise and CS.cruiseState.enabled:
       self.v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
 
