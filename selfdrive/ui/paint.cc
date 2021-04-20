@@ -243,12 +243,13 @@ static void ui_draw_vision_road_sign(UIState *s) {
     speed_limit *= 0.6225;
   }
 
-  const Rect rect = {s->viz_rect.x + (bdr_is * 2) + 184, int(s->viz_rect.y + (bdr_is * 1.5)), 184, 202};
+  const Rect rect = {s->viz_rect.x + (bdr_is * 2) + 200, int(s->viz_rect.y + (bdr_is * 1.5)), 184, 202};
   ui_fill_rect(s->vg, rect, COLOR_WHITE_ALPHA(100), 30.);
   ui_draw_rect(s->vg, rect, COLOR_BLACK_ALPHA(100), 6, 20.);
 
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
-  ui_draw_text(s, rect.centerX(), 148-border_shifter, "SPEED LIMIT", 26 * 2.5, COLOR_BLACK_ALPHA(200), "sans-regular");
+  ui_draw_text(s, rect.centerX(), 148-(border_shifter*2), "SPEED", 48, COLOR_BLACK_ALPHA(200), "sans-regular");
+  ui_draw_text(s, rect.centerX(), 148-(border_shifter*2)+32, "LIMIT", 48, COLOR_BLACK_ALPHA(200), "sans-regular");
   const std::string maxspeed_str = std::to_string((int)std::nearbyint(speed_limit));
   ui_draw_text(s, rect.centerX(), 242-border_shifter, maxspeed_str.c_str(), 48 * 2.5, COLOR_BLACK, "sans-bold");
 }
