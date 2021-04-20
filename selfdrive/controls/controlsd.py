@@ -317,6 +317,7 @@ class Controls:
           self.v_cruise_kph = self.last_speed_limit_kph + self.speed_limit_offset_kph if self.has_seen_road_sign else car_cruise_speed
       else:
         self.v_cruise_kph = car_cruise_speed
+        self.has_seen_road_sign = False
 
     self.setpoint_offset = self.opParams.get(SETPOINT_OFFSET) * CV.MPH_TO_KPH
 
@@ -385,7 +386,6 @@ class Controls:
             self.state = State.enabled
           self.current_alert_types.append(ET.ENABLE)
           self.v_cruise_kph = initialize_v_cruise(CS.vEgo, CS.buttonEvents, self.v_cruise_kph_last)
-          self.has_seen_road_sign = False
 
     # Check if actuators are enabled
     self.active = self.state == State.enabled or self.state == State.softDisabling
