@@ -227,6 +227,33 @@ static void ui_draw_vision_maxspeed(UIState *s) {
   }
 }
 
+static void ui_draw_vision_road_sign(UIState *s) {
+  #ifndef ENABLE_ROAD_SIGNS
+  return;
+  #endif
+  const int SET_SPEED_NA = 255;
+
+  float speed_limit = s->scene.car_state.getSpeedLimitKph();
+  const bool is_speed_limit_valid = speed_limit > 0 && speed_limit <= SET_SPEED_NA && s->scene.car_state.getSpeedLimitValid();
+
+  if (!is_speed_limit_valid)
+    return;
+
+  if (!s->scene.is_metric) {
+    speed_limit *= 0.6225;
+  }
+
+  const Rect rect = {s->viz_rect.x + (bdr_is * 2) + 200, int(s->viz_rect.y + (bdr_is * 1.5)), 184, 202};
+  ui_fill_rect(s->vg, rect, COLOR_WHITE_ALPHA(100), 30.);
+  ui_draw_rect(s->vg, rect, COLOR_BLACK_ALPHA(100), 6, 20.);
+
+  nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
+  ui_draw_text(s, rect.centerX(), 148-(border_shifter*2), "SPEED", 48, COLOR_BLACK_ALPHA(200), "sans-regular");
+  ui_draw_text(s, rect.centerX(), 148-(border_shifter*2)+32, "LIMIT", 48, COLOR_BLACK_ALPHA(200), "sans-regular");
+  const std::string maxspeed_str = std::to_string((int)std::nearbyint(speed_limit));
+  ui_draw_text(s, rect.centerX(), 242-border_shifter, maxspeed_str.c_str(), 48 * 2.5, COLOR_BLACK, "sans-bold");
+}
+
 static void ui_draw_vision_speed(UIState *s) {
   const float speed = std::max(0.0, s->scene.car_state.getVEgo() * (s->scene.is_metric ? 3.6 : 2.2369363));
   const std::string speed_str = std::to_string((int)std::nearbyint(speed));
@@ -304,6 +331,7 @@ static void ui_draw_vision_header(UIState *s) {
   ui_fill_rect(s->vg, {s->viz_rect.x, s->viz_rect.y, s->viz_rect.w, header_h}, gradient);
 
   ui_draw_vision_maxspeed(s);
+  ui_draw_vision_road_sign(s);
   ui_draw_vision_speed(s);
   ui_draw_vision_event(s);
 }

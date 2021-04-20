@@ -282,7 +282,8 @@ class opParams:
                         DAY_BRIGHTNESS: Param(245, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS),
                         NIGHT_BRIGHTNESS: Param(50, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS),
                         HIGH_BEAM_BRIGHTNESS: Param(20, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS),
-                        DISENGAGE_ON_GAS: Param(True, [bool], description='Whether you want openpilot to disengage on gas input or not.', live=True)}
+                        DISENGAGE_ON_GAS: Param(True, [bool], description='Whether you want openpilot to disengage on gas input or not.', live=True),
+                        ENABLE_ROAD_SIGNS: Param(False, [bool], live=True, depends_on=SHOW_TOYOTA_OPTS, description='Use Toyota\'s road sign assist to control OP speed.')}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
@@ -543,3 +544,5 @@ NIGHT_BRIGHTNESS = 'night_time_brightness'
 HIGH_BEAM_BRIGHTNESS = 'high_beam_brightness'
 
 DISENGAGE_ON_GAS = 'disengage_on_gas'
+
+ENABLE_ROAD_SIGNS = 'enable_road_sign_assist'

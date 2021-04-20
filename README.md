@@ -80,6 +80,11 @@ Notable other params / features not apart of live tuning or another specifically
     - Select from 3 fixed brightness values depending on which type of head lights (daytime, nighttime, high beams) are on.
       - For C2 the brightness range is 0 - 255, not sure about other devices.
   - **Toyota Only** (PRs welcomed for head light CAN/DBC messages for other manufacturers.)
+- **Road Sign Assist**
+  - `show_toyota_options` -> `enable_road_sign_assist`
+  - Allows FlexPilot to use info from road sign that the car sees on its own.
+    - At the moment, it only auto adjust OP max travel speed based on speed limit signs.
+  - **Select Toyotas Only** (PRs welcomed if there's manufacturer that can read signs on its own.)
 
 ## UI
 I've made a few small changes to the UI as well.

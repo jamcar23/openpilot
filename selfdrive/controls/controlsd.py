@@ -6,7 +6,7 @@ from common.numpy_fast import clip
 from common.realtime import sec_since_boot, config_realtime_process, Priority, Ratekeeper, DT_CTRL
 from common.profiler import Profiler
 from common.params import Params, put_nonblocking
-from common.op_params import opParams, SETPOINT_OFFSET, COAST_SPEED, ENABLE_COASTING
+from common.op_params import opParams, SETPOINT_OFFSET, COAST_SPEED, ENABLE_COASTING, ENABLE_ROAD_SIGNS
 import cereal.messaging as messaging
 from selfdrive.config import Conversions as CV
 from selfdrive.swaglog import cloudlog
@@ -147,6 +147,11 @@ class Controls:
     self.prof = Profiler(False)  # off by default
 
     self.is_toyota = is_toyota(self.CP)
+    self.start_cruise_kph = 0
+    self.last_speed_limit_kph = 0
+    self.last_car_speed_at_sign_kph = 0
+    self.speed_limit_offset_kph = 0
+    self.has_seen_road_sign = False
 
   def update_events(self, CS):
     """Compute carEvents from carState"""
@@ -298,7 +303,21 @@ class Controls:
     if not self.CP.enableCruise:
       self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled)
     elif self.CP.enableCruise and CS.cruiseState.enabled:
-      self.v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
+      car_cruise_speed = CS.cruiseState.speed * CV.MS_TO_KPH
+
+      if self.opParams.get(ENABLE_ROAD_SIGNS):
+        if CS.speedLimitValid and CS.speedLimitKph > 0:
+          if self.last_speed_limit_kph != CS.speedLimitKph:
+            self.last_car_speed_at_sign_kph = car_cruise_speed
+          self.speed_limit_offset_kph = car_cruise_speed - self.last_car_speed_at_sign_kph
+          self.v_cruise_kph = CS.speedLimitKph + self.speed_limit_offset_kph
+          self.last_speed_limit_kph = CS.speedLimitKph
+          self.has_seen_road_sign = True
+        else:
+          self.v_cruise_kph = self.last_speed_limit_kph + self.speed_limit_offset_kph if self.has_seen_road_sign else car_cruise_speed
+      else:
+        self.v_cruise_kph = car_cruise_speed
+        self.has_seen_road_sign = False
 
     self.setpoint_offset = self.opParams.get(SETPOINT_OFFSET) * CV.MPH_TO_KPH
 
