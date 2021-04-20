@@ -150,6 +150,7 @@ class Controls:
     self.start_cruise_kph = 0
     self.last_speed_limit_kph = 0
     self.speed_limit_offset_kph = 0
+    self.has_seen_road_sign = False
 
   def update_events(self, CS):
     """Compute carEvents from carState"""
@@ -313,8 +314,9 @@ class Controls:
           self.speed_limit_offset_kph = 0
         self.v_cruise_kph = CS.speedLimitKph + self.speed_limit_offset_kph
         self.last_speed_limit_kph = CS.speedLimitKph
+        self.has_seen_road_sign = True
       else:
-        self.v_cruise_kph = self.v_cruise_kph_last
+        self.v_cruise_kph = self.v_cruise_kph_last if self.has_seen_road_sign else CS.cruiseState.speed * CV.MS_TO_KPH
     elif self.CP.enableCruise and CS.cruiseState.enabled:
       self.v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
 
@@ -385,6 +387,7 @@ class Controls:
             self.state = State.enabled
           self.current_alert_types.append(ET.ENABLE)
           self.v_cruise_kph = initialize_v_cruise(CS.vEgo, CS.buttonEvents, self.v_cruise_kph_last)
+          self.has_seen_road_sign = False
 
     # Check if actuators are enabled
     self.active = self.state == State.enabled or self.state == State.softDisabling
