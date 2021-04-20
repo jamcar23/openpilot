@@ -53,7 +53,7 @@ jobs:
       if: ${{ github.event_name == 'workflow_dispatch' || steps.wait_for_tests.outcome == 'success'}}
       uses: ad-m/github-push-action@master
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.REPO_PAT }}
         branch: ${{ env.BRANCH }}
         directory: ${{ env.TARGET_DIR }}
         force: true
