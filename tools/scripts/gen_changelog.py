@@ -67,7 +67,7 @@ def create_new_params_section(cur_hash, prev_hash):
 def create_commits_section(cur_hash, prev_hash):
   commits = get_git_log([f'{prev_hash}..{cur_hash}', '--pretty=format:"%s"']).replace('"', '').splitlines()
 
-  if 'Merge pull request #' in commits[0] and 'from jamcar23/update-' in commits[0]:
+  if ('Merge pull request #' in commits[0] and 'from jamcar23/update-' in commits[0]) or ('Merge branch \'update-' in commits[0] and 'into src' in commits[0]):
     commits = []
 
   commits = commits[1:][::-1]
