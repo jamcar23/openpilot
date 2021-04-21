@@ -23,6 +23,14 @@ def get_git_log(cmd: List[str], default: Optional[str] = None) -> Optional[str]:
 def get_git_diff(cmd: List[str], default: Optional[str] = None) -> Optional[str]:
   return run_cmd_default(['git', 'diff', ] + cmd, default)
 
+def strip_param_line(line):
+  param = line[1:].strip()
+  last_char_idx = param.rfind(")")
+
+  if last_char_idx != -1:
+    param = param[0:last_char_idx + 1]
+
+  return param
 
 if __name__ == '__main__':
   hashs = get_git_log(['--grep', '^Merge pull request #[0-9]\{1,\} from jamcar23', '--pretty=format:"%h"']).replace('"', '').splitlines()
@@ -46,24 +54,25 @@ if __name__ == '__main__':
         continue
 
       if line.startswith('+') and 'Param(' in line:
-        param = line[1:].strip()
-        last_char_idx = param.rfind(")")
+        new_params.append(strip_param_line(line))
 
-        if last_char_idx != -1:
-          param = param[0:last_char_idx + 1]
+    # print(f'new params: {new_params}')
+    # break
 
-        new_params.append(param)
+    v_changes = f'Version {len(hashs) - i}\n'
+    v_changes += '========================\n'
+  #   v_changes += diff
+    v_changes += '  * New OP Params:\n'
 
-    print(f'new params: {new_params}')
+    for new_param in new_params:
+      v_changes += f'    * {new_param}\n'
+
+    v_changes += '\n\n'
+
+    changelog += v_changes
+
     break
 
-  #   v_changes = f'Version {len(hashs) - i}\n'
-  #   v_changes += '========================\n'
-  #   v_changes += diff
-  #   v_changes += '\n\n'
-
-  #   changelog += v_changes
-
-  # with open('CHANGELOG.md', 'w') as f:
-  #   f.write(changelog)
+  with open('CHANGELOG.md', 'w') as f:
+    f.write(changelog)
 
