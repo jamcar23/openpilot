@@ -1,11 +1,36 @@
 #!/usr/bin/env python3
+import subprocess
 from typing import List, Optional
 
-from selfdrive.version import run_cmd_default
+# TODO add this back, it's causing problems with windows, git, and docker
+#from selfdrive.version import run_cmd_default
+
+def run_cmd(cmd: List[str]) -> str:
+    return subprocess.check_output(cmd, encoding='utf8').strip()
+
+
+def run_cmd_default(cmd: List[str], default: Optional[str] = None) -> Optional[str]:
+  try:
+    return run_cmd(cmd)
+  except subprocess.CalledProcessError:
+    return default
 
 def get_git_log(cmd: List[str], default: Optional[str] = None) -> Optional[str]:
+  # print(f'cmd: {["git", "log" ] + cmd}')
   return run_cmd_default(['git', 'log', ] + cmd, default)
+
+def get_git_diff(cmd: List[str], default: Optional[str] = None) -> Optional[str]:
+  return run_cmd_default(['git', 'diff', ] + cmd, default)
 
 
 if __name__ == '__main__':
-  print(get_git_log(['--grep="Merge pull request"', '--grep="from=jamcar23"', '--pretty=format:"%h"']))
+  hashs = get_git_log(['--grep="Merge pull request"', '--grep="from=jamcar23"', '--pretty=format:"%h"'])
+  print(f'hashs: {hashs}')
+
+  for i in range(len(hashs)):
+    if i == len(hashs) - 1:
+      break
+
+    diff = get_git_diff([hashs[i + 1], hashs[i], '--', 'common/op_params.py'])
+    print(diff)
+
