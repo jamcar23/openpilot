@@ -1,4 +1,4 @@
-Version 53
+Version 53 (openpilot v0.8.3)
 ========================
   Source commit: 33e98404
   * New OP Params:
@@ -23,7 +23,7 @@ Version 53
     * fix(controls): offset speed limit from car's last speed
     * fix(controls): properly set last cruise speed when reenabling
 
-Version 52
+Version 52 (openpilot v0.8.3)
 ========================
   Source commit: 92d4c8f6
   * Commits:
@@ -33,7 +33,7 @@ Version 52
     * fix(planner): temp remove wide camera from lat planner
     * fix(planner): get bool param correctly
 
-Version 51
+Version 51 (openpilot v0.8.3)
 ========================
   Source commit: 124b95b3
   * New OP Params:
@@ -45,7 +45,7 @@ Version 51
     * Merge branch 'src' into disengage-on-gas
     * docs(readme): add ToC section for notable op params
 
-Version 50
+Version 50 (openpilot v0.8.3)
 ========================
   Source commit: a378051f
   * New OP Params:
@@ -60,13 +60,13 @@ Version 50
     * feat(params): add params for brightness when high beams are on
     * docs(readme): add spot about screen brightness via head lights
 
-Version 49
+Version 49 (openpilot v0.8.3)
 ========================
   Source commit: dcd91d2f
   * Commits:
     * fix(ui): change home screen to say flexpilot instead of op
 
-Version 48
+Version 48 (openpilot v0.8.3)
 ========================
   Source commit: 550c0109
   * New OP Params:
@@ -87,11 +87,11 @@ Version 48
     * fix(ui): fix typo in accessing captin proto enums
     * tests(processes): update process replay refs for head-light-screen-brightness
 
-Version 47
+Version 47 (openpilot v0.8.3)
 ========================
   Source commit: 48763617
 
-Version 46
+Version 46 (openpilot v0.8.2)
 ========================
   Source commit: 2caaf37f
   * Commits:
@@ -99,7 +99,7 @@ Version 46
     * fix(ui): add model reader to ui scene
     * docs(readme): update GH action status badges
 
-Version 45
+Version 45 (openpilot v0.8.2)
 ========================
   Source commit: 3b2b4e0b
   * Commits:
@@ -132,7 +132,7 @@ Version 45
     * fix(ui): properly show aEgo in dev ui
     * refactor(ui): change grouping of dev ui measurements
 
-Version 44
+Version 44 (openpilot v0.8.2)
 ========================
   Source commit: 4d975819
   * New OP Params:
@@ -147,7 +147,7 @@ Version 44
     * INDI_ACTUATOR_EFFECTIVENESS_BP_MULTI: Param([[0, 5], [20, 24]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS)
     * INDI_ACTUATOR_EFFECTIVENESS_V_MULTI: Param([[1.5, 1.75], [2, 3]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS)
 
-Version 43
+Version 43 (openpilot v0.8.1)
 ========================
   Source commit: d3aeeba1
   * New OP Params:
@@ -240,13 +240,13 @@ Version 43
     * docs(readme): use complete installation command
     * docs(readme): add my favorite multi bp tune to readme
 
-Version 42
+Version 42 (openpilot v0.8.1)
 ========================
   Source commit: 0e6dcd1b
   * Commits:
     * feat(actions): only push out release if build release works
 
-Version 41
+Version 41 (openpilot v0.8.1)
 ========================
   Source commit: 55e9f61e
   * New OP Params:
@@ -262,7 +262,7 @@ Version 41
   * Commits:
     * feat(params): add param to toggle planner params
 
-Version 40
+Version 40 (openpilot v0.8.1)
 ========================
   Source commit: 0f74b346
   * Commits:
@@ -272,7 +272,7 @@ Version 40
     * fix(sentry): pass args and kwargs to client
     * fix(sentry): track discord username before dongle id
 
-Version 39
+Version 39 (openpilot v0.8.1)
 ========================
   Source commit: 5c6def4d
   * Commits:
@@ -287,7 +287,7 @@ Version 39
     * fix(actions): get correct length, set correct ref, and check correct status code
     * feat(actions): limit branch clean up to src branch
 
-Version 38
+Version 38 (openpilot v0.8.1)
 ========================
   Source commit: 446ba0b8
   * Commits:
@@ -308,7 +308,7 @@ Version 38
     * fix(docker): make sure op_edit is included in fat image
     * fix(params): ignore bare except in op_edit
 
-Version 37
+Version 37 (openpilot v0.8.1)
 ========================
   Source commit: 17619301
   * New OP Params:
@@ -323,17 +323,17 @@ Version 37
     * fix(params): fix op edit to cast default values to str
     * tests(processes): update process replay refs for can-tuning
 
-Version 36
+Version 36 (openpilot v0.8.1)
 ========================
   Source commit: 7f4bc738
 
-Version 35
+Version 35 (openpilot v0.8.0)
 ========================
   Source commit: 6440d9fc
   * Commits:
     * fix(toyota): update default corolla tss2 indi tune
 
-Version 34
+Version 34 (openpilot v0.8.0)
 ========================
   Source commit: 97d6a4e3
   * New OP Params:
@@ -347,7 +347,7 @@ Version 34
     * fix(params): only check if not default
     * fix(params): allow op_edit to handle none as list default
 
-Version 33
+Version 33 (openpilot v0.8.0)
 ========================
   Source commit: 063e93e6
   * Commits:
@@ -360,25 +360,25 @@ Version 33
     * tests(numpy): add test case for xp containing values not in x
     * refactor(numpy): move calc_interp function back into get_interp
 
-Version 32
+Version 32 (openpilot v0.8.0)
 ========================
   Source commit: b8436a2e
   * Commits:
     * 0b6e45f8-21c1-408a-b61d-3dce02a69d23/500 (#19528)
 
-Version 31
+Version 31 (openpilot v0.8.0)
 ========================
   Source commit: a7a81f91
   * Commits:
     * Early model 081 (#19510)
 
-Version 30
+Version 30 (openpilot v0.8.0)
 ========================
   Source commit: bb4a2226
   * Commits:
     * Revert fix(ui): remove engine rpm from ui
 
-Version 29
+Version 29 (openpilot v0.8.0)
 ========================
   Source commit: d50d2dd4
   * New OP Params:
@@ -402,7 +402,7 @@ Version 29
     * fix(toyota): apply briskspirit braking by default
     * fix(py): remove unused imports
 
-Version 28
+Version 28 (openpilot v0.8.0)
 ========================
   Source commit: 7baf74bb
   * Commits:
@@ -413,11 +413,11 @@ Version 28
     * feat(toyota): record engine rpm into car state
     * tests(processes): update process replay refs for dev-ui
 
-Version 27
+Version 27 (openpilot v0.8.0)
 ========================
   Source commit: ae1083d7
 
-Version 26
+Version 26 (openpilot v0.7.9)
 ========================
   Source commit: 36e9cd24
   * New OP Params:
@@ -508,14 +508,14 @@ Version 26
     * refactor(params): change a_cruise op params to match stock values
     * tests(processes): update process replay refs for tuning
 
-Version 25
+Version 25 (openpilot v0.7.9)
 ========================
   Source commit: b95f8e32
   * Commits:
     * refactor(sentry): log all exceptions to sentry
     * fix(sentry): remove unused import in crash.py
 
-Version 24
+Version 24 (openpilot v0.7.9)
 ========================
   Source commit: b70f8916
   * Commits:
@@ -524,20 +524,20 @@ Version 24
     * feat(sentry): improve crash logging
     * fix(sentry): upload error tags to sentry
 
-Version 23
+Version 23 (openpilot v0.7.9)
 ========================
   Source commit: b3d323d4
   * Commits:
     * fix(params): fix entering values into a list
     * fix(coasting): only update planner for updated model if coasting is enable
 
-Version 22
+Version 22 (openpilot v0.7.9)
 ========================
   Source commit: 1ac1945e
   * Commits:
     * Revert Latest torch model
 
-Version 21
+Version 21 (openpilot v0.7.9)
 ========================
   Source commit: 14162240
   * New OP Params:
@@ -605,31 +605,31 @@ Version 21
     * feat(params): add ability to replace lists in op edit
     * fix(params): check types when replacing list in op params
 
-Version 20
+Version 20 (openpilot v0.7.9)
 ========================
   Source commit: ab8f6d5a
   * Commits:
     * feat(models): update model to 5034ac8b-5703-4a49-948b-11c064d10880/780 b5e5c420-7042-4d0c-92e5-770eb09936a5/800
 
-Version 19
+Version 19 (openpilot v0.7.9)
 ========================
   Source commit: bada60f2
   * Commits:
     * db090195-8810-42de-ab38-bb835d775d87/601
 
-Version 18
+Version 18 (openpilot v0.7.9)
 ========================
   Source commit: 1419a444
   * Commits:
     * 2895ace6-a296-47ac-86e6-17ea800a74e5/550
 
-Version 17
+Version 17 (openpilot v0.7.9)
 ========================
   Source commit: a4e29af3
   * Commits:
     * chore(git): update panda submodule
 
-Version 16
+Version 16 (openpilot v0.7.9)
 ========================
   Source commit: d7b005c5
   * New OP Params:
@@ -639,7 +639,7 @@ Version 16
   * Commits:
     * feat(toyota): add optional unsafe steering torqure rate
 
-Version 15
+Version 15 (openpilot v0.7.9)
 ========================
   Source commit: 1f05c49d
   * Commits:
@@ -660,7 +660,7 @@ Version 15
     * fix ui drawing with clips
     * ./compile_torch.py 5034ac8b-5703-4a49-948b-11c064d10880/780 dfcd2375-81d8-49df-95bf-1d2d6ad86010/450 with variable history length
 
-Version 14
+Version 14 (openpilot v0.7.9)
 ========================
   Source commit: 784e5e90
   * New OP Params:
@@ -692,7 +692,7 @@ Version 14
     * fix(actions): checkout repo with PAT
     * tests(processes): update process replay refs for eco-mode
 
-Version 13
+Version 13 (openpilot v0.7.9)
 ========================
   Source commit: 2f1e9cf6
   * Commits:
@@ -721,7 +721,7 @@ Version 13
     * fix(actions): properly exit prebuilt job
     * fix(actions): use proper pr ci branch name and don't use ::set-env
 
-Version 12
+Version 12 (openpilot v0.7.9)
 ========================
   Source commit: 0161ddc7
   * Commits:
@@ -761,7 +761,7 @@ Version 12
     * Merge branch 'src' into refactor-model
     * fix(models): add missing 3D model lfs hash
 
-Version 11
+Version 11 (openpilot v0.7.9)
 ========================
   Source commit: 239ebfad
   * New OP Params:
@@ -1206,7 +1206,7 @@ Version 11
     * fix(tools): improve logging in transfer script
     * fix(tools): remove unused imports in transfer script
 
-Version 10
+Version 10 (openpilot v0.7.7)
 ========================
   Source commit: 4bac8e22
   * New OP Params:
@@ -1236,7 +1236,7 @@ Version 10
     * fix(toyota): reset gas clip to 1.0
     * fix(params): properly op param default values match expected type
 
-Version 9
+Version 9 (openpilot v0.7.7)
 ========================
   Source commit: 2ea8066f
   * Commits:
@@ -1244,7 +1244,7 @@ Version 9
     * chore(git): update opendbc submodule for corolla TSS2 safety param
     * chore(git): fix opendbc submodule to use v0.7.7
 
-Version 8
+Version 8 (openpilot v0.7.7)
 ========================
   Source commit: 88e7ed25
   * New OP Params:
@@ -1277,7 +1277,7 @@ Version 8
     * fix(params): fix issues using list types in op params
     * feat(toyota): made max gas an op param
 
-Version 7
+Version 7 (openpilot v0.7.7)
 ========================
   Source commit: 3f6f12f3
   * New OP Params:
@@ -1299,13 +1299,13 @@ Version 7
     * Fix grade force in test_long plant (#2225)
     * Merge branch 'src' into coasting
 
-Version 6
+Version 6 (openpilot v0.7.7)
 ========================
   Source commit: 8a62d538
   * Commits:
     * Better poly (#1437)
 
-Version 5
+Version 5 (openpilot v0.7.7)
 ========================
   Source commit: edfa06a8
   * New OP Params:
@@ -1314,14 +1314,14 @@ Version 5
   * Commits:
     * feat(toyota): made corolla indi optional
 
-Version 4
+Version 4 (openpilot v0.7.7)
 ========================
   Source commit: fbfcac23
   * Commits:
     * chore(git): update cereal submodule to point to my fork
     * chore(git): replace all submodule relative urls with github urls
 
-Version 3
+Version 3 (openpilot v0.7.7)
 ========================
   Source commit: 1821c6b1
   * Commits:
@@ -1335,7 +1335,7 @@ Version 3
     * feat(actions): add new action for build slash command
     * feat(actions): add build as a possible slash command
 
-Version 2
+Version 2 (openpilot v0.7.7)
 ========================
   Source commit: 3305587d
   * New OP Params:
@@ -1348,7 +1348,7 @@ Version 2
     * fix(path): update default lane change values
     * fix(path): fix E502 in path planner
 
-Version 1
+Version 1 (openpilot v0.7.7)
 ========================
   Source commit: a811bf18
   * New OP Params:

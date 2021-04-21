@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import subprocess
+import requests
+
 from typing import List, Optional
 
 # TODO add this back, it's causing problems with windows, git, and docker
@@ -22,6 +24,13 @@ def get_git_log(cmd: List[str], default: Optional[str] = None) -> Optional[str]:
 
 def get_git_diff(cmd: List[str], default: Optional[str] = None) -> Optional[str]:
   return run_cmd_default(['git', 'diff', ] + cmd, default)
+
+def get_commit_op_version(commit_hash):
+  version = requests.get(f'https://raw.githubusercontent.com/jamcar23/openpilot/{commit_hash}/selfdrive/common/version.h').text
+  version = version[version.find('"')+1:version.rfind('"')]
+
+  # print(f'op_version: {version}')
+  return version
 
 def strip_param_line(line):
   param = line[1:].strip()
@@ -104,9 +113,11 @@ if __name__ == '__main__':
     sections = [create_new_params_section(cur_hash, prev_hash),
                 create_commits_section(cur_hash, prev_hash)]
 
+    op_version = get_commit_op_version(cur_hash)
+
     # break
 
-    v_changes = f'Version {len(hashs) - i}\n'
+    v_changes = f'Version {len(hashs) - i} (openpilot v{get_commit_op_version(cur_hash)})\n'
     v_changes += '========================\n'
     v_changes += create_indent(1) + f'Source commit: {cur_hash}\n'
 
