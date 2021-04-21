@@ -27,10 +27,21 @@ if __name__ == '__main__':
   hashs = get_git_log(['--grep="Merge pull request"', '--grep="from=jamcar23"', '--pretty=format:"%h"'])
   print(f'hashs: {hashs}')
 
+  changelog = ''
+
   for i in range(len(hashs)):
     if i == len(hashs) - 1:
       break
 
     diff = get_git_diff([hashs[i + 1], hashs[i], '--', 'common/op_params.py'])
-    print(diff)
+
+    v_changes = f'Version {len(hashs) - i}\n'
+    v_changes += '========================\n'
+    v_changes += diff
+    v_changes += '\n\n'
+
+    changelog += v_changes
+
+  with open('CHANGELOG.md', 'w') as f:
+    f.write(changelog)
 

@@ -1,0 +1,39 @@
+name: gen changelog
+on:
+  push:
+    branches-ignore:
+      - 'testing-closet*'
+    paths-ignore:
+      - '**.md'
+      - 'README*'
+env:
+  RUN_CMD_BASE: "docker run --shm-size 1G -e PYTHONPATH=/tmp/openpilot -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v /tmp/comma_download_cache:/tmp/comma_download_cache"
+
+jobs:
+  gen_changelog:
+    name: generate changelog
+    runs-on: ubuntu-20.04
+    timeout-minutes: 90
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+        lfs: true
+        fetch-depth: 0
+    - name: Prepare CI Env Vars
+      run: |
+        chmod +x ./.github/scripts/ci_env_vars.sh
+        source ./.github/scripts/ci_env_vars.sh
+    - name: pull docker ci image
+      run: |
+        docker pull $CI_IMAGE
+    - name: run changelog generation
+      run: |
+      eval "$RUN_CMD_BASE -v $PWD:/tmp/openpilot --rm $CI_IMAGE /bin/sh -c " \
+      "cd /tmp/openpilot && python tools/scripts/gen_changelog.py"
+    - uses: actions/upload-artifact@v2
+      if: always()
+      continue-on-error: true
+      with:
+        name: process_replay_diff.txt
+        path: CHANGELOG.md
