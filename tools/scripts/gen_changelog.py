@@ -157,7 +157,7 @@ def increment_semantic_version(version, section = SemVerSections.MAJOR):
 
 
 def main():
-  hashs = get_git_log(['--grep', r'^Merge pull request #[0-9]\{1,\} from jamcar23', '--pretty=format:"%h"']).replace('"', '').splitlines()
+  hashs = get_git_log(['--grep', r'^Merge pull request #[0-9]\{1,\} from jamcar23', '--pretty=format:"%h"']).replace('"', '').splitlines()[::-1]
   # hashs = get_git_log(['--grep="Merge pull request"', '--grep="from=jamcar23"', '--pretty=format:"%h"'])
   # print(f'hashs: {hashs}')
 
@@ -168,6 +168,8 @@ def main():
     last_entry.fp_version = last_written_entry.fp_version
     last_entry.op_version = last_written_entry.op_version
     last_entry.commit_hash = last_written_entry.commit_hash
+
+    hashs = hashs[hashs.index(last_entry.commit_hash) + 1:]
   else:
     last_entry.fp_version = '0.1.0'
 
@@ -179,10 +181,11 @@ def main():
     #   break
 
     cur_hash = hashs[i]
-    prev_hash = hashs[i + 1] if i < len(hashs) - 1 else '2fd6f3ac'
+    prev_hash = hashs[i - 1] if i >= 1 else '2fd6f3ac'
 
     if last_written_entry and last_written_entry.commit_hash == cur_hash:
-      break
+      pass
+      # break
 
     sections = [create_new_params_section(cur_hash, prev_hash),
                 create_commits_section(cur_hash, prev_hash)]
@@ -199,7 +202,7 @@ def main():
 
     v_changes += create_changes_from_sections(sections)
 
-    changelog += v_changes.strip() + '\n\n'
+    changelog = v_changes.strip() + '\n\n' + changelog
 
     last_entry.fp_version = fp_version
     last_entry.op_version = op_version
@@ -210,7 +213,7 @@ def main():
     log_lines = f.readlines()
 
   with open('CHANGELOG.md', 'w') as f:
-    f.write(changelog.strip() + '\n')
+    f.write(changelog.strip() + '\n\n')
     f.writelines(log_lines)
 
 if __name__ == '__main__':
