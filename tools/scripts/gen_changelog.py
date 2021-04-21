@@ -32,6 +32,14 @@ def strip_param_line(line):
 
   return param
 
+def create_indent(num_indents, single_indent='  '):
+  indent = ''
+
+  for i in range(num_indents):
+    indent += single_indent
+
+  return indent
+
 if __name__ == '__main__':
   hashs = get_git_log(['--grep', '^Merge pull request #[0-9]\{1,\} from jamcar23', '--pretty=format:"%h"']).replace('"', '').splitlines()
   # hashs = get_git_log(['--grep="Merge pull request"', '--grep="from=jamcar23"', '--pretty=format:"%h"'])
@@ -62,10 +70,10 @@ if __name__ == '__main__':
     v_changes = f'Version {len(hashs) - i}\n'
     v_changes += '========================\n'
   #   v_changes += diff
-    v_changes += '  * New OP Params:\n'
+    v_changes += create_indent(1) + '* New OP Params:\n'
 
     for new_param in new_params:
-      v_changes += f'    * {new_param}\n'
+      v_changes += f'{create_indent(2)}* {new_param}\n'
 
     v_changes += '\n\n'
 
@@ -74,5 +82,5 @@ if __name__ == '__main__':
     break
 
   with open('CHANGELOG.md', 'w') as f:
-    f.write(changelog)
+    f.write(changelog.strip() + '\n')
 
