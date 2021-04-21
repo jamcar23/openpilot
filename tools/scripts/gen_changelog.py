@@ -40,7 +40,14 @@ def create_indent(num_indents, single_indent='  '):
 
   return indent
 
-def get_new_params_between_prs(cur_hash, prev_hash):
+class Section:
+  def __init__(self, title, children):
+    super().__init__()
+
+    self.title = title
+    self.children = children
+
+def create_new_params_section(cur_hash, prev_hash):
   diff = get_git_diff([prev_hash, cur_hash, '--', 'common/op_params.py'])
     # print(f'diff: {diff}')
     # break
@@ -55,9 +62,9 @@ def get_new_params_between_prs(cur_hash, prev_hash):
       new_params.append(strip_param_line(line))
 
   # print(f'new params: {new_params}')
-  return new_params
+  return Section('New OP Params', new_params)
 
-def get_commits_between_prs(cur_hash, prev_hash):
+def create_commits_section(cur_hash, prev_hash):
   commits = get_git_log([f'{prev_hash}..{cur_hash}', '--pretty=format:"%s"']).replace('"', '').splitlines()
 
   if 'Merge pull request #' in commits[0] and 'from jamcar23/update-' in commits[0]:
@@ -66,7 +73,19 @@ def get_commits_between_prs(cur_hash, prev_hash):
   commits = commits[1:][::-1]
 
   # print(f'commits: {commits}')
-  return commits
+  return Section('Commits', commits)
+
+def create_changes_from_sections(sections):
+  changes = ''
+
+  for s in sections:
+    if s and s.title and len(s.children):
+      changes += f'{create_indent(1)}* {s.title}:\n'
+      for c in s.children:
+        changes += f'{create_indent(2)}* {c}\n'
+
+  return changes
+
 
 if __name__ == '__main__':
   hashs = get_git_log(['--grep', '^Merge pull request #[0-9]\{1,\} from jamcar23', '--pretty=format:"%h"']).replace('"', '').splitlines()
@@ -82,8 +101,8 @@ if __name__ == '__main__':
     cur_hash = hashs[i]
     prev_hash = hashs[i + 1]
 
-    new_params = get_new_params_between_prs(cur_hash, prev_hash)
-    commits = get_commits_between_prs(cur_hash, prev_hash)
+    sections = [create_new_params_section(cur_hash, prev_hash),
+                create_commits_section(cur_hash, prev_hash)]
 
     # break
 
@@ -91,15 +110,7 @@ if __name__ == '__main__':
     v_changes += '========================\n'
   #   v_changes += diff
 
-    if len(new_params):
-      v_changes += create_indent(1) + '* New OP Params:\n'
-      for new_param in new_params:
-        v_changes += f'{create_indent(2)}* {new_param}\n'
-
-    if len(commits):
-      v_changes += create_indent(1) + '* Commits:\n'
-      for commit in commits:
-        v_changes += f'{create_indent(2)}* {commit}\n'
+    v_changes += create_changes_from_sections(sections)
 
     changelog += v_changes.strip() + '\n\n'
 
