@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import subprocess
 import requests
+import re
 
 from typing import List, Optional
 
@@ -95,12 +96,45 @@ def create_changes_from_sections(sections):
 
   return changes
 
+class ChangeLogEntry:
+  def __init__(self):
+    super().__init__()
 
-if __name__ == '__main__':
-  hashs = get_git_log(['--grep', '^Merge pull request #[0-9]\{1,\} from jamcar23', '--pretty=format:"%h"']).replace('"', '').splitlines()
+    self.fp_version = ''
+    self.op_version = ''
+    self.commit_hash = ''
+
+def get_last_entry_from_log():
+  lines = ''
+  log_entry_pattern = re.compile(r'Version (\d+) \(openpilot v([\d.]+)\)\n========================\n\s*Source commit: ([\w\d]+)')
+
+  with open('CHANGELOG.md', 'r') as f:
+    i = 0
+    while i < 15:
+      line = f.readline()
+      if not line:
+        break
+
+      match = log_entry_pattern.search(lines)
+      if match:
+        entry = ChangeLogEntry()
+        entry.fp_version = match.group(1)
+        entry.op_version = match.group(2)
+        entry.commit_hash = match.group(3)
+
+        return entry
+
+      i += 1
+      lines += line
+
+  return None
+
+def main():
+  hashs = get_git_log(['--grep', r'^Merge pull request #[0-9]\{1,\} from jamcar23', '--pretty=format:"%h"']).replace('"', '').splitlines()
   # hashs = get_git_log(['--grep="Merge pull request"', '--grep="from=jamcar23"', '--pretty=format:"%h"'])
   # print(f'hashs: {hashs}')
 
+  last_entry = get_last_entry_from_log()
   changelog = ''
 
   for i in range(len(hashs)):
@@ -109,6 +143,9 @@ if __name__ == '__main__':
 
     cur_hash = hashs[i]
     prev_hash = hashs[i + 1] if i < len(hashs) - 1 else '2fd6f3ac'
+
+    if last_entry and last_entry.commit_hash == cur_hash:
+      break
 
     sections = [create_new_params_section(cur_hash, prev_hash),
                 create_commits_section(cur_hash, prev_hash)]
@@ -127,6 +164,13 @@ if __name__ == '__main__':
 
     # break
 
+  log_lines = []
+  with open('CHANGELOG.md', 'r') as f:
+    log_lines = f.readlines()
+
   with open('CHANGELOG.md', 'w') as f:
     f.write(changelog.strip() + '\n')
+    f.writelines(log_lines)
 
+if __name__ == '__main__':
+  main()
