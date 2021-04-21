@@ -95,11 +95,11 @@ if __name__ == '__main__':
   changelog = ''
 
   for i in range(len(hashs)):
-    if i == len(hashs) - 1:
-      break
+    # if i == len(hashs) - 1:
+    #   break
 
     cur_hash = hashs[i]
-    prev_hash = hashs[i + 1]
+    prev_hash = hashs[i + 1] if i < len(hashs) - 1 else '2fd6f3ac'
 
     sections = [create_new_params_section(cur_hash, prev_hash),
                 create_commits_section(cur_hash, prev_hash)]

@@ -1347,3 +1347,36 @@ Version 2
     * feat(path): add auto lane change option
     * fix(path): update default lane change values
     * fix(path): fix E502 in path planner
+
+Version 1
+========================
+  Source commit: a811bf18
+  * New OP Params:
+    * self.fork_params = {'camera_offset': Param(default=0.06, allowed_types=VT.number)
+    * self.fork_params = {'camera_offset': Param(0.06, VT.number, 'Your camera offset to use in lane_planner.py', live=True)
+    * 'indi_inner_gain': Param(6.0, float, live=True)
+    * 'indi_outer_gain': Param(15.0, float, live=True)
+    * 'indi_time_constant': Param(5.5, float, live=True)
+    * 'indi_actuator_effectiveness': Param(6.0, float, live=True)
+    * 'steer_actuator_delay': Param(0.57, float, live=True)
+    * self.fork_params['username'] = Param(None, [type(None), str, bool], 'Your identifier provided with any crash logs sent to Sentry.\nHelps the developer reach out to you if anything goes wrong')
+    * self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
+    * return Param(None, None)
+  * Commits:
+    * feat(params): add op_params and op_edit from shane's fork
+    * feat(params): add support for live indi tunning and actuator breakpoints
+    * refactor(params): remove unused op_params from shane's code
+    * fix(params): add missing colors file for op params / edit
+    * fix(indi): remove actuator effectiveness breakpoints
+    * fix(params): fix flake incompatible types in assignment of colors
+    * fix(indi): fix F401, unused import
+    * fix(indi): reimport clip; fixes F821
+    * fix(params): fix E1101; using Colors instead of COLORS
+    * fix(params): fix W0102 in op_params
+    * fix(params): fix W0102; remove default assignment
+    * fix(params): fix missing assignment in constructor
+    * fix(params): print instead of erroring out when reading file
+    * fix(params): only read and write op params on mobile
+    * fix(params): catch exception when can't write file
+    * fix(params): turn err into string
+    * fix(params): only change param file permissions if write passed
