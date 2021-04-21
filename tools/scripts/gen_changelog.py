@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
     # break
 
-    v_changes = f'Version {len(hashs) - i} (openpilot v{get_commit_op_version(cur_hash)})\n'
+    v_changes = f'Version {len(hashs) - i} (openpilot v{op_version})\n'
     v_changes += '========================\n'
     v_changes += create_indent(1) + f'Source commit: {cur_hash}\n'
 
