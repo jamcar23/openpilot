@@ -49,7 +49,7 @@ if __name__ == '__main__':
         param = line[1:].strip()
         last_char_idx = param.rfind(")")
 
-        if last_char_idx:
+        if last_char_idx != -1:
           param = param[0:last_char_idx + 1]
 
         new_params.append(param)
