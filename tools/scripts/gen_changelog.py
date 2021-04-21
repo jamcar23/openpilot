@@ -106,7 +106,7 @@ class ChangeLogEntry:
 
 def get_last_entry_from_log():
   lines = ''
-  log_entry_pattern = re.compile(r'Version (\d+) \(openpilot v([\d.]+)\)\n========================\n\s*Source commit: ([\w\d]+)')
+  log_entry_pattern = re.compile(r'Version (\d+.\d+.\d) \(openpilot v([\d.]+)\)\n========================\n\s*Source commit: ([\w\d]+)')
 
   with open('CHANGELOG.md', 'r') as f:
     i = 0
@@ -116,7 +116,9 @@ def get_last_entry_from_log():
         break
 
       match = log_entry_pattern.search(lines)
+      # print(match)
       if match:
+        # print('match')
         entry = ChangeLogEntry()
         entry.fp_version = match.group(1)
         entry.op_version = match.group(2)
@@ -129,12 +131,47 @@ def get_last_entry_from_log():
 
   return None
 
+class SemVerSections:
+  MAJOR = 0
+  MINOR = 1
+  PATCH = 2
+
+def increment_semantic_version(version, section = SemVerSections.MAJOR):
+  if not version:
+    return None
+
+  sections = version.split('.')
+  # print(f'sections: {sections}')
+
+  if section == SemVerSections.PATCH:
+    sections[SemVerSections.PATCH] = str(int(sections[SemVerSections.PATCH]) + 1)
+  elif section == SemVerSections.MINOR:
+    sections[SemVerSections.PATCH] = '0'
+    sections[SemVerSections.MINOR] = str(int(sections[SemVerSections.MINOR]) + 1)
+  elif section == SemVerSections.MAJOR:
+    sections[SemVerSections.PATCH] = '0'
+    sections[SemVerSections.MINOR] = '0'
+    sections[SemVerSections.MAJOR] = str(int(sections[SemVerSections.MAJOR]) + 1)
+
+  return '.'.join(sections)
+
+
 def main():
   hashs = get_git_log(['--grep', r'^Merge pull request #[0-9]\{1,\} from jamcar23', '--pretty=format:"%h"']).replace('"', '').splitlines()
   # hashs = get_git_log(['--grep="Merge pull request"', '--grep="from=jamcar23"', '--pretty=format:"%h"'])
   # print(f'hashs: {hashs}')
 
-  last_entry = get_last_entry_from_log()
+  last_written_entry = get_last_entry_from_log()
+  last_entry = ChangeLogEntry()
+
+  if last_written_entry:
+    last_entry.fp_version = last_written_entry.fp_version
+    last_entry.op_version = last_written_entry.op_version
+    last_entry.commit_hash = last_written_entry.commit_hash
+  else:
+    last_entry.fp_version = '0.1.0'
+
+  # print(last_entry.fp_version)
   changelog = ''
 
   for i in range(len(hashs)):
@@ -144,17 +181,19 @@ def main():
     cur_hash = hashs[i]
     prev_hash = hashs[i + 1] if i < len(hashs) - 1 else '2fd6f3ac'
 
-    if last_entry and last_entry.commit_hash == cur_hash:
+    if last_written_entry and last_written_entry.commit_hash == cur_hash:
       break
 
     sections = [create_new_params_section(cur_hash, prev_hash),
                 create_commits_section(cur_hash, prev_hash)]
 
     op_version = get_commit_op_version(cur_hash)
+    fp_version = increment_semantic_version(last_entry.fp_version, SemVerSections.MAJOR if op_version != last_entry.op_version else SemVerSections.MINOR)
+    # print(fp_version)
 
     # break
 
-    v_changes = f'Version {len(hashs) - i} (openpilot v{op_version})\n'
+    v_changes = f'Version {fp_version} (openpilot v{op_version})\n'
     v_changes += '========================\n'
     v_changes += create_indent(1) + f'Source commit: {cur_hash}\n'
 
@@ -162,7 +201,9 @@ def main():
 
     changelog += v_changes.strip() + '\n\n'
 
-    # break
+    last_entry.fp_version = fp_version
+    last_entry.op_version = op_version
+    last_entry.commit_hash = cur_hash
 
   log_lines = []
   with open('CHANGELOG.md', 'r') as f:
