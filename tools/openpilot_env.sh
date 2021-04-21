@@ -1,3 +1,5 @@
+#!/bin/bash -e
+
 if [ -z "$OPENPILOT_ENV" ]; then
   export PYTHONPATH="$HOME/openpilot"
 
