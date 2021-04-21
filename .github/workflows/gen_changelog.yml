@@ -6,6 +6,8 @@ on:
     paths-ignore:
       - '**.md'
       - 'README*'
+  workflow_dispatch:
+
 env:
   RUN_CMD_BASE: "docker run --shm-size 1G -e PYTHONPATH=/tmp/openpilot -e GITHUB_ACTION -e GITHUB_REF -e GITHUB_HEAD_REF -e GITHUB_SHA -e GITHUB_REPOSITORY -e GITHUB_RUN_ID -v /tmp/comma_download_cache:/tmp/comma_download_cache"
 
