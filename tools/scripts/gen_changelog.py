@@ -27,7 +27,7 @@ def get_git_diff(cmd: List[str], default: Optional[str] = None) -> Optional[str]
 if __name__ == '__main__':
   hashs = get_git_log(['--grep', '^Merge pull request #[0-9]\{1,\} from jamcar23', '--pretty=format:"%h"']).replace('"', '').splitlines()
   # hashs = get_git_log(['--grep="Merge pull request"', '--grep="from=jamcar23"', '--pretty=format:"%h"'])
-  print(f'hashs: {hashs}')
+  # print(f'hashs: {hashs}')
 
   changelog = ''
 
@@ -36,7 +36,25 @@ if __name__ == '__main__':
       break
 
     diff = get_git_diff([hashs[i + 1], hashs[i], '--', 'common/op_params.py'])
-    print(f'diff: {diff}')
+    # print(f'diff: {diff}')
+    # break
+
+    new_params = []
+
+    for line in diff.splitlines():
+      if not line:
+        continue
+
+      if line.startswith('+') and 'Param(' in line:
+        param = line[1:].strip()
+        last_char_idx = param.rfind(")")
+
+        if last_char_idx:
+          param = param[0:last_char_idx + 1]
+
+        new_params.append(param)
+
+    print(f'new params: {new_params}')
     break
 
   #   v_changes = f'Version {len(hashs) - i}\n'
