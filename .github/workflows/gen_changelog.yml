@@ -31,8 +31,8 @@ jobs:
         docker pull $CI_IMAGE
     - name: run changelog generation
       run: |
-      eval "$RUN_CMD_BASE -v $PWD:/tmp/openpilot --rm $CI_IMAGE /bin/sh -c " \
-      "cd /tmp/openpilot && python tools/scripts/gen_changelog.py"
+        eval "$RUN_CMD_BASE -v $PWD:/tmp/openpilot --rm $CI_IMAGE /bin/sh -c " \
+        "cd /tmp/openpilot && python tools/scripts/gen_changelog.py"
     - uses: actions/upload-artifact@v2
       if: always()
       continue-on-error: true
