@@ -108,7 +108,7 @@ if __name__ == '__main__':
 
     v_changes = f'Version {len(hashs) - i}\n'
     v_changes += '========================\n'
-  #   v_changes += diff
+    v_changes += create_indent(1) + f'Source commit: {cur_hash}\n'
 
     v_changes += create_changes_from_sections(sections)
 

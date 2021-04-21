@@ -1,5 +1,6 @@
 Version 53
 ========================
+  Source commit: 33e98404
   * New OP Params:
     * DISENGAGE_ON_GAS: Param(True, [bool], description='Whether you want openpilot to disengage on gas input or not.', live=True)
     * ENABLE_ROAD_SIGNS: Param(False, [bool], live=True, depends_on=SHOW_TOYOTA_OPTS, description='Use Toyota\'s road sign assist to control OP speed.')
@@ -24,6 +25,7 @@ Version 53
 
 Version 52
 ========================
+  Source commit: 92d4c8f6
   * Commits:
     * no heading cost (#20594)
     * MPC retune for laneless fix (#20616)
@@ -33,6 +35,7 @@ Version 52
 
 Version 51
 ========================
+  Source commit: 124b95b3
   * New OP Params:
     * HIGH_BEAM_BRIGHTNESS: Param(20, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS)
     * DISENGAGE_ON_GAS: Param(True, [bool], description='Whether you want openpilot to disengage on gas input or not.', live=True)
@@ -44,6 +47,7 @@ Version 51
 
 Version 50
 ========================
+  Source commit: a378051f
   * New OP Params:
     * SHOW_BUILD_OPTS: Param(False, [bool], live=False, description='Show options for compile time features.')
     * ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS: Param(False, [bool], depends_on=SHOW_BUILD_OPTS, description='When enabled, the screen brightness will adjust depending on the car headlights.')
@@ -58,11 +62,13 @@ Version 50
 
 Version 49
 ========================
+  Source commit: dcd91d2f
   * Commits:
     * fix(ui): change home screen to say flexpilot instead of op
 
 Version 48
 ========================
+  Source commit: 550c0109
   * New OP Params:
     * STEER_RATE_COST: Param(1., VT.number, live=True, depends_on=ENABLE_STEER_RATE_COST)
     * SHOW_BUILD_OPTS: Param(False, [bool])
@@ -83,9 +89,11 @@ Version 48
 
 Version 47
 ========================
+  Source commit: 48763617
 
 Version 46
 ========================
+  Source commit: 2caaf37f
   * Commits:
     * feat(ui): port colored lane lines from shane
     * fix(ui): add model reader to ui scene
@@ -93,6 +101,7 @@ Version 46
 
 Version 45
 ========================
+  Source commit: 3b2b4e0b
   * Commits:
     * hotfix(docker): make sure docker images build correctly
     * hotfix(github): properly copy files from docker container when using fat image
@@ -125,6 +134,7 @@ Version 45
 
 Version 44
 ========================
+  Source commit: 4d975819
   * New OP Params:
     * STEER_ACTUATOR_DELAY_BP_MULTI: Param([[0], [0, 4, 9, 17]], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS_MULTI)
     * STEER_ACTUATOR_DELAY_V_MULTI: Param([[0.45, 0.4, 0.3, 0.16]], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS_MULTI)
@@ -139,6 +149,7 @@ Version 44
 
 Version 43
 ========================
+  Source commit: d3aeeba1
   * New OP Params:
     * ENABLE_ACTUATOR_DELAY_BPS_MULTI: Param(False, bool, live=True, depends_on=SHOW_ACTUATOR_DELAY_PARAMS)
     * STEER_ACTUATOR_DELAY_BP_MULTI: Param([[0], [0, 4, 7]], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS_MULTI)
@@ -231,11 +242,13 @@ Version 43
 
 Version 42
 ========================
+  Source commit: 0e6dcd1b
   * Commits:
     * feat(actions): only push out release if build release works
 
 Version 41
 ========================
+  Source commit: 55e9f61e
   * New OP Params:
     * TOYOTA_PERMIT_BRAKING: Param(1, [1, 0, 'lead'], live=True, depends_on=ENABLE_TOYOTA_ACCEL_PARAMS)
     * ENABLE_PLANNER_PARAMS: Param(False, [bool], live=True)
@@ -251,6 +264,7 @@ Version 41
 
 Version 40
 ========================
+  Source commit: 0f74b346
   * Commits:
     * feat(version): update dirty tag to be based on my fork
     * feat(events): don't show startup event when on r2++
@@ -260,6 +274,7 @@ Version 40
 
 Version 39
 ========================
+  Source commit: 5c6def4d
   * Commits:
     * hotfix(actions): add missing 's' when checking for main branch
     * hotifx(docker): add new line to op fat docker file
@@ -274,6 +289,7 @@ Version 39
 
 Version 38
 ========================
+  Source commit: 446ba0b8
   * Commits:
     * feat(actions): publish my own docker image to github
     * feat(actions): remove old build workflow and don't rebuild for markdown changes
@@ -294,6 +310,7 @@ Version 38
 
 Version 37
 ========================
+  Source commit: 17619301
   * New OP Params:
     * DISABLED_PROCESSES: Param(None, [str, list, type(None)], description='You\'re on your own here', depends_on=ENABLE_MANAGER_PARAMS)
     * ENABLE_TOYOTA_CAN_PARAMS: Param(False, [bool], live=True, depends_on=SHOW_TOYOTA_OPTS)
@@ -308,14 +325,17 @@ Version 37
 
 Version 36
 ========================
+  Source commit: 7f4bc738
 
 Version 35
 ========================
+  Source commit: 6440d9fc
   * Commits:
     * fix(toyota): update default corolla tss2 indi tune
 
 Version 34
 ========================
+  Source commit: 97d6a4e3
   * New OP Params:
     * COROLLA_BODY_TYPE: Param('hatchback', ['sedan', 'hatchback'], depends_on=SHOW_TOYOTA_OPTS)
     * ENABLE_MANAGER_PARAMS: Param(False, [bool], depends_on=SHOW_UNSAFE_OPTS)
@@ -329,6 +349,7 @@ Version 34
 
 Version 33
 ========================
+  Source commit: 063e93e6
   * Commits:
     * tests(numpy): add more tests for interp when array lens varry
     * fix(numpy): make interp work when fp is shorter
@@ -341,21 +362,25 @@ Version 33
 
 Version 32
 ========================
+  Source commit: b8436a2e
   * Commits:
     * 0b6e45f8-21c1-408a-b61d-3dce02a69d23/500 (#19528)
 
 Version 31
 ========================
+  Source commit: a7a81f91
   * Commits:
     * Early model 081 (#19510)
 
 Version 30
 ========================
+  Source commit: bb4a2226
   * Commits:
     * Revert fix(ui): remove engine rpm from ui
 
 Version 29
 ========================
+  Source commit: d50d2dd4
   * New OP Params:
     * 'corolla_use_indi': Param(False, bool, depends_on=SHOW_TOYOTA_OPTS)
     * 'accel_hyst_gap': Param(0.02, VT.number, live=True, depends_on=SHOW_TOYOTA_OPTS)
@@ -379,6 +404,7 @@ Version 29
 
 Version 28
 ========================
+  Source commit: 7baf74bb
   * Commits:
     * feat(ui): add dev ui to 0.8
     * fix(ui): remove liveMpc info from ui
@@ -389,9 +415,11 @@ Version 28
 
 Version 27
 ========================
+  Source commit: ae1083d7
 
 Version 26
 ========================
+  Source commit: 36e9cd24
   * New OP Params:
     * self.fork_params = {CAM_OFFSET: Param(0.06, VT.number, 'Your camera offset to use in lane_planner.py', live=True)
     * 'indi_inner_gain': Param(9.0, VT.number, live=True, depends_on=SHOW_INDI_PARAMS)
@@ -482,12 +510,14 @@ Version 26
 
 Version 25
 ========================
+  Source commit: b95f8e32
   * Commits:
     * refactor(sentry): log all exceptions to sentry
     * fix(sentry): remove unused import in crash.py
 
 Version 24
 ========================
+  Source commit: b70f8916
   * Commits:
     * feat(actions): update refs now removes old refs
     * chore(sentry): replace comma's sentry url with my own
@@ -496,17 +526,20 @@ Version 24
 
 Version 23
 ========================
+  Source commit: b3d323d4
   * Commits:
     * fix(params): fix entering values into a list
     * fix(coasting): only update planner for updated model if coasting is enable
 
 Version 22
 ========================
+  Source commit: 1ac1945e
   * Commits:
     * Revert Latest torch model
 
 Version 21
 ========================
+  Source commit: 14162240
   * New OP Params:
     * ENABLE_COASTING: Param(False, bool, 'When true the car will try to coast down hills instead of braking.', live=True)
     * COAST_SPEED: Param(10.0, VT.number, 'The amount of speed to coast by before applying the brakes. Unit: MPH',
@@ -574,26 +607,31 @@ Version 21
 
 Version 20
 ========================
+  Source commit: ab8f6d5a
   * Commits:
     * feat(models): update model to 5034ac8b-5703-4a49-948b-11c064d10880/780 b5e5c420-7042-4d0c-92e5-770eb09936a5/800
 
 Version 19
 ========================
+  Source commit: bada60f2
   * Commits:
     * db090195-8810-42de-ab38-bb835d775d87/601
 
 Version 18
 ========================
+  Source commit: 1419a444
   * Commits:
     * 2895ace6-a296-47ac-86e6-17ea800a74e5/550
 
 Version 17
 ========================
+  Source commit: a4e29af3
   * Commits:
     * chore(git): update panda submodule
 
 Version 16
 ========================
+  Source commit: d7b005c5
   * New OP Params:
     * 'coast_speed': Param(10.0, VT.number, 'The amount of speed to coast by before applying the brakes. Unit: MPH')
     * 'a_cruise_max_v_following': Param([1.6, 1.4, 1.4, .7, .3], [list, float], live=True)
@@ -603,6 +641,7 @@ Version 16
 
 Version 15
 ========================
+  Source commit: 1f05c49d
   * Commits:
     * Added pytorch supercombo
     * fix rebase
@@ -623,6 +662,7 @@ Version 15
 
 Version 14
 ========================
+  Source commit: 784e5e90
   * New OP Params:
     * 'indi_inner_gain': Param(9.0, VT.number, live=True)
     * 'indi_outer_gain': Param(8.9, VT.number, live=True)
@@ -654,6 +694,7 @@ Version 14
 
 Version 13
 ========================
+  Source commit: 2f1e9cf6
   * Commits:
     * hotfix(actions): remove lfs support when checking out project
     * fix(params): stop op params from reading file during ci
@@ -682,6 +723,7 @@ Version 13
 
 Version 12
 ========================
+  Source commit: 0161ddc7
   * Commits:
     * refactor draw model
     * rebase master
@@ -721,6 +763,7 @@ Version 12
 
 Version 11
 ========================
+  Source commit: 239ebfad
   * New OP Params:
     * 'indi_outer_gain_v': Param([15, 15, 15], [list, float, int], live=True)
   * Commits:
@@ -1165,6 +1208,7 @@ Version 11
 
 Version 10
 ========================
+  Source commit: 4bac8e22
   * New OP Params:
     * 'indi_inner_gain': Param(6.0, VT.number, live=True)
     * 'indi_outer_gain': Param(15.0, VT.number, live=True)
@@ -1194,6 +1238,7 @@ Version 10
 
 Version 9
 ========================
+  Source commit: 2ea8066f
   * Commits:
     * feat(toyota): update corolla TSS2 safety param
     * chore(git): update opendbc submodule for corolla TSS2 safety param
@@ -1201,6 +1246,7 @@ Version 9
 
 Version 8
 ========================
+  Source commit: 88e7ed25
   * New OP Params:
     * 'corolla_use_indi': Param(False, bool)
     * 'accel_hyst_gap': Param(0.02, float, live=True)
@@ -1233,6 +1279,7 @@ Version 8
 
 Version 7
 ========================
+  Source commit: 3f6f12f3
   * New OP Params:
     * 'enable_coasting': Param(False, bool, 'When true the car will try to coast down hills instead of braking.')
     * 'coast_speed': Param(10.0, float, 'The amount of speed to coast by before applying the brakes. Unit: MPH')
@@ -1254,11 +1301,13 @@ Version 7
 
 Version 6
 ========================
+  Source commit: 8a62d538
   * Commits:
     * Better poly (#1437)
 
 Version 5
 ========================
+  Source commit: edfa06a8
   * New OP Params:
     * 'alca_min_speed': Param(20.0, VT.number, 'The minimum speed allowed for an automatic lane change (in MPH)')
     * 'corolla_use_indi': Param(False, bool)
@@ -1267,12 +1316,14 @@ Version 5
 
 Version 4
 ========================
+  Source commit: fbfcac23
   * Commits:
     * chore(git): update cereal submodule to point to my fork
     * chore(git): replace all submodule relative urls with github urls
 
 Version 3
 ========================
+  Source commit: 1821c6b1
   * Commits:
     * fix(actions): fix build action to include phonelibs
     * fix(actions): copy op_edit to release build
@@ -1286,6 +1337,7 @@ Version 3
 
 Version 2
 ========================
+  Source commit: 3305587d
   * New OP Params:
     * 'steer_actuator_delay': Param(0.57, float, live=True)
     * 'alca_nudge_required': Param(False, bool, 'Whether to wait for applied torque to the wheel (nudge)
