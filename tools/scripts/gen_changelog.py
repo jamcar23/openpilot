@@ -35,7 +35,7 @@ def strip_param_line(line):
 def create_indent(num_indents, single_indent='  '):
   indent = ''
 
-  for i in range(num_indents):
+  for _ in range(num_indents):
     indent += single_indent
 
   return indent
@@ -59,6 +59,10 @@ def get_new_params_between_prs(cur_hash, prev_hash):
 
 def get_commits_between_prs(cur_hash, prev_hash):
   commits = get_git_log([f'{prev_hash}..{cur_hash}', '--pretty=format:"%s"']).replace('"', '').splitlines()
+
+  if 'Merge pull request #' in commits[0] and 'from jamcar23/update-' in commits[0]:
+    commits = []
+
   commits = commits[1:][::-1]
 
   # print(f'commits: {commits}')
