@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash -e
 
 # TARGET_DIR="$1"
 # BRANCH="$2"
@@ -14,7 +14,7 @@ touch panda/board/obj/.placeholder
 
 echo "!board/obj/.placeholder" >> panda/.gitignore
 
-VERSION="$(date +%y.%m.%d.%H%M)"
+VERSION="$(python -c 'from tools.scripts.gen_changelog import export_next_semver_number; export_next_semver_number()')"
 echo "#define COMMA_VERSION \"$VERSION\"" > selfdrive/common/version.h
 
 git init

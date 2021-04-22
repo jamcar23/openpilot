@@ -175,6 +175,21 @@ def increment_semantic_version(version, section = SemVerSections.MAJOR):
 
   return '.'.join(sections)
 
+def get_next_semantic_version_number(last_entry, op_version):
+  if last_entry.fp_version and op_version != last_entry.op_version:
+    semver_change = SemVerSections.MAJOR
+  else:
+    semver_change = SemVerSections.MINOR
+
+  return increment_semantic_version(last_entry.fp_version, semver_change) if last_entry.fp_version else '1.0.0'
+
+def export_next_semver_number():
+  last_entry = get_last_entry_from_log()
+  last_commit = get_git_log(['-1', '--pretty=format:"%h"']).replace('"', '').strip()
+  op_version = get_commit_op_version(last_commit)
+
+  print(get_next_semantic_version_number(last_entry, op_version))
+
 class PullRequest:
   def __init__(self, commit_hash, base_hash, head_hash):
     super().__init__()
@@ -280,12 +295,9 @@ def main():
     op_version = get_commit_op_version(cur_hash.hash)
 
     if last_entry.fp_version and op_version != last_entry.op_version:
-      semver_change = SemVerSections.MAJOR
       sections[1] = Section('Openpilot Changes', op_releases[op_version])
-    else:
-      semver_change = SemVerSections.MINOR
 
-    fp_version = increment_semantic_version(last_entry.fp_version, semver_change) if last_entry.fp_version else '1.0.0'
+    fp_version = get_next_semantic_version_number()
     # print(fp_version)
 
     # break
