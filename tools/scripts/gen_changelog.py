@@ -320,13 +320,14 @@ def main():
     last_entry.op_version = op_version
     last_entry.commit_hash = cur_hash.hash
 
-  log_lines = []
-  with open('CHANGELOG.md', 'r') as f:
-    log_lines = f.readlines()
+  if changelog:
+    log_lines = []
+    with open('CHANGELOG.md', 'r') as f:
+      log_lines = f.readlines()
 
-  with open('CHANGELOG.md', 'w') as f:
-    f.write(changelog.strip() + '\n\n')
-    f.writelines(log_lines)
+    with open('CHANGELOG.md', 'w') as f:
+      f.write(changelog.strip() + '\n\n')
+      f.writelines(log_lines)
 
 if __name__ == '__main__':
   main()
