@@ -62,14 +62,28 @@ def create_new_params_section(cur_hash, prev_hash):
     # print(f'diff: {diff}')
     # break
 
+  old_params = []
   new_params = []
 
   for line in diff.splitlines():
     if not line:
       continue
 
+    if line.startswith('-') and 'Param(' in line:
+      old_params.append(strip_param_line(line))
     if line.startswith('+') and 'Param(' in line:
-      new_params.append(strip_param_line(line))
+      param_line = strip_param_line(line)
+      param_key = param_line[0:param_line.find(':') + 1]
+
+      found_old_param = False
+
+      for old_param in old_params:
+        if old_param.startswith(param_key):
+          found_old_param = True
+          break
+
+      if not found_old_param:
+        new_params.append(param_line)
 
   # print(f'new params: {new_params}')
   return Section('New OP Params', new_params)
