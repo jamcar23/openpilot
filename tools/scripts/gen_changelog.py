@@ -77,7 +77,7 @@ def create_new_params_section(cur_hash, prev_hash):
 def create_commits_section(cur_hash, prev_hash):
   commits = get_git_log([f'{prev_hash}..{cur_hash}', '--pretty=format:"%s"']).replace('"', '').splitlines()
 
-  if ('Merge pull request #' in commits[0] and 'from jamcar23/update-' in commits[0]) or ('Merge branch \'update-' in commits[0] and 'into src' in commits[0]):
+  if ('Merge pull request #' in commits[0] and 'from jamcar23/update-' in commits[0]) or ('Merge branch \'update-' in commits[0] and 'into src' in commits[0]) or 'bump version' in commits[0]:
     commits = []
 
   commits = commits[::-1]
@@ -222,7 +222,14 @@ def main():
                 create_commits_section(cur_hash.head_hash, cur_hash.base_hash)]
 
     op_version = get_commit_op_version(cur_hash.hash)
-    fp_version = increment_semantic_version(last_entry.fp_version, SemVerSections.MAJOR if op_version != last_entry.op_version else SemVerSections.MINOR)
+
+    if op_version != last_entry.op_version:
+      semver_change = SemVerSections.MAJOR
+      sections[1] = None
+    else:
+      semver_change = SemVerSections.MINOR
+
+    fp_version = increment_semantic_version(last_entry.fp_version, semver_change)
     # print(fp_version)
 
     # break
