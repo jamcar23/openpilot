@@ -297,7 +297,7 @@ def main():
     if last_entry.fp_version and op_version != last_entry.op_version:
       sections[1] = Section('Openpilot Changes', op_releases[op_version])
 
-    fp_version = get_next_semantic_version_number()
+    fp_version = get_next_semantic_version_number(last_entry, op_version)
     # print(fp_version)
 
     # break
