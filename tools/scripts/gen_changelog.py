@@ -12,7 +12,13 @@ DOCUMENTED_PARAM_KEYS = []
 
 def run_cmd(cmd: List[str]) -> str:
   # print(f'cmd: {cmd}')
-  return subprocess.check_output(cmd, encoding='utf8', shell=True).strip()
+  with subprocess.Popen(cmd, encoding='utf8', stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
+    output, err = p.communicate()
+
+    if p.returncode != 0:
+      raise subprocess.CalledProcessError(p.returncode, cmd, output, err)
+
+    return output
 
 
 def run_cmd_default(cmd: List[str], default: Optional[str] = None) -> Optional[str]:
