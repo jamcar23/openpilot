@@ -163,6 +163,44 @@ class PullRequest:
     self.base_hash = base_hash
     self.head_hash = head_hash
 
+def get_op_version_changelog():
+  op_version_pattern = re.compile(r'Version ([\d.]+) \(\d\d\d\d-\d\d-\d\d\)')
+  op_log_seperator_pattern = re.compile(r'[=]+')
+  versions = {}
+
+  with open('RELEASES.md', 'r') as f:
+    lines = f.readlines()
+
+  # print(f'lines: {lines}')
+  i = 0
+  while i < len(lines):
+    line = lines[i].strip()
+    match = op_version_pattern.search(line)
+    changes = []
+
+    # if match:
+    #   print('op release version match')
+    #   print(f'line + 1: {lines[i + 1]}')
+
+    if match and op_log_seperator_pattern.search(lines[i + 1].strip()):
+      # print('op release version match')
+      o = 2
+      ll = lines[i + o].strip()
+      # print(f'll: {ll}')
+
+      while ll.startswith('*'):
+        changes.append(ll[1:])
+        o += 1
+        ll = lines[i + o].strip()
+
+    if len(changes):
+      versions[match.group(1)] = changes
+      i += len(changes)
+
+    i += 1
+
+  # print(f'op releases: {versions}')
+  return versions
 
 def main():
   commit_logs = get_git_log(['--grep', r'^Merge pull request #[0-9]\{1,\} from jamcar23', '--pretty=short'])
@@ -200,11 +238,11 @@ def main():
 
     if trim_hashs:
       hashs = hashs[hash_idx + 1:]
-
   else:
     last_entry.fp_version = '0.1.0'
 
   # print(last_entry.fp_version)
+  op_releases = get_op_version_changelog()
   changelog = ''
 
   for i in range(len(hashs)):
@@ -225,7 +263,7 @@ def main():
 
     if op_version != last_entry.op_version:
       semver_change = SemVerSections.MAJOR
-      sections[1] = None
+      sections[1] = Section('Openpilot Changes', op_releases[op_version])
     else:
       semver_change = SemVerSections.MINOR
 
