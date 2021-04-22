@@ -26,17 +26,12 @@ jobs:
       run: |
         chmod +x ./.github/scripts/ci_env_vars.sh
         source ./.github/scripts/ci_env_vars.sh
-    # - name: pull docker ci image
-    #   run: |
-    #     docker pull $CI_IMAGE
     - name: manually run git ops
       run: |
         echo "running git log..."
         git log --grep='^Merge pull request #[0-9]\{1,\} from jamcar23' --pretty=short
     - name: run changelog generation
       run: |
-        # eval "$RUN_CMD_BASE -v $PWD:/tmp/openpilot --rm $CI_IMAGE /bin/sh -c " \
-        # "cd /tmp/openpilot && python tools/scripts/gen_changelog.py"
         python tools/scripts/gen_changelog.py
     - uses: actions/upload-artifact@v2
       if: always()
