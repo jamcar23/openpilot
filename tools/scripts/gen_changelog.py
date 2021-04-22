@@ -2,6 +2,7 @@
 import subprocess
 import requests
 import re
+import sys
 
 from typing import List, Optional
 
@@ -330,4 +331,9 @@ def main():
       f.writelines(log_lines)
 
 if __name__ == '__main__':
-  main()
+  args = sys.argv[1:]
+
+  if '--export' in args:
+    export_next_semver_number()
+  else:
+    main()
