@@ -1,4 +1,4 @@
-#!/usr/bin/env bash -e
+#!/bin/bash -e
 
 # TARGET_DIR="$1"
 # BRANCH="$2"
