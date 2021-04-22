@@ -1,8 +1,7 @@
-Version 53 (openpilot v0.8.3)
+Version 6.6.0 (openpilot v0.8.3)
 ========================
   Source commit: 33e98404
   * New OP Params:
-    * DISENGAGE_ON_GAS: Param(True, [bool], description='Whether you want openpilot to disengage on gas input or not.', live=True)
     * ENABLE_ROAD_SIGNS: Param(False, [bool], live=True, depends_on=SHOW_TOYOTA_OPTS, description='Use Toyota\'s road sign assist to control OP speed.')
   * Commits:
     * feat(car): add speed limit fields to car state
@@ -23,7 +22,7 @@ Version 53 (openpilot v0.8.3)
     * fix(controls): offset speed limit from car's last speed
     * fix(controls): properly set last cruise speed when reenabling
 
-Version 52 (openpilot v0.8.3)
+Version 6.5.0 (openpilot v0.8.3)
 ========================
   Source commit: 92d4c8f6
   * Commits:
@@ -33,26 +32,20 @@ Version 52 (openpilot v0.8.3)
     * fix(planner): temp remove wide camera from lat planner
     * fix(planner): get bool param correctly
 
-Version 51 (openpilot v0.8.3)
+Version 6.4.0 (openpilot v0.8.3)
 ========================
   Source commit: 124b95b3
   * New OP Params:
-    * HIGH_BEAM_BRIGHTNESS: Param(20, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS)
     * DISENGAGE_ON_GAS: Param(True, [bool], description='Whether you want openpilot to disengage on gas input or not.', live=True)
   * Commits:
     * feat(params): enable optional disengage on gas
     * fix(param); made disengage on gas a live param
     * Merge branch 'src' into disengage-on-gas
-    * docs(readme): add ToC section for notable op params
 
-Version 50 (openpilot v0.8.3)
+Version 6.3.0 (openpilot v0.8.3)
 ========================
   Source commit: a378051f
   * New OP Params:
-    * SHOW_BUILD_OPTS: Param(False, [bool], live=False, description='Show options for compile time features.')
-    * ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS: Param(False, [bool], depends_on=SHOW_BUILD_OPTS, description='When enabled, the screen brightness will adjust depending on the car headlights.')
-    * DAY_BRIGHTNESS: Param(245, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS)
-    * NIGHT_BRIGHTNESS: Param(50, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS)
     * HIGH_BEAM_BRIGHTNESS: Param(20, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS)
   * Commits:
     * fix(param): made show build options a live param
@@ -60,17 +53,16 @@ Version 50 (openpilot v0.8.3)
     * feat(params): add params for brightness when high beams are on
     * docs(readme): add spot about screen brightness via head lights
 
-Version 49 (openpilot v0.8.3)
+Version 6.2.0 (openpilot v0.8.3)
 ========================
   Source commit: dcd91d2f
   * Commits:
     * fix(ui): change home screen to say flexpilot instead of op
 
-Version 48 (openpilot v0.8.3)
+Version 6.1.0 (openpilot v0.8.3)
 ========================
   Source commit: 550c0109
   * New OP Params:
-    * STEER_RATE_COST: Param(1., VT.number, live=True, depends_on=ENABLE_STEER_RATE_COST)
     * SHOW_BUILD_OPTS: Param(False, [bool])
     * ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS: Param(True, [bool], depends_on=SHOW_BUILD_OPTS, description='When enabled the screen brightness will be brightness_m when head lights are off.')
     * DAY_BRIGHTNESS: Param(0.8, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS)
@@ -87,26 +79,33 @@ Version 48 (openpilot v0.8.3)
     * fix(ui): fix typo in accessing captin proto enums
     * tests(processes): update process replay refs for head-light-screen-brightness
 
-Version 47 (openpilot v0.8.3)
+Version 6.0.0 (openpilot v0.8.3)
 ========================
   Source commit: 48763617
+  * Openpilot Changes:
+    *  New model
+    *  Trained on new diverse dataset from 2000+ users from 30+ countries
+    *  Trained with improved segnet from the comma-pencil community project
+    *  🥬 Dramatically improved end-to-end lateral performance 🥬
+    *  Toggle added to disable the use of lanelines
+    *  NEOS update: update packages and support for new UI
+    *  New offroad UI based on Qt
+    *  Default SSH key only used for setup
+    *  Kia Ceed 2019 support thanks to ZanZaD13!
+    *  Kia Seltos 2021 support thanks to speedking456!
+    *  Added support for many Volkswagen and Škoda models thanks to jyoung8607!
 
-Version 46 (openpilot v0.8.2)
+Version 5.2.0 (openpilot v0.8.2)
 ========================
   Source commit: 2caaf37f
   * Commits:
     * feat(ui): port colored lane lines from shane
     * fix(ui): add model reader to ui scene
-    * docs(readme): update GH action status badges
 
-Version 45 (openpilot v0.8.2)
+Version 5.1.0 (openpilot v0.8.2)
 ========================
   Source commit: 3b2b4e0b
   * Commits:
-    * hotfix(docker): make sure docker images build correctly
-    * hotfix(github): properly copy files from docker container when using fat image
-    * hotfix(github): properly make ci release without extra files
-    * hotfeat(github): make ci release manually invokable
     * feat(ui): draw measurements from dev ui in 0.8.1
     * fix(ui): update CPU temp and perc in dev UI
     * fix(ui): update gps accuracy and altitude in dev ui
@@ -132,22 +131,26 @@ Version 45 (openpilot v0.8.2)
     * fix(ui): properly show aEgo in dev ui
     * refactor(ui): change grouping of dev ui measurements
 
-Version 44 (openpilot v0.8.2)
+Version 5.0.0 (openpilot v0.8.2)
 ========================
   Source commit: 4d975819
-  * New OP Params:
-    * STEER_ACTUATOR_DELAY_BP_MULTI: Param([[0], [0, 4, 9, 17]], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS_MULTI)
-    * STEER_ACTUATOR_DELAY_V_MULTI: Param([[0.45, 0.4, 0.3, 0.16]], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS_MULTI)
-    * INDI_INNER_GAIN_BP_MULTI: Param([[0, 6, 15], [20, 24, 30]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS)
-    * INDI_INNER_GAIN_V_MULTI: Param([[5.25, 5.5, 6.5], [6.25, 6.75, 8.5], [7.5, 8.5, 10]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS)
-    * INDI_OUTER_GAIN_BP_MULTI: Param([[0, 3, 7], [20, 24, 30]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS)
-    * INDI_OUTER_GAIN_V_MULTI: Param([[4, 4.5, 6], [4.5, 5.25, 6.25], [6, 6.5, 7.5]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS)
-    * INDI_TIME_CONSTANT_BP_MULTI: Param([[0, 5, 10], [20, 24, 30]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS)
-    * INDI_TIME_CONSTANT_V_MULTI: Param([[0.3, 0.5, 1], [1.25, 1.5], [2.25]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS)
-    * INDI_ACTUATOR_EFFECTIVENESS_BP_MULTI: Param([[0, 5], [20, 24]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS)
-    * INDI_ACTUATOR_EFFECTIVENESS_V_MULTI: Param([[1.5, 1.75], [2, 3]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS)
+  * Openpilot Changes:
+    *  Use model points directly in MPC (no more polyfits), making lateral planning more accurate
+    *  Use model heading prediction for smoother lateral control
+    *  Smarter actuator delay compensation
+    *  Improve qcamera resolution for improved video in explorer and connect
+    *  Adjust maximum engagement speed to better fit the model's training distribution
+    *  New driver monitoring model trained with 3x more diverse data
+    *  Improved face detection with masks
+    *  More predictable DM alerts when visibility is bad
+    *  Rewritten video streaming between openpilot processes
+    *  Improved longitudinal tuning on TSS2 Corolla and Rav4 thanks to briskspirit!
+    *  Audi A3 2015 and 2017 support thanks to keeleysam!
+    *  Nissan Altima 2020 support thanks to avolmensky!
+    *  Lexus ES Hybrid 2018 support thanks to TheInventorMan!
+    *  Toyota Camry Hybrid 2021 support thanks to alancyau!
 
-Version 43 (openpilot v0.8.1)
+Version 4.7.0 (openpilot v0.8.1)
 ========================
   Source commit: d3aeeba1
   * New OP Params:
@@ -180,7 +183,6 @@ Version 43 (openpilot v0.8.1)
     * INDI_ACTUATOR_EFFECTIVENESS_V_MULTI: Param([[1.25, 1.5], [2, 3]], [list, float, int], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS)
     * INDI_MULTI_BREAKPOINT_SOURCE: Param(['desired_steer_abs', 'vego'], [list, str], live=True, depends_on=ENABLE_MULTI_INDI_BREAKPOINTS)
     * ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE: Param(False, bool, depends_on=ENABLE_UNSAFE_STEERING_RATE, description='Toyota only.\nThis is HIGHLY unsafe, '
-    * 'a_cruise_max_v_following': Param([1.6, 1.6, 0.65, .4], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS)
     * ENABLE_STEER_RATE_COST: Param(False, [bool], live=True, depends_on=ENABLE_PLANNER_PARAMS, description='Technically live but treat it like it\'s not.')
     * STEER_RATE_COST: Param(1., VT.number, live=True, depends_on=ENABLE_STEER_RATE_COST)
   * Commits:
@@ -240,29 +242,22 @@ Version 43 (openpilot v0.8.1)
     * docs(readme): use complete installation command
     * docs(readme): add my favorite multi bp tune to readme
 
-Version 42 (openpilot v0.8.1)
+Version 4.6.0 (openpilot v0.8.1)
 ========================
   Source commit: 0e6dcd1b
   * Commits:
     * feat(actions): only push out release if build release works
 
-Version 41 (openpilot v0.8.1)
+Version 4.5.0 (openpilot v0.8.1)
 ========================
   Source commit: 55e9f61e
   * New OP Params:
-    * TOYOTA_PERMIT_BRAKING: Param(1, [1, 0, 'lead'], live=True, depends_on=ENABLE_TOYOTA_ACCEL_PARAMS)
     * ENABLE_PLANNER_PARAMS: Param(False, [bool], live=True)
     * ENABLE_PLNR_ACCEL_LIMITS: Param(False, [bool], live=True, depends_on=ENABLE_PLANNER_PARAMS)
-    * 'a_cruise_min_bp': Param([0., 5.,  10., 20.,  40.], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS)
-    * 'a_cruise_min_v': Param([-1.0, -.8, -.67, -.5, -.30], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS)
-    * 'a_cruise_min_v_following': Param([-1.0, -.8, -.67, -.5, -.30], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS)
-    * 'a_cruise_max_bp': Param([0.,  6.4, 22.5, 40.], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS)
-    * 'a_cruise_max_v': Param([1.2, 1.2, 0.65, .4], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS)
-    * 'a_cruise_max_v_following': Param([1.6, 1.6, 0.65, .4], [list, float], live=True, depends_on=ENABLE_PLNR_ACCEL_LIMITS)
   * Commits:
     * feat(params): add param to toggle planner params
 
-Version 40 (openpilot v0.8.1)
+Version 4.4.0 (openpilot v0.8.1)
 ========================
   Source commit: 0f74b346
   * Commits:
@@ -272,14 +267,11 @@ Version 40 (openpilot v0.8.1)
     * fix(sentry): pass args and kwargs to client
     * fix(sentry): track discord username before dongle id
 
-Version 39 (openpilot v0.8.1)
+Version 4.3.0 (openpilot v0.8.1)
 ========================
   Source commit: 5c6def4d
   * Commits:
-    * hotfix(actions): add missing 's' when checking for main branch
-    * hotifx(docker): add new line to op fat docker file
     * chore(actions): remove unused sim tests workflow
-    * feat(github): update issue templates for new labels
     * feat(actions): add workflow to clean up old ci branches
     * feat(actions): check for error when deleting branch
     * fix(actions): properly get branch name sub string
@@ -287,7 +279,7 @@ Version 39 (openpilot v0.8.1)
     * fix(actions): get correct length, set correct ref, and check correct status code
     * feat(actions): limit branch clean up to src branch
 
-Version 38 (openpilot v0.8.1)
+Version 4.2.0 (openpilot v0.8.1)
 ========================
   Source commit: 446ba0b8
   * Commits:
@@ -308,11 +300,10 @@ Version 38 (openpilot v0.8.1)
     * fix(docker): make sure op_edit is included in fat image
     * fix(params): ignore bare except in op_edit
 
-Version 37 (openpilot v0.8.1)
+Version 4.1.0 (openpilot v0.8.1)
 ========================
   Source commit: 17619301
   * New OP Params:
-    * DISABLED_PROCESSES: Param(None, [str, list, type(None)], description='You\'re on your own here', depends_on=ENABLE_MANAGER_PARAMS)
     * ENABLE_TOYOTA_CAN_PARAMS: Param(False, [bool], live=True, depends_on=SHOW_TOYOTA_OPTS)
     * ENABLE_TOYOTA_ACCEL_PARAMS: Param(False, [bool], live=True, depends_on=ENABLE_TOYOTA_CAN_PARAMS)
     * TOYOTA_ACC_TYPE: Param(1, [int], live=True, depends_on=ENABLE_TOYOTA_ACCEL_PARAMS)
@@ -323,21 +314,28 @@ Version 37 (openpilot v0.8.1)
     * fix(params): fix op edit to cast default values to str
     * tests(processes): update process replay refs for can-tuning
 
-Version 36 (openpilot v0.8.1)
+Version 4.0.0 (openpilot v0.8.1)
 ========================
   Source commit: 7f4bc738
+  * Openpilot Changes:
+    *  Original EON is deprecated, upgrade to comma two
+    *  Better model performance in heavy rain
+    *  Better lane positioning in turns
+    *  Fixed bug where model would cut turns on empty roads at night
+    *  Fixed issue where some Toyotas would not completely stop thanks to briskspirit!
+    *  Toyota Camry 2021 with TSS2.5 support
+    *  Hyundai Ioniq Electric 2020 support thanks to baldwalker!
 
-Version 35 (openpilot v0.8.0)
+Version 3.8.0 (openpilot v0.8.0)
 ========================
   Source commit: 6440d9fc
   * Commits:
     * fix(toyota): update default corolla tss2 indi tune
 
-Version 34 (openpilot v0.8.0)
+Version 3.7.0 (openpilot v0.8.0)
 ========================
   Source commit: 97d6a4e3
   * New OP Params:
-    * COROLLA_BODY_TYPE: Param('hatchback', ['sedan', 'hatchback'], depends_on=SHOW_TOYOTA_OPTS)
     * ENABLE_MANAGER_PARAMS: Param(False, [bool], depends_on=SHOW_UNSAFE_OPTS)
     * DISABLED_PROCESSES: Param(None, [str, list, type(None)], description='You\'re on your own here', depends_on=ENABLE_MANAGER_PARAMS)
   * Commits:
@@ -347,7 +345,7 @@ Version 34 (openpilot v0.8.0)
     * fix(params): only check if not default
     * fix(params): allow op_edit to handle none as list default
 
-Version 33 (openpilot v0.8.0)
+Version 3.6.0 (openpilot v0.8.0)
 ========================
   Source commit: 063e93e6
   * Commits:
@@ -360,30 +358,28 @@ Version 33 (openpilot v0.8.0)
     * tests(numpy): add test case for xp containing values not in x
     * refactor(numpy): move calc_interp function back into get_interp
 
-Version 32 (openpilot v0.8.0)
+Version 3.5.0 (openpilot v0.8.0)
 ========================
   Source commit: b8436a2e
   * Commits:
     * 0b6e45f8-21c1-408a-b61d-3dce02a69d23/500 (#19528)
 
-Version 31 (openpilot v0.8.0)
+Version 3.4.0 (openpilot v0.8.0)
 ========================
   Source commit: a7a81f91
   * Commits:
     * Early model 081 (#19510)
 
-Version 30 (openpilot v0.8.0)
+Version 3.3.0 (openpilot v0.8.0)
 ========================
   Source commit: bb4a2226
   * Commits:
     * Revert fix(ui): remove engine rpm from ui
 
-Version 29 (openpilot v0.8.0)
+Version 3.2.0 (openpilot v0.8.0)
 ========================
   Source commit: d50d2dd4
   * New OP Params:
-    * 'corolla_use_indi': Param(False, bool, depends_on=SHOW_TOYOTA_OPTS)
-    * 'accel_hyst_gap': Param(0.02, VT.number, live=True, depends_on=SHOW_TOYOTA_OPTS)
     * ENABLE_START_STOP_PARAMS: Param(False, bool, live=True, depends_on=ENABLE_LONG_PARAMS)
     * STOP_BRAKE_RATE_BP: Param([0], [list, float, int], live=True, depends_on=ENABLE_START_STOP_PARAMS)
     * STOP_BRAKE_RATE_V: Param([0.2], [list, float, int], live=True, depends_on=ENABLE_START_STOP_PARAMS)
@@ -402,7 +398,7 @@ Version 29 (openpilot v0.8.0)
     * fix(toyota): apply briskspirit braking by default
     * fix(py): remove unused imports
 
-Version 28 (openpilot v0.8.0)
+Version 3.1.0 (openpilot v0.8.0)
 ========================
   Source commit: 7baf74bb
   * Commits:
@@ -413,25 +409,30 @@ Version 28 (openpilot v0.8.0)
     * feat(toyota): record engine rpm into car state
     * tests(processes): update process replay refs for dev-ui
 
-Version 27 (openpilot v0.8.0)
+Version 3.0.0 (openpilot v0.8.0)
 ========================
   Source commit: ae1083d7
+  * Openpilot Changes:
+    *  New driving model: fully 3D and improved cut-in detection
+    *  UI draws 2 road edges, 4 lanelines and paths in 3D
+    *  Major fixes to cut-in detection for openpilot longitudinal
+    *  Grey panda is no longer supported, upgrade to comma two or black panda
+    *  Lexus NX 2018 support thanks to matt12eagles!
+    *  Kia Niro EV 2020 support thanks to nickn17!
+    *  Toyota Prius 2021 support thanks to rav4kumar!
+    *  Improved lane positioning with uncertain lanelines, wide lanes and exits
+    *  Improved lateral control for Prius and Subaru
 
-Version 26 (openpilot v0.7.9)
+Version 2.15.0 (openpilot v0.7.9)
 ========================
   Source commit: 36e9cd24
   * New OP Params:
     * self.fork_params = {CAM_OFFSET: Param(0.06, VT.number, 'Your camera offset to use in lane_planner.py', live=True)
-    * 'indi_inner_gain': Param(9.0, VT.number, live=True, depends_on=SHOW_INDI_PARAMS)
-    * 'indi_outer_gain': Param(8.9, VT.number, live=True, depends_on=SHOW_INDI_PARAMS)
-    * 'indi_time_constant': Param(5.5, VT.number, live=True, depends_on=SHOW_INDI_PARAMS)
-    * 'indi_actuator_effectiveness': Param(9.0, VT.number, live=True, depends_on=SHOW_INDI_PARAMS)
     * SHOW_ACTUATOR_DELAY_PARAMS: Param(False, bool, live=True, depends_on=ENABLE_LAT_PARAMS)
     * STEER_ACTUATOR_DELAY: Param(0.60, VT.number, live=True, depends_on=SHOW_ACTUATOR_DELAY_PARAMS)
     * ENABLE_ACTUATOR_DELAY_BPS: Param(False, bool, live=True, depends_on=SHOW_ACTUATOR_DELAY_PARAMS)
     * STEER_ACTUATOR_DELAY_BP: Param([0.], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS)
     * STEER_ACTUATOR_DELAY_V: Param([0.6], [list, float, int], live=True, depends_on=ENABLE_ACTUATOR_DELAY_BPS)
-    * ENABLE_COASTING: Param(False, bool, 'When true the car will try to coast down hills instead of braking.', live=True, depends_on=SHOW_EXPERIMENTAL_OPTS)
     * ENABLE_LONG_PID_PARAMS: Param(False, bool, live=True, depends_on=ENABLE_LONG_PARAMS)
     * LONG_PID_KP_BP: Param([0., 5., 35.], [list, float, int], live=True, depends_on=ENABLE_LONG_PID_PARAMS)
     * LONG_PID_KP_V: Param([3.6, 2.4, 1.5], [list, float, int], live=True, depends_on=ENABLE_LONG_PID_PARAMS)
@@ -442,14 +443,6 @@ Version 26 (openpilot v0.7.9)
     * ENABLE_LONG_DEADZONE_PARAMS: Param(False, bool, live=True, depends_on=ENABLE_LONG_PARAMS)
     * LONG_DEADZONE_BP: Param([0., 9.], [list, float, int], live=True, depends_on=ENABLE_LONG_DEADZONE_PARAMS)
     * LONG_DEADZONE_V: Param([0., .15], [list, float, int], live=True, depends_on=ENABLE_LONG_DEADZONE_PARAMS)
-    * INDI_SHOW_BREAKPOINTS: Param(False, bool, live=True, depends_on=SHOW_INDI_PARAMS)
-    * 'a_cruise_min_bp': Param([0., 5.,  10., 20.,  40.], [list, float], live=True, depends_on=SHOW_A_CRUISE)
-    * 'a_cruise_min_v': Param([-1.0, -.8, -.67, -.5, -.30], [list, float], live=True, depends_on=SHOW_A_CRUISE)
-    * 'a_cruise_min_v_following': Param([-1.0, -.8, -.67, -.5, -.30], [list, float], live=True, depends_on=SHOW_A_CRUISE)
-    * 'a_cruise_max_bp': Param([0.,  6.4, 22.5, 40.], [list, float], live=True, depends_on=SHOW_A_CRUISE)
-    * 'a_cruise_max_v': Param([1.2, 1.2, 0.65, .4], [list, float], live=True, depends_on=SHOW_A_CRUISE)
-    * 'a_cruise_max_v_following': Param([1.6, 1.6, 0.65, .4], [list, float], live=True, depends_on=SHOW_A_CRUISE)
-    * ENABLE_UNSAFE_STEERING_RATE: Param(False, bool, depends_on=SHOW_UNSAFE_OPTS, description='Toyota only.\nThis is HIGHLY unsafe, '
     * ENABLE_LAT_PARAMS: Param(False, bool, live=True, description="When true, the lat params set in op_edit.")
     * WHICH_LAT_CTRL: Param('indi', ['pid', 'indi', 'lqr'], live=True, depends_on= ENABLE_LAT_PARAMS, description='Which lat controller to use, '
     * SHOW_LQR_PARAMS: Param(False, [bool], live=True, depends_on=ENABLE_LAT_PARAMS)
@@ -508,36 +501,35 @@ Version 26 (openpilot v0.7.9)
     * refactor(params): change a_cruise op params to match stock values
     * tests(processes): update process replay refs for tuning
 
-Version 25 (openpilot v0.7.9)
+Version 2.14.0 (openpilot v0.7.9)
 ========================
   Source commit: b95f8e32
   * Commits:
     * refactor(sentry): log all exceptions to sentry
     * fix(sentry): remove unused import in crash.py
 
-Version 24 (openpilot v0.7.9)
+Version 2.13.0 (openpilot v0.7.9)
 ========================
   Source commit: b70f8916
   * Commits:
-    * feat(actions): update refs now removes old refs
     * chore(sentry): replace comma's sentry url with my own
     * feat(sentry): improve crash logging
     * fix(sentry): upload error tags to sentry
 
-Version 23 (openpilot v0.7.9)
+Version 2.12.0 (openpilot v0.7.9)
 ========================
   Source commit: b3d323d4
   * Commits:
     * fix(params): fix entering values into a list
     * fix(coasting): only update planner for updated model if coasting is enable
 
-Version 22 (openpilot v0.7.9)
+Version 2.11.0 (openpilot v0.7.9)
 ========================
   Source commit: 1ac1945e
   * Commits:
     * Revert Latest torch model
 
-Version 21 (openpilot v0.7.9)
+Version 2.10.0 (openpilot v0.7.9)
 ========================
   Source commit: 14162240
   * New OP Params:
@@ -555,23 +547,7 @@ Version 21 (openpilot v0.7.9)
     * BRAKE_MAX_BP: Param([0., 20, 33], [list, float, int], live=True, depends_on=ENABLE_BRAKE_PARAMS)
     * BRAKE_MAX_V: Param([0.5, 0.5, 0.5], [list, float], live=True, depends_on=ENABLE_BRAKE_PARAMS)
     * INDI_SHOW_BREAKPOINTS: Param(False, bool, live=True)
-    * 'indi_use_vego_breakpoints': Param(False, bool, live=True, depends_on=INDI_SHOW_BREAKPOINTS)
-    * 'indi_use_steer_angle_breakpoints': Param(False, bool, live=True, depends_on=INDI_SHOW_BREAKPOINTS)
-    * 'indi_inner_gain_bp': Param([0, 255, 255], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS)
-    * 'indi_inner_gain_v': Param([6.0, 6.0, 6.0], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS)
-    * 'indi_outer_gain_bp': Param([0, 255, 255], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS)
-    * 'indi_outer_gain_v': Param([15, 15, 15], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS)
-    * 'indi_time_constant_bp': Param([0, 255, 255], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS)
-    * 'indi_time_constant_v': Param([5.5, 5.5, 5.5], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS)
-    * 'indi_actuator_effectiveness_bp': Param([0, 255, 255], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS)
-    * 'indi_actuator_effectiveness_v': Param([6, 6, 6], [list, float, int], live=True, depends_on=INDI_SHOW_BREAKPOINTS)
     * SHOW_A_CRUISE: Param(False, bool, live=True)
-    * 'a_cruise_min_bp': Param([0.0, 5.0, 10.0, 20.0, 55.0], [list, float], live=True, depends_on=SHOW_A_CRUISE)
-    * 'a_cruise_min_v': Param([-1.0, -0.7, -0.6, -0.5, -0.3], [list, float], live=True, depends_on=SHOW_A_CRUISE)
-    * 'a_cruise_min_v_following': Param([-3.0, -2.5, -2.0, -1.5, -1.0], [list, float], live=True, depends_on=SHOW_A_CRUISE)
-    * 'a_cruise_max_bp': Param([0., 5., 10., 20., 55.], [list, float], live=True, depends_on=SHOW_A_CRUISE)
-    * 'a_cruise_max_v': Param([0.8, 0.9, 1.0, 0.4, 0.2], [list, float], live=True, depends_on=SHOW_A_CRUISE)
-    * 'a_cruise_max_v_following': Param([1.6, 1.4, 1.4, .7, .3], [list, float], live=True, depends_on=SHOW_A_CRUISE)
   * Commits:
     * refactor(params): refactor coasting op params to use string constants
     * fix(controls): only replace setpoint offset with coast speed if coasting is enabled
@@ -605,41 +581,39 @@ Version 21 (openpilot v0.7.9)
     * feat(params): add ability to replace lists in op edit
     * fix(params): check types when replacing list in op params
 
-Version 20 (openpilot v0.7.9)
+Version 2.9.0 (openpilot v0.7.9)
 ========================
   Source commit: ab8f6d5a
   * Commits:
     * feat(models): update model to 5034ac8b-5703-4a49-948b-11c064d10880/780 b5e5c420-7042-4d0c-92e5-770eb09936a5/800
 
-Version 19 (openpilot v0.7.9)
+Version 2.8.0 (openpilot v0.7.9)
 ========================
   Source commit: bada60f2
   * Commits:
     * db090195-8810-42de-ab38-bb835d775d87/601
 
-Version 18 (openpilot v0.7.9)
+Version 2.7.0 (openpilot v0.7.9)
 ========================
   Source commit: 1419a444
   * Commits:
     * 2895ace6-a296-47ac-86e6-17ea800a74e5/550
 
-Version 17 (openpilot v0.7.9)
+Version 2.6.0 (openpilot v0.7.9)
 ========================
   Source commit: a4e29af3
   * Commits:
     * chore(git): update panda submodule
 
-Version 16 (openpilot v0.7.9)
+Version 2.5.0 (openpilot v0.7.9)
 ========================
   Source commit: d7b005c5
   * New OP Params:
-    * 'coast_speed': Param(10.0, VT.number, 'The amount of speed to coast by before applying the brakes. Unit: MPH')
-    * 'a_cruise_max_v_following': Param([1.6, 1.4, 1.4, .7, .3], [list, float], live=True)
     * ENABLE_UNSAFE_STEERING_RATE: Param(False, bool)
   * Commits:
     * feat(toyota): add optional unsafe steering torqure rate
 
-Version 15 (openpilot v0.7.9)
+Version 2.4.0 (openpilot v0.7.9)
 ========================
   Source commit: 1f05c49d
   * Commits:
@@ -660,15 +634,10 @@ Version 15 (openpilot v0.7.9)
     * fix ui drawing with clips
     * ./compile_torch.py 5034ac8b-5703-4a49-948b-11c064d10880/780 dfcd2375-81d8-49df-95bf-1d2d6ad86010/450 with variable history length
 
-Version 14 (openpilot v0.7.9)
+Version 2.3.0 (openpilot v0.7.9)
 ========================
   Source commit: 784e5e90
   * New OP Params:
-    * 'indi_inner_gain': Param(9.0, VT.number, live=True)
-    * 'indi_outer_gain': Param(8.9, VT.number, live=True)
-    * 'indi_actuator_effectiveness': Param(9.0, VT.number, live=True)
-    * 'steer_actuator_delay': Param(0.60, VT.number, live=True)
-    * 'indi_actuator_effectiveness_v': Param([6, 6, 6], [list, float, int], live=True)
     * 'a_cruise_min_bp': Param([0.0, 5.0, 10.0, 20.0, 55.0], [list, float], live=True)
     * 'a_cruise_min_v': Param([-1.0, -0.7, -0.6, -0.5, -0.3], [list, float], live=True)
     * 'a_cruise_min_v_following': Param([-3.0, -2.5, -2.0, -1.5, -1.0], [list, float], live=True)
@@ -681,22 +650,12 @@ Version 14 (openpilot v0.7.9)
     * fix(ui): draw road edges with a higher alpha value
     * fix(tests): fix following distance unit tests
     * Merge branch 'src' into eco-mode
-    * feat(actions): add slash command to update refs
-    * fix(actions): remove git config user info
-    * fix(actions): fix indentation typo in run command
-    * fix(actions): docker map volume when updating refs
-    * fix(actions): fix typo in docker run command
-    * fix(actions): commit ref_commit file in update-refs workflow
-    * fix(actions): use PAT for update_refs workflow
-    * fix(actions): properly commit updated ref files
-    * fix(actions): checkout repo with PAT
     * tests(processes): update process replay refs for eco-mode
 
-Version 13 (openpilot v0.7.9)
+Version 2.2.0 (openpilot v0.7.9)
 ========================
   Source commit: 2f1e9cf6
   * Commits:
-    * hotfix(actions): remove lfs support when checking out project
     * fix(params): stop op params from reading file during ci
     * fix(tests): update refs now uses windows compatible file names
     * chore(git): update git lfs attributes
@@ -721,7 +680,7 @@ Version 13 (openpilot v0.7.9)
     * fix(actions): properly exit prebuilt job
     * fix(actions): use proper pr ci branch name and don't use ::set-env
 
-Version 12 (openpilot v0.7.9)
+Version 2.1.0 (openpilot v0.7.9)
 ========================
   Source commit: 0161ddc7
   * Commits:
@@ -761,464 +720,22 @@ Version 12 (openpilot v0.7.9)
     * Merge branch 'src' into refactor-model
     * fix(models): add missing 3D model lfs hash
 
-Version 11 (openpilot v0.7.9)
+Version 2.0.0 (openpilot v0.7.9)
 ========================
   Source commit: 239ebfad
   * New OP Params:
     * 'indi_outer_gain_v': Param([15, 15, 15], [list, float, int], live=True)
-  * Commits:
-    * bump to 0.7.8
-    * fix tested branch detection
-    * Update values.py (#1824)
-    * Revert Update values.py (#1824)
-    * Nissan: Tweaking steeringPressed/LKAS_MAX_TORQUE (#1865)
-    * Add 2020 Insight FW (#1879)
-    * bump opendbc
-    * Honda CRV BSM alert from B-CAN (#1867)
-    * update pipfile.lock (#1896)
-    * add tolerance to process replay compare (#1904)
-    * fix modeld replay test
-    * fix cppcheck on ubuntu 19.10
-    * make sure boardd loopback test can run standalone
-    * boardd: release claimed interface before closing usb (#1855)
-    * fix buffer overflow (#1871)
-    * boardd: Add new functions usb_read, usb_write (#1856)
-    * Add fwdCamera f/w for 2020 Corolla Hybrid ZR (AUS) (#1911)
-    * fix spinner
-    * skip 1st segment in debug replay
-    * Subaru Global generated dbc and new signals (#1908)
-    * add HYUNDAI_GENESIS test route
-    * Only draw lead car indicators when controlling longitudinal (#1914)
-    * add test route for HYUNDAI.KIA_SORENTO
-    * Use hyundai legacy safety for Kia Sorento (#1912)
-    * update refs
-    * add timeout on procLog socket for CPU usage test
-    * Update pip to 20.1.1 so python-opencv installation succeeds
-    * remove old params learner (#1918)
-    * Improve on-device CI reliability (#1922)
-    * Test Car Models 2.0 (#1903)
-    * Car cleanup (#1924)
-    * kia stinger: use hyundaiLegacy safety mode and add test route
-    * boardd: use enum instead of magic number (#1927)
-    * sidebar: remove unnecessary checks on uilayout_sidebarcollapsed (#1928)
-    * qcom2 build fixes
-    * bump cereal
-    * Local variable ARCH isn't used anymore (#1930)
-    * remove dead lines from boardd cython setup
-    * Add Lexus RX300 2019 FW (#1838)
-    * Update TOTAL_SCONS_NODES (#1938)
-    * EfficientNet driver monitoring (#1907)
-    * start 0.7.8 release notes
-    * UI cleanup (#1941)
-    * Add a minimal debugging tool to show the UI while device not in car (#1937)
-    * needed in pipeline
-    * can't directly access sockets anymore
-    * Revert can't directly access sockets anymore, was supposed to be on branch
-    * new palisade fingerprint (#1945)
-    * fail new car model unit tests if missing a test route
-    * Remove get_one_can from messaging (#1946)
-    * not useful
-    * bump panda
-    * add locationd, paramsd, dmonitoringd to CPU usage script
-    * Misc locationd improvements (#1714)
-    * fix locationd profiling
-    * dont init sound
-    * Panda abstraction layer in boardd (#1919)
-    * modeld: read frame_id if sm.update(0)>0 (#1947)
-    * Driver view refactor (#1869)
-    * Test can valid in car unit tests (#1961)
-    * bump opendbc
-    * Run CI tests in parallel (#1962)
-    * remove duplicate call to getDMonitoringState (#1964)
-    * Add frequency check to hyundai camera can parser (#1965)
-    * bump opendbc
-    * Update Hyundai DBC (#1968)
-    * we have routes for these now
-    * Add Hyundai Veloster 2019 (#1955)
-    * add hyundai veloster to release notes
-    * veloster steers down to zero
-    * Add missing chrysler can parser checks (#1967)
-    * Update bug_report.md
-    * Cleanup locationd msg building (#1972)
-    * add fall filter and less FP on posenet (#1971)
-    * remove selfdrive/common/visionstream.c (#1931)
-    * Add Kia Stinger transmission FW version (#1975)
-    * improve updated responsiveness (#1973)
-    * makes more sense
-    * Make sure memory is released by using unique_ptr (#1958)
-    * persist falling test
-    * Revert persist falling test
-    * Cleanup updated (#1981)
-    * camerad: cache rgb_roi_buf&conv_result (#1979)
-    * wrong units
-    * Setup PC testing in Jenkins (#1984)
-    * add CI dependency for new tests
-    * Improve update reliability and responsiveness (#1986)
-    * fix counter mismatch in sim
-    * Scripts for containerized CARLA (#1987)
-    * remove dead lines from calibrationd
-    * second segment is ok for car unit tests
-    * persist falling until message sent (#1982)
-    * Track calib spread (#1988)
-    * release opencl objects (#1978)
-    * Add Camry 2020 camera fw
-    * Updater tests (#1974)
-    * Subaru pre-global: add support for Subaru Legacy 2015-18 (#1805)
-    * only check offroad in dmonitoringd on init
-    * Add 2020 Accord
-    * bump panda
-    * tf 2.2.
-    * Remove non-SCC Hyundai Kona port (#1997)
-    * fix missing negative limit in pid controller (#2001)
-    * update_ci_routes.py: upload route by arg
-    * fix bug that visionstream_destroy may be called twice (#1999)
-    * camerad: close ops_sock in camera_close (#1998)
-    * Improve CPU usage test reliability (#2002)
-    * Car Port: Hyundai Genesis G70 2018 (#2000)
-    * add genesis g70 to release notes
-    * fix for PC: detach panda kernel driver if active (#1950)
-    * default pull request template
-    * can't do nested html comments
-    * Build openpilot on mac in CI (#1792)
-    * bump panda
-    * update dm new model description
-    * Add preglobal Subaru Forester and Outback (#1993)
-    * Fix Readme
-    * Fix Genesis G70 in readme
-    * Test standalone binary builds in CI (#2008)
-    * Added additional IS 300 engine f/w (#2015)
-    * camerad: protect concurrent access to shared variables and avoid race conditions (#1966)
-    * Nissan harnesses for sale
-    * Car Port: 2020 Hyundai Kona (#2010)
-    * increase controlsd CPU test threshold
-    * add kona to release notes
-    * Alert when updated consistently fails (#2013)
-    * update total scons nodes
-    * update optima fingerprint and Fw Fp (#2017)
-    * fix linter
-    * fix boardd build
-    * Don't check dirty on prebuilt release (#2014)
-    * Force battery temperature to 0 on comma two
-    * NEOS background updater (#1892)
-    * add background download to release notes
-    * add missing agent for jenkins job
-    * fix get_git_remote not returning a value
-    * add date to release notes
-    * add launch_env.sh to release files
-    * Pigeon abstraction layer (#1977)
-    * bump panda
-    * increase CPU test timeout to allow for installing new APKs
-    * Setup script improvements to MacOS / Ubuntu (#2012)
-    * EU Corolla Hybrid TSS2 EPS f/w (#2027)
-    * Add fwdCamera f/w for CAR.COROLLA_TSS2 (#2028)
-    * exit camerad cleanly on PC (#2035)
-    * init and destroy transform_lock (#2003)
-    * remove old test runner
-    * Kilometers per hour now displayed as km/h (#2032)
-    * add function cl_get_device_id (#1948)
-    * Car power integrator + power management refactor (#1994)
-    * fix two little bugs (#2033)
-    * paint.cc: remove redundant calls  (#2025)
-    * more panda fault types (#2036)
-    * bump version to 0.7.9
-    * remove dead code in updated
-    * remove old tests (#2040)
-    * fd should be initialized as -1 (#2041)
-    * ui: refactor model related functions (#2026)
-    * log when thermald shuts down device
-    * add a sleep after cloudlog
-    * clip carBatteryCapacity to 0
-    * more init time in cpu test
-    * Qt ui for PC (#2023)
-    * Revert more init time in cpu test
-    * Don't build by default
-    * Fix qt env in SConstruct
-    * boardd: return early from usb functions if not connected
-    * Add Lexus RX esp FW (#2050)
-    * ui: force GLES context
-    * ui: larger font size
-    * Added fingerprint for my 2020 Corolla Hybrid Sx sedan (#2052)
-    * small dmonitoringd cleanup
-    * Prius 2018 Engine FW (#2054)
-    * Add 2020 RAV4 LE Hybrid engine f/w (#2058)
-    * 2020 Corolla Hybrid Sx sedan FW (#2059)
-    * update code stats script
-    * type hints for messaging (#2061)
-    * split dockerfile into base image and CI image (#2066)
-    * move matmul3 into live_thread (#2069)
-    * remove device_id&context from ModelFrame (#2064)
-    * visionstream: fix doube fd close (#2057)
-    * fingerprint for China 2019 CRV Hybrid (#2056)
-    * paint.cc: deleted two meaningless lines (#2043)
-    * Thermald cleanup (#2049)
-    * bump cereal
-    * fix prebuilt container
-    * Pandad: turn on panda power (#2073)
-    * Remove unnecessary string copy (#2067)
-    * More Insight FW versions
-    * mac ui kind of works (#2079)
-    * Universal clocksd (#2075)
-    * bump cereal
-    * Loggerd rotation test (#2077)
-    * wait longer for tici camerad startup
-    * Tici sensord (#2072)
-    * sensord: more precise 100 Hz, compensate for time spend measuring
-    * Hardware abstraction class (#2080)
-    * Systemd logcatd (#2085)
-    * larch64 modeld fixes (#2086)
-    * apport support for tombstoned (#2087)
-    * larch64 dmonitoringmodeld fixes
-    * hardware.py: PC is wifi so uploader works
-    * bump panda
-    * add frame count check to loggerd rotation test
-    * missing two f's, loggerd should really work on pc
-    * Fix OMX error on loggerd rotation when using multiple cameras (#1953)
-    * Tici camerad (#2048)
-    * open by path instead of number
-    * make sure snpe can find libopencl
-    * UI cleanup (#2091)
-    * increase timeout on mac CI build
-    * small uploader cleanup
-    * Sound stability test (#2089)
-    * not show soft recover alerts
-    * remove read_param_timeout (#2095)
-    * bump cereal
-    * fix CI cache auto-deletion
-    * need no divided by 2
-    * lidar is a scam (#2094)
-    * fix hyundai editing can parser values
-    * driver monitoring cleanup (#2101)
-    * Show lane lines and path while using uiview.py (#2104)
-    * Added Toyota Camry 2019 (AUS) SX(2.5L FWD, 6speed) firmware versions (#2096)
-    * build script that uses docker container (#1944)
-    * Revert Added Toyota Camry 2019 (AUS) SX(2.5L FWD, 6speed) firmware versions (#2096)
-    * Remove opencv from phonelibs (#2107)
-    * Fix camera view on PC
-    * ui: simplify shader versions and fix hardcoded texture size (#2112)
-    * Wait 5 minutes after offroad before changing thresholds (#2113)
-    * use buffered meta
-    * remove recurrent LOGD and prints
-    * bump panda
-    * Reduce plannerd and dmonitoringd CPU usage (#2108)
-    * paramsd process replay test (#2118)
-    * Add Insight fw
-    * 1024 MB should be enough for anyone
-    * pc ui: print opengl version on startup
-    * tici: fix set_realtime_priority (#2124)
-    * sensord cleanup (#2111)
-    * Add 2020 Highlander engine fw
-    * release copy_q in visionbuf_free (#2121)
-    * add more opengl info on startup to pc ui
-    * UI vision refactor (#2115)
-    * clean up old params
-    * TextWindow Enhancements (#2114)
-    * pytorch pip packages
-    * fix pylint errors
-    * remove vp everywhere (#2122)
-    * make calibrationInvalid a permanent alert
-    * update refs after new alert
-    * sidebar cleanup (#2130)
-    * CAR.CAMRY f/w (#2134)
-    * Fix loggerd not rotating encoder if dcamera upload disabled (#2133)
-    * UI: support multiple frame sizes (#2099)
-    * Always keep display on with ignition (#2138)
-    * link ui against right opengl(ES) lib
-    * Update CONTRIBUTING.md
-    * ui: glTexImage2D only redundant on QCOM
-    * hide camera view when in reverse (#2144)
-    * bump rednose
-    * bump submodules
-    * QT UI: sounds (#2078)
-    * temporarily disable mac build
-    * wait 5s before showing waiting for controls
-    * Add 2020 Highlander Hybrid fw
-    * simple unit test for startup alert
-    * fix timing issues with new test
-    * set params for new test
-    * Split car identities to CX5, CX9, and Mazda3 (#2097)
-    * turn display on in spinner (#2148)
-    * dockerize carla + openpilot (#2011)
-    * only build sim container on schedule
-    * cleanup controlsd env variable reading
-    * add repo check to sim ci build
-    * bump cereal
-    * Tici light sensor (#2150)
-    * Reduce paramsd and calibrationd CPU usage (#2119)
-    * remove unused import in cycle_alerts
-    * run deleter on tici
-    * Update README.md
-    * Update README.md
-    * swap ur/dl (#2153)
-    * don't ship QT UI in release
-    * Revert don't ship QT UI in release, needed by release CI test for now
-    * handle exception in android service call
-    * fix simulator CI (#2159)
-    * prevent reversing alert from showing while changing gears
-    * tici driver monitoring (#2158)
-    * tici launch script (#2155)
-    * UI: simplify layout calculation (#2131)
-    * bump cereal
-    * message builder (#2161)
-    * set canValid for mock car
-    * more messagebuilder (#2162)
-    * send initial calibration packet immediately
-    * use MessageBuilder::toBytes (#2167)
-    * Auto reset bad calibration (#2151)
-    * Update README.md (#2156)
-    * Cut down unnecessary DM uncertain alerts (#2157)
-    * cleanup README PC section
-    * need to free tici DSP asap
-    * improve tici camerad robustness (#2135)
-    * fix stretched UI on pc
-    * fix tbuffer img tearing
-    * bump max vision clients for tici
-    * only do reset if already calibrated (#2176)
-    * Fix typo
-    * update pipenv install
-    * more pipenv version updates
-    * remove schedule-triggered CI workflow (#2178)
-    * Update 17 Corolla safetyParam (#2175)
-    * bump opendbc
-    * disable CI simulator container build until fixed
-    * tici: fix ui rotation (#2184)
-    * hub is handled by systemd gpio service (#2172)
-    * remove unused submaster (#2187)
-    * Add firmwares for CAR.COROLLA_TSS2 (#2185)
-    * Add CAR.LEXUS_RX various missing firmware (#2189)
-    * Update readme for 2018 Lexus RX
-    * Improve realtime performance on NEOS (#2166)
-    * add android procs to cpu usage sript
-    * Add 2020 Highlander and Ridgeline fw
-    * fix tici ui lag
-    * rt debug scripts (#2165)
-    * FileReader: cache files locally (#2170)
-    * Tici hardware abstraction layer (#2183)
-    * tici: offroad ui powersave (#2191)
-    * these should be debug logs
-    * Realtime shield (#2194)
-    * promote hyundai palisade to offically supported (#2195)
-    * type hints for alerts and fix community feature alert (#2196)
-    * Get power usage from current sensor (#2192)
-    * Only run rtshield when onroad
-    * tici: take into account frame timestamp (#2199)
-    * tici camera art (#2188)
-    * revert tici ui rotate
-    * tici: set volume at 90%
-    * 2019 C-HR fw
-    * alertmanager type hints (#2201)
-    * quick lgtm fixes
-    * add type hints to selfdrive/version.py
-    * Revert tici: take into account frame timestamp (#2199)
-    * remove parallel url downloader
-    * cleanup long planner, mpc: unused globals and arguments (#2211)
-    * touch.c:deleting useless function (#2208)
-    * bump cereal
-    * add function write_file() (#2181)
-    * Fix makefiles after read_file() helper
-    * tici: BMX055 magnetometer& temperature sensor (#2212)
-    * read bool param with read_db_bool (#2205)
-    * Add CAR.RAV4H_TSS2 ESP f/w (#2213)
-    * Pilot 2019 is same platform as 2016-18
-    * Fix Highlander order in readme
-    * bump cereal
-    * Uploader speedup (#2214)
-    * Improved updater robustness (#2046)
-    * Make readme consistent
-    * remove unused alert
-    * All Insight trims have Honda Sensing
-    * fix unused dt entry on android (#2160)
-    * fix dmonitoringmodeld random high CPU usage (#2216)
-    * bump laika
-    * Lexus CT Hybrid needs LSS
-    * Add 2020 Honda Odyssey fw
-    * tici: fix ui rotation (#2222)
-    * remove unused globals, use self.reset() (#2220)
-    * Params: use a multiple-reader / single-writer flock to improve concurrency (#2207)
-    * SConstruct better tici detection
-    * camerad: close file descriptors (#2065)
-    * qcom2 needs cc conversion (#2125)
-    * Add 2017 Lexus RX engine fw
-    * bump cereal
-    * fix modeld launch script larch64 detection
-    * Update README.md
-    * Combine Toyota Avalon rows
-    * ProPILOT
-    * Typo: thershold -> threshold (#2230)
-    * Add engine f/w for CAR.LEXUS_RX (#2235)
-    * Add symphony-cpu lib once (#2232)
-    * close lock_fd if flock failed (#2231)
-    * Fix grade force in test_long plant (#2225)
-    * Add 2021 Corolla Hybrid to Supported Cars in README.md (#2229)
-    * Enable Ctrl-C for Carla Server (#2240)
-    * no more question issue type, we have discussions
-    * this sounds better
-    * Name openpilot docker container (#2239)
-    * tici light sensor (#2238)
-    * add 1 second delay to acc pedal alert (#2221)
-    * pre-reqs for honda bosch longitudinal control (#1458)
-    * fix compilation with Clang 10 on ubuntu 20.04
-    * Revert fix compilation with Clang 10 on ubuntu 20.04
-    * add ECU disable script from #1459
-    * updated: log git corruption (#2242)
-    * bump submodules
-    * fix resource leak when rotating encoder (#2141)
-    * Add Flags to Control Simulator (#2246)
-    * fix paths for waste3 debug script
-    * updated: remove old overlay init file
-    * jenkins: clean workspace (#2248)
-    * fix compilation with Clang 10 on ubuntu 20.04 (#2243)
-    * update testing closet client
-    * simplify testing closet client
-    * Update release notes
-    * 0.7.9 release notes tweak
-    * Increase HKG torque limit (#2249)
-    * bump submodules
-    * run loggerd tests in CI (#2241)
-    * Tici updated (#2126)
-    * Run all driving processes on cores 2-3 (#2257)
-    * Refactor loggerd rotations (#2247)
-    * Merge branch 'master' into update-0.7.9
-    * chore(git): update submodules to proper commits
-    * fix(ui): fix build issues with model and path data
-    * fix(ui): fix issues with poly data type
-    * fix(ui): update poly to capnp list reader
-    * fix(ui): replace paint with 0.7.9 paint
-    * Fix calibration invalid alert on startup (#2270)
-    * fix not going onroad on clean dashcam install (#2280)
-    * hotfix(params): correct name for indi outer gain
-    * fix(actions): update build action to 0.7.9
-    * chore(git): update forked submodules to 0.7.9
-    * Merge branch 'update-0.7.9' into src
-    * feat(tools): add initial script to transfer drives between devices
-    * feat(tools): add script from upstream to calc toyota eps factor
-    * fix(tools): replace URLFile with request
-    * fix(tools): require only date for route
-    * fix(tools): add newline seperator after finish upload
-    * feat(tools): add ability to transfer all drives
-    * fix(tools): fix various typos and timeouts
-    * fix(tools): properly check if route has already been uploaded
-    * fix(tools): retry if fetching files fails
-    * fix(tools): properly retry all network connections
-    * fix(tools): python3 fixes for transfer script
-    * fix(tools): switch to better retry function
-    * fix(tools): fix kwargs in transfer script
-    * fix(tools): improve logging in transfer script when requests fail
-    * fix(tools): improve logging in transfer script
-    * fix(tools): remove unused imports in transfer script
+  * Openpilot Changes:
+    *  Improved car battery power management
+    *  Improved updater robustness
+    *  Improved realtime performance
+    *  Reduced UI and modeld lags
+    *  Increased torque on 2020 Hyundai Sonata and Palisade
 
-Version 10 (openpilot v0.7.7)
+Version 1.9.0 (openpilot v0.7.7)
 ========================
   Source commit: 4bac8e22
   * New OP Params:
-    * 'indi_inner_gain': Param(6.0, VT.number, live=True)
-    * 'indi_outer_gain': Param(15.0, VT.number, live=True)
-    * 'indi_time_constant': Param(5.5, VT.number, live=True)
-    * 'indi_actuator_effectiveness': Param(6.0, VT.number, live=True)
-    * 'steer_actuator_delay': Param(0.57, VT.number, live=True)
-    * 'coast_speed': Param(10.0, VT.number, 'The amount of speed to coast by before applying the brakes. Unit: MPH')
-    * 'accel_hyst_gap': Param(0.02, VT.number, live=True)
-    * 'gas_max_bp': Param([0., 20, 33], [list, float, int])
-    * 'gas_max_v': Param([0.3, 0.2, 0.075], [list, float])
     * 'indi_use_vego_breakpoints': Param(False, bool, live=True)
     * 'indi_use_steer_angle_breakpoints': Param(False, bool, live=True)
     * 'indi_inner_gain_bp': Param([0, 255, 255], [list, float, int], live=True)
@@ -1230,13 +747,12 @@ Version 10 (openpilot v0.7.7)
     * 'indi_actuator_effectiveness_bp': Param([0, 255, 255], [list, float, int], live=True)
     * 'indi_actuator_effectiveness_v': Param([6, 6, 6], [list, float, int], live=True)
   * Commits:
-    * hotfix(toyota): update corolla safetyParam to 50
     * feat(params): add new values to op params for indi breakpoints
     * feat(indi): update indi controller to have live breakpoints
     * fix(toyota): reset gas clip to 1.0
     * fix(params): properly op param default values match expected type
 
-Version 9 (openpilot v0.7.7)
+Version 1.8.0 (openpilot v0.7.7)
 ========================
   Source commit: 2ea8066f
   * Commits:
@@ -1244,28 +760,17 @@ Version 9 (openpilot v0.7.7)
     * chore(git): update opendbc submodule for corolla TSS2 safety param
     * chore(git): fix opendbc submodule to use v0.7.7
 
-Version 8 (openpilot v0.7.7)
+Version 1.7.0 (openpilot v0.7.7)
 ========================
   Source commit: 88e7ed25
   * New OP Params:
-    * 'corolla_use_indi': Param(False, bool)
     * 'accel_hyst_gap': Param(0.02, float, live=True)
     * 'always_eval_coast_plan': Param(False, bool)
     * 'gas_max_bp': Param([0., 20, 33], [list, float])
     * 'gas_max_v': Param([0.3, 0.2, 0.075], [list, float])
-    * return Param(None, type(None))
   * Commits:
-    * hotfix(params): hotfix default param in opParams
-    * fix(ci): add gitignore after commit
-    * chore(git): update git ignore to not ignore certain release files
-    * fix(ci): include placeholder in panda gitignore
-    * fix(ci): prevent coping phonelibs twice
-    * fix(ci): remove gitignore from panda folder
-    * chore(git): override ignore for all release phonelibs
     * feat(coasting): lower accel to 0 when coasting
-    * fix(actions): fix build command to build pr branch
     * fix(coasting): lower gas when last output was positive
-    * Revert Better poly (#1437)
     * Merge branch 'src' into coasting
     * fix(coasting): out min of last output or curent output
     * fix(coasting): change curise plan wehn gasbrake is in between accel hyst gap
@@ -1277,7 +782,7 @@ Version 8 (openpilot v0.7.7)
     * fix(params): fix issues using list types in op params
     * feat(toyota): made max gas an op param
 
-Version 7 (openpilot v0.7.7)
+Version 1.6.0 (openpilot v0.7.7)
 ========================
   Source commit: 3f6f12f3
   * New OP Params:
@@ -1299,69 +804,55 @@ Version 7 (openpilot v0.7.7)
     * Fix grade force in test_long plant (#2225)
     * Merge branch 'src' into coasting
 
-Version 6 (openpilot v0.7.7)
+Version 1.5.0 (openpilot v0.7.7)
 ========================
   Source commit: 8a62d538
   * Commits:
     * Better poly (#1437)
 
-Version 5 (openpilot v0.7.7)
+Version 1.4.0 (openpilot v0.7.7)
 ========================
   Source commit: edfa06a8
   * New OP Params:
-    * 'alca_min_speed': Param(20.0, VT.number, 'The minimum speed allowed for an automatic lane change (in MPH)')
     * 'corolla_use_indi': Param(False, bool)
   * Commits:
     * feat(toyota): made corolla indi optional
 
-Version 4 (openpilot v0.7.7)
+Version 1.3.0 (openpilot v0.7.7)
 ========================
   Source commit: fbfcac23
   * Commits:
     * chore(git): update cereal submodule to point to my fork
     * chore(git): replace all submodule relative urls with github urls
 
-Version 3 (openpilot v0.7.7)
+Version 1.2.0 (openpilot v0.7.7)
 ========================
   Source commit: 1821c6b1
   * Commits:
-    * fix(actions): fix build action to include phonelibs
-    * fix(actions): copy op_edit to release build
-    * fix(actions): copy over op_params and create panda obj file
-    * fix(ci): add op_params and related files to common files
-    * refactor(actions): move build release job into its own script
-    * fix(actions): checkout with lfs
-    * feat(actions): change release version to be date & time
     * feat(actions): add new action for build slash command
-    * feat(actions): add build as a possible slash command
 
-Version 2 (openpilot v0.7.7)
+Version 1.1.0 (openpilot v0.7.7)
 ========================
   Source commit: 3305587d
   * New OP Params:
-    * 'steer_actuator_delay': Param(0.57, float, live=True)
     * 'alca_nudge_required': Param(False, bool, 'Whether to wait for applied torque to the wheel (nudge)
     * 'alca_min_speed': Param(20.0, VT.number, 'The minimum speed allowed for an automatic lane change (in MPH)')
   * Commits:
-    * hotfix(actions): switch release branch to r2++
     * feat(path): add auto lane change option
     * fix(path): update default lane change values
     * fix(path): fix E502 in path planner
 
-Version 1 (openpilot v0.7.7)
+Version 1.0.0 (openpilot v0.7.7)
 ========================
   Source commit: a811bf18
   * New OP Params:
     * self.fork_params = {'camera_offset': Param(default=0.06, allowed_types=VT.number)
-    * self.fork_params = {'camera_offset': Param(0.06, VT.number, 'Your camera offset to use in lane_planner.py', live=True)
     * 'indi_inner_gain': Param(6.0, float, live=True)
     * 'indi_outer_gain': Param(15.0, float, live=True)
     * 'indi_time_constant': Param(5.5, float, live=True)
     * 'indi_actuator_effectiveness': Param(6.0, float, live=True)
     * 'steer_actuator_delay': Param(0.57, float, live=True)
     * self.fork_params['username'] = Param(None, [type(None), str, bool], 'Your identifier provided with any crash logs sent to Sentry.\nHelps the developer reach out to you if anything goes wrong')
-    * self.fork_params['op_edit_live_mode'] = Param(False, bool, 'This parameter controls which mode opEdit starts in', hidden=True)
-    * return Param(None, None)
   * Commits:
     * feat(params): add op_params and op_edit from shane's fork
     * feat(params): add support for live indi tunning and actuator breakpoints
@@ -1380,3 +871,4 @@ Version 1 (openpilot v0.7.7)
     * fix(params): catch exception when can't write file
     * fix(params): turn err into string
     * fix(params): only change param file permissions if write passed
+

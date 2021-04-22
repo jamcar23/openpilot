@@ -8,6 +8,8 @@ from typing import List, Optional
 # TODO add this back, it's causing problems with windows, git, and docker
 #from selfdrive.version import run_cmd_default
 
+DOCUMENTED_PARAM_KEYS = []
+
 def run_cmd(cmd: List[str]) -> str:
   # print(f'cmd: {cmd}')
   return subprocess.check_output(cmd, encoding='utf8', shell=True).strip()
@@ -75,6 +77,9 @@ def create_new_params_section(cur_hash, prev_hash):
       param_line = strip_param_line(line)
       param_key = param_line[0:param_line.find(':') + 1]
 
+      if param_key in DOCUMENTED_PARAM_KEYS:
+        continue
+
       found_old_param = False
 
       for old_param in old_params:
@@ -84,6 +89,7 @@ def create_new_params_section(cur_hash, prev_hash):
 
       if not found_old_param:
         new_params.append(param_line)
+        DOCUMENTED_PARAM_KEYS.append(param_key)
 
   # print(f'new params: {new_params}')
   return Section('New OP Params', new_params)
@@ -252,8 +258,6 @@ def main():
 
     if trim_hashs:
       hashs = hashs[hash_idx + 1:]
-  else:
-    last_entry.fp_version = '0.1.0'
 
   # print(last_entry.fp_version)
   op_releases = get_op_version_changelog()
@@ -275,13 +279,13 @@ def main():
 
     op_version = get_commit_op_version(cur_hash.hash)
 
-    if op_version != last_entry.op_version:
+    if last_entry.fp_version and op_version != last_entry.op_version:
       semver_change = SemVerSections.MAJOR
       sections[1] = Section('Openpilot Changes', op_releases[op_version])
     else:
       semver_change = SemVerSections.MINOR
 
-    fp_version = increment_semantic_version(last_entry.fp_version, semver_change)
+    fp_version = increment_semantic_version(last_entry.fp_version, semver_change) if last_entry.fp_version else '1.0.0'
     # print(fp_version)
 
     # break
