@@ -1,4 +1,5 @@
 from .NodesData import NodesData, NodeDataIdx
+from .geo import ref_vectors, R
 import numpy as np
 
 
@@ -9,7 +10,7 @@ _SUBSTANTIAL_CURVATURE_THRESHOLD = 0.003  # 333 mts radius
 class Route():
   """A set of consecutive way relations forming a default driving route.
   """
-  def __init__(self, current, way_relations, way_collection_id):
+  def __init__(self, current, wr_index, way_collection_id):
     self.way_collection_id = way_collection_id
     self._ordered_way_relations = []
     self._nodes_data = None
@@ -19,22 +20,47 @@ class Route():
     if not current.active:
       return
 
-    # We need a ref or a name to build a route.
-    ref = current.ref
-    name = current.name
-    # TODO: consider allowing to build a route when no ref or name is available.
-    # be aware of the time taken to search for matching ways as we build the route.
-    if ref is None and name is None:
-      return
+    # Build the route by finding iteratavely the best matching ways continuing after the end of the
+    # current (last_wr) way. Use the index to find the continuation posibilities on each iteration.
+    last_wr = current
+    while True:
+      # - Append current element to the route list of ordered way relations.
+      self._ordered_way_relations.append(last_wr)
 
-    # Reduce way relations to those matching the ref or name of the current one.
-    way_relations = list(filter(lambda wr: wr.has_name_or_ref(name, ref), way_relations))
+      # Get the id of the node at the end of the way.
+      last_node_id = last_wr.last_node.id
 
-    # Build the ordered way relations list by recursively finding the next wr.
-    wr = current
-    while wr is not None:
-      self._ordered_way_relations.append(wr)
-      wr, way_relations = wr.next_wr(way_relations)
+      # Get the way relations that share the end node id from the index
+      way_relations = wr_index[last_node_id]
+
+      # if no more way_relations than last_wr, we got to the end.
+      if len(way_relations) == 1:
+        break
+
+      # Get the coordinates for the edge node
+      ref_point = last_wr.last_node_coordinates
+
+      # Get the array of coordinaes for the nodes following edge node on each of the common way relations.
+      points = np.array(list(map(lambda wr: wr.node_before_edge_coordinates(last_node_id), way_relations)))
+
+      # Get the vectors in cartesian plane for the end sections of each way.
+      v = ref_vectors(ref_point, points) * R
+
+      # - Calculate the bearing (from true north clockwise) for every end section of each way.
+      b = np.arctan2(v[:, 0], v[:, 1])
+
+      # - Find index of las_wr section and calculate deltas of bearings to the other sections.
+      last_wr_idx = way_relations.index(last_wr)
+      b_ref = b[last_wr_idx]
+      delta = b - b_ref
+
+      # - The section with the best continuation is the one with a bearing delta closest to pi. This is equivalent
+      # to taking the one with the smallest cosine of the bearing delta, as cosine is minimum (-1) on both pi and -pi.
+      best_idx = np.argmin(np.cos(delta))
+
+      # - Select next way and update its direction before continuing to next iteration.
+      last_wr = way_relations[best_idx]
+      last_wr.update_direction_from_starting_node(last_node_id)
 
     # Build the node data from the ordered list of way relations
     self._nodes_data = NodesData(self._ordered_way_relations)

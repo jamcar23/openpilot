@@ -13,6 +13,12 @@ class WayCollection():
     self.id = uuid.uuid4()
     self.way_relations = list(map(lambda way: WayRelation(way), ways))
 
+    # Create the index by edge node ids.
+    self.wr_index = {}
+    for wr in self.way_relations:
+      for node_id in wr.edge_nodes_ids:
+        self.wr_index[node_id] = self.wr_index.get(node_id, []) + [wr]
+
   def get_route(self, location, bearing):
     """Provides the best route found in the way collection based on provided `location` and `bearing`
     """
@@ -36,7 +42,7 @@ class WayCollection():
 
     # If more than one is active, filter out any active way relation where the bearing delta indicator is too high.
     else:
-      wr_acceptable_bearing = list(filter(lambda wr: wr.active_bearing_delta <= _ACCEPTABLE_BEARING_DELTA_IND, 
+      wr_acceptable_bearing = list(filter(lambda wr: wr.active_bearing_delta <= _ACCEPTABLE_BEARING_DELTA_IND,
                                           active_way_relations))
 
       # If delta bearing indicator is too high for all, then use as current the one that has the shorter one.
@@ -58,4 +64,4 @@ class WayCollection():
       if wr.id != current.id:
         wr.reset_location_variables()
 
-    return Route(current, self.way_relations, self.id)
+    return Route(current, self.wr_index, self.id)

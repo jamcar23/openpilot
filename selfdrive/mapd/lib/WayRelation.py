@@ -1,4 +1,4 @@
-from .geo import DIRECTION, R, vectors
+from .geo import DIRECTION, R, vectors, bearing_to_points, distance_to_points
 from selfdrive.config import Conversions as CV
 from datetime import datetime
 import numpy as np
@@ -121,27 +121,6 @@ def conditional_speed_limit_for_osm_tag_limit_string(limit_string):
   return 0.
 
 
-def bearing_to_points(point, points):
-  """Calculate the bearings (angle from true north clockwise) of the vectors between `point` and each
-  one of the entries in `points`. Both `point` and `points` elements are 2 element arrays containing a latitud,
-  longitude pair in radians.
-  """
-  delta = points - point
-  x = np.sin(delta[:, 1]) * np.cos(points[:, 0])
-  y = np.cos(point[0]) * np.sin(points[:, 0]) - (np.sin(point[0]) * np.cos(points[:, 0]) * np.cos(delta[:, 1]))
-  return np.arctan2(x, y)
-
-
-def distance_to_points(point, points):
-  """Calculate the distance of the vectors between `point` and each one of the entries in `points`.
-  Both `point` and `points` elements are 2 element arrays containing a latitud, longitude pair in radians.
-  """
-  delta = points - point
-  a = np.sin(delta[:, 0] / 2)**2 + np.cos(point[0]) * np.cos(points[:, 0]) * np.sin(delta[:, 1] / 2)**2
-  c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
-  return c * R
-
-
 class WayRelation():
   """A class that represent the relationship of an OSM way and a given `location` and `bearing` of a driving vehicle.
   """
@@ -160,12 +139,19 @@ class WayRelation():
     self.bbox = np.row_stack((np.amin(self._nodes_np, 0) - _WAY_BBOX_PADING,
                               np.amax(self._nodes_np, 0) + _WAY_BBOX_PADING))
 
+    # Get the edge nodes ids.
+    self.edge_nodes_ids = [way.nodes[0].id, way.nodes[-1].id]
+
     if location is not None and bearing is not None:
       self.update(location, bearing)
 
   def __repr__(self):
-    return f'(id: {self.id}, name: {self.name}, ref: {self.ref}, ahead: {self.ahead_idx}, \
-           behind: {self.behind_idx}, {self.direction}, active: {self.active})'
+    return f'(id: {self.id}, between {self.behind_idx} and {self.ahead_idx}, {self.direction}, active: {self.active})'
+
+  def __eq__(self, other):
+    if isinstance(other, WayRelation):
+        return self.id == other.id
+    return False
 
   def reset_location_variables(self):
     self.location = None
@@ -266,9 +252,9 @@ class WayRelation():
 
   def update_direction_from_starting_node(self, start_node_id):
     self._speed_limit = None
-    if self.way.nodes[0].id == start_node_id:
+    if self.edge_nodes_ids[0] == start_node_id:
       self.direction = DIRECTION.FORWARD
-    elif self.way.nodes[-1].id == start_node_id:
+    elif self.edge_nodes_ids[-1] == start_node_id:
       self.direction = DIRECTION.BACKWARD
     else:
       self.direction = DIRECTION.NONE
@@ -313,14 +299,6 @@ class WayRelation():
     return self._speed_limit
 
   @property
-  def ref(self):
-    return self.way.tags.get("ref", None)
-
-  @property
-  def name(self):
-    return self.way.tags.get("name", None)
-
-  @property
   def active_bearing_delta(self):
     """Returns the sine of the delta between the current location bearing and the exact
        bearing of the portion of way we are currentluy located at.
@@ -351,61 +329,23 @@ class WayRelation():
       return self.way.nodes[0]
     return None
 
-  def edge_on_node(self, node_id):
-    """Indicates if the associated way starts or ends in the node with `node_id`
+  @property
+  def last_node_coordinates(self):
+    """Returns the coordinates for the last node on the way considering the traveling direction. (in radians)
     """
-    return self.way.nodes[0].id == node_id or self.way.nodes[-1].id == node_id
+    if self.direction == DIRECTION.FORWARD:
+      return self._nodes_np[-1]
+    if self.direction == DIRECTION.BACKWARD:
+      return self._nodes_np[0]
+    return None
 
   def node_before_edge_coordinates(self, node_id):
-    """Returns the coordinates of the node before the edge node identifeid with `node_id`
+    """Returns the coordinates of the node before the edge node identifeid with `node_id`. (in radians)
     """
-    if self.way.nodes[0].id == node_id:
-      return np.array([self.way.nodes[1].lat, self.way.nodes[1].lon], dtype=float)
+    if self.edge_nodes_ids[0] == node_id:
+      return self._nodes_np[1]
 
-    if self.way.nodes[-1].id == node_id:
-      return np.array([self.way.nodes[-2].lat, self.way.nodes[-2].lon], dtype=float)
+    if self.edge_nodes_ids[-1] == node_id:
+      return self._nodes_np[-2]
 
     return np.array([0., 0.])
-
-  def next_wr(self, way_relations):
-    """Returns a tuple with the next way relation (if any) based on `location` and `bearing` and
-    the `way_relations` list excluding the found next way relation. (to help with recursion)
-    """
-    if self.direction not in [DIRECTION.FORWARD, DIRECTION.BACKWARD]:
-      return None, way_relations
-
-    def continuation_factor(next_wr):
-      """Indicates how much the `next_wr` looks like a straight continuation of the current one.
-      A min value of `0` indicates the `next_wr` continues with the exact same bearing as current.
-      A max value of `2` indicates the `next_wr` continues in the complete oposite direction to current.
-      """
-      ref_point = np.array([self.last_node.lat, self.last_node.lon], dtype=float)
-      adjacent_points = np.row_stack((self.node_before_edge_coordinates(self.last_node.id),
-                                      next_wr.node_before_edge_coordinates(self.last_node.id)))
-      bearings = bearing_to_points(np.radians(ref_point), np.radians(adjacent_points))
-      delta = np.diff(bearings)[0]
-      return np.cos(delta) + 1
-
-    possible_next_wr = list(filter(lambda wr: wr.id != self.id and wr.edge_on_node(self.last_node.id), way_relations))
-    possible_next_wr.sort(key=lambda wr: continuation_factor(wr))
-    possibles = len(possible_next_wr)
-
-    if possibles == 0:
-      return None, way_relations
-
-    if possibles == 1 or (self.ref is None and self.name is None):
-      next_wr = possible_next_wr[0]
-    else:
-      next_wr = next((wr for wr in possible_next_wr if wr.has_name_or_ref(self.name, self.ref)), possible_next_wr[0])
-
-    next_wr.update_direction_from_starting_node(self.last_node.id)
-    updated_way_relations = list(filter(lambda wr: wr.id != next_wr.id, way_relations))
-
-    return next_wr, updated_way_relations
-
-  def has_name_or_ref(self, name, ref):
-    if ref is not None and self.ref is not None and self.ref == ref:
-      return True
-    if name is not None and self.name is not None and self.name == name:
-      return True
-    return False
