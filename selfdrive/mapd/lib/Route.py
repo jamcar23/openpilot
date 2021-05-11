@@ -1,6 +1,7 @@
 from .NodesData import NodesData, NodeDataIdx
 from .geo import ref_vectors, R
 import numpy as np
+from itertools import compress
 
 
 _DISTANCE_LIMIT_FOR_CURRENT_CURVATURE = 20.  # mts
@@ -40,7 +41,7 @@ class Route():
       # Get the coordinates for the edge node
       ref_point = last_wr.last_node_coordinates
 
-      # Get the array of coordinaes for the nodes following edge node on each of the common way relations.
+      # Get the array of coordinates for the nodes following edge node on each of the common way relations.
       points = np.array(list(map(lambda wr: wr.node_before_edge_coordinates(last_node_id), way_relations)))
 
       # Get the vectors in cartesian plane for the end sections of each way.
@@ -54,13 +55,28 @@ class Route():
       b_ref = b[last_wr_idx]
       delta = b - b_ref
 
+      # - Update the direction of the possible continuation ways excluding the last_wr
+      for idx, wr in enumerate(way_relations):
+        if idx != last_wr_idx:
+          wr.update_direction_from_starting_node(last_node_id)
+
+      # - Filter the possible continuation way relations:
+      #   - exclude last_wr
+      #   - exclude all way relations that are prohibited due to traffic direction.
+      mask = [idx != last_wr_idx and not wr.is_prohibited for idx, wr in enumerate(way_relations)]
+      way_relations = list(compress(way_relations, mask))
+      delta = delta[mask]
+
+      # if no options left, we got to the end.
+      if len(way_relations) == 0:
+        break
+
       # - The section with the best continuation is the one with a bearing delta closest to pi. This is equivalent
       # to taking the one with the smallest cosine of the bearing delta, as cosine is minimum (-1) on both pi and -pi.
       best_idx = np.argmin(np.cos(delta))
 
-      # - Select next way and update its direction before continuing to next iteration.
+      # - Select next way.
       last_wr = way_relations[best_idx]
-      last_wr.update_direction_from_starting_node(last_node_id)
 
     # Build the node data from the ordered list of way relations
     self._nodes_data = NodesData(self._ordered_way_relations)

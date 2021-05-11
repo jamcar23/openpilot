@@ -306,6 +306,14 @@ class WayRelation():
     return self._active_bearing_delta
 
   @property
+  def is_one_way(self):
+    return self.way.tags.get("oneway") in ['yes'] or self.way.tags.get("highway") in ["motorway"]
+
+  @property
+  def is_prohibited(self):
+    return self.is_one_way and self.direction == DIRECTION.BACKWARD
+
+  @property
   def distance_to_way(self):
     """Returns the perpendicular (i.e. minimum) distance between current location and the way
     """
