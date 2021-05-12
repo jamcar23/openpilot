@@ -25,6 +25,11 @@ class Route():
     # current (last_wr) way. Use the index to find the continuation posibilities on each iteration.
     last_wr = current
     while True:
+      # - Make sure the last_wr is not the same as the first one in the ordered list as to prevent circle routes
+      # to loop forever.
+      if len(self._ordered_way_relations) > 0 and last_wr.id == self._ordered_way_relations[0].id:
+        break
+
       # - Append current element to the route list of ordered way relations.
       self._ordered_way_relations.append(last_wr)
 
