@@ -1,7 +1,7 @@
 import unittest
 from decimal import Decimal
 from math import pi
-from .geo import coord_to_rad
+import numpy as np
 
 
 class TestMapsdGeoLibrary(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestMapsdGeoLibrary(unittest.TestCase):
         (0., 2 * pi),
         (pi, 3 * pi),
     ]
-    rad_tuples = list(map(lambda p: coord_to_rad(p), points))
+    rad_tuples = list(map(lambda p: np.radians(p), points))
     self.assertEqual(rad_tuples, expected)
 
   # Helpers

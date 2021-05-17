@@ -1,4 +1,3 @@
-from math import sin, cos, sqrt, atan2, radians
 from enum import Enum
 import numpy as np
 
@@ -59,35 +58,6 @@ def distance_to_points(point, points):
   a = np.sin(delta[:, 0] / 2)**2 + np.cos(point[0]) * np.cos(points[:, 0]) * np.sin(delta[:, 1] / 2)**2
   c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
   return c * R
-
-
-def coord_to_rad(point):
-  """Tranform coordinates in degrees to radians
-  """
-  return tuple(map(lambda p: radians(p), point))
-
-
-def distance(point_a, point_b):
-  """Calculate the distance in meters between two points expressed in coordinates in degrees (lat, lon)
-  """
-  point_a_in_rad = coord_to_rad(point_a)
-  point_b_in_rad = coord_to_rad(point_b)
-  return _distance_from_rad(point_a_in_rad, point_b_in_rad)
-
-
-def _distance_from_rad(point_a_in_rad, point_b_in_rad):
-  """Calculate the distance in meters between two points expressed in coordinates in radians (lat, lon)
-  """
-  (latA, lonA) = point_a_in_rad
-  (latB, lonB) = point_b_in_rad
-
-  dlon = lonB - lonA
-  dlat = latB - latA
-
-  a = sin(dlat / 2)**2 + cos(latA) * cos(latB) * sin(dlon / 2)**2
-  c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-  return R * c
 
 
 class DIRECTION(Enum):

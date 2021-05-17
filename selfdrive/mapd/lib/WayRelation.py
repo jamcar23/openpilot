@@ -27,8 +27,6 @@ _WD = {
     'Su': 6
 }
 
-_ALL_WD = _WD.values()
-
 
 def is_osm_time_condition_active(condition_string):
   """
@@ -314,10 +312,6 @@ class WayRelation():
     """Returns the perpendicular (i.e. minimum) distance between current location and the way
     """
     return self._distance_to_way
-
-  @property
-  def node_behind(self):
-    return self.way.nodes[self.behind_idx] if self.behind_idx is not None else None
 
   @property
   def node_ahead(self):

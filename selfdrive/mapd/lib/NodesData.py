@@ -216,19 +216,6 @@ class NodesData:
 
     return limits_ahead
 
-  def curvatures_ahead(self, ahead_idx, distance_to_node_ahead):
-    """Provides a numpy array of ordered pairs by distance including the distance ahead and the curvature.
-    """
-    if len(self._nodes_data) == 0 or ahead_idx is None:
-      return np.array([])
-
-    # Find the cumulative distances to nodes and its curvature
-    dist = np.concatenate(([distance_to_node_ahead], self.get(NodeDataIdx.dist_next)[ahead_idx:-1]))
-    dist = np.cumsum(dist, axis=0)
-    curv = self.get(NodeDataIdx.curvature)[ahead_idx:]
-
-    return np.column_stack((dist, curv))
-
   def distance_to_end(self, ahead_idx, distance_to_node_ahead):
     if len(self._nodes_data) == 0 or ahead_idx is None:
       return None

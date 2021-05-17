@@ -7,10 +7,8 @@ from common.realtime import Ratekeeper
 from selfdrive.mapd.lib.osm import OSM
 from selfdrive.mapd.lib.geo import distance_to_points
 from selfdrive.mapd.lib.WayCollection import WayCollection
-from .config import QUERY_RADIUS, MIN_DISTANCE_FOR_NEW_QUERY
+from .config import QUERY_RADIUS, MIN_DISTANCE_FOR_NEW_QUERY, FULL_STOP_MAX_SPEED
 
-
-FULL_STOP_MAX_SPEED = 1.39  # m/s Max speed for considering car is stopped.
 
 _DEBUG = True
 

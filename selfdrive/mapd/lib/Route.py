@@ -5,8 +5,6 @@ from itertools import compress
 import numpy as np
 
 
-_DISTANCE_LIMIT_FOR_CURRENT_CURVATURE = 20.  # mts
-_SUBSTANTIAL_CURVATURE_THRESHOLD = 0.003  # 333 mts radius
 _MAX_ALLOWED_BEARING_DELTA_COSINE_AT_EDGE = -0.3420  # bearing delta at route edge must be 180 +/- 70 degrees.
 _MAP_DATA_EDGE_DISTANCE = 50  # mts. Consider edge of map data from this distance to edge of query radius.
 
@@ -44,7 +42,7 @@ class Route():
       # - Append current element to the route list of ordered way relations.
       self._ordered_way_relations.append(last_wr)
 
-      # - Get the id of the node at the end of the way and the fetch the way relations that share the end node id from 
+      # - Get the id of the node at the end of the way and the fetch the way relations that share the end node id from
       # the index.
       last_node_id = last_wr.last_node.id
       way_relations = wr_index[last_node_id]
@@ -139,10 +137,6 @@ class Route():
       if ids[idx] == node_ahead_id:
         self._ahead_idx = idx
         break
-
-  @property
-  def valid(self):
-    return self.current_wr is not None
 
   @property
   def current_wr(self):
@@ -258,69 +252,6 @@ class Route():
       return None
 
     return limits_ahead[0]
-
-  @property
-  def curvatures_ahead(self):
-    """Provides a list of ordered pairs by distance including the distance ahead and the curvature.
-    """
-    if not self.located or self._nodes_data is None:
-      return None
-
-    if self._curvatures_ahead is not None:
-      return self._curvatures_ahead
-
-    self._curvatures_ahead = self._nodes_data.curvatures_ahead(self._ahead_idx, self._distance_to_node_ahead)
-    return self._curvatures_ahead
-
-  @property
-  def immediate_curvature(self):
-    """Provides the highest curvature value in the immediate region ahead.
-    """
-    if not self.located:
-      return None
-
-    curvatures_ahead = self.curvatures_ahead
-    if not len(curvatures_ahead):
-      return None
-
-    immediate_curvatures = curvatures_ahead[curvatures_ahead[:, 0] <= _DISTANCE_LIMIT_FOR_CURRENT_CURVATURE]
-    if not len(immediate_curvatures):
-      return None
-
-    return np.max(immediate_curvatures[:, 1])
-
-  @property
-  def max_curvature_ahead(self):
-    """Provides the maximum curvature on route ahead
-    """
-    if not self.located:
-      return None
-
-    curvatures_ahead = self.curvatures_ahead
-    if not len(curvatures_ahead):
-      return None
-
-    return np.max(curvatures_ahead[:, 1])
-
-  @property
-  def next_substantial_curvature(self):
-    """Provides the next substantial curvature and the distance to it.
-    """
-    if not self.located:
-      return None
-
-    curvatures_ahead = self.curvatures_ahead
-    if not len(curvatures_ahead):
-      return None
-
-    filt = np.logical_and(curvatures_ahead[:, 0] > _DISTANCE_LIMIT_FOR_CURRENT_CURVATURE,
-                          curvatures_ahead[:, 1] > _SUBSTANTIAL_CURVATURE_THRESHOLD)
-    substantial_curvatures_ahead = curvatures_ahead[filt]
-
-    if not len(substantial_curvatures_ahead):
-      return None
-
-    return substantial_curvatures_ahead[0, :]
 
   @property
   def distance_to_end(self):
