@@ -1,17 +1,28 @@
 from .NodesData import NodesData, NodeDataIdx
-from .geo import ref_vectors, R
-import numpy as np
+from selfdrive.mapd.config import QUERY_RADIUS
+from .geo import ref_vectors, R, distance_to_points
 from itertools import compress
+import numpy as np
 
 
 _DISTANCE_LIMIT_FOR_CURRENT_CURVATURE = 20.  # mts
 _SUBSTANTIAL_CURVATURE_THRESHOLD = 0.003  # 333 mts radius
+_MAX_ALLOWED_BEARING_DELTA_COSINE_AT_EDGE = -0.3420  # bearing delta at route edge must be 180 +/- 70 degrees.
+_MAP_DATA_EDGE_DISTANCE = 50  # mts. Consider edge of map data from this distance to edge of query radius.
 
 
 class Route():
   """A set of consecutive way relations forming a default driving route.
   """
-  def __init__(self, current, wr_index, way_collection_id):
+  def __init__(self, current, wr_index, way_collection_id, query_center):
+    """Create a Route object from a given `wr_index` (Way relation index)
+
+    Args:
+        current (WayRelation): The Way Relation that is currently located. It must be active.
+        wr_index (Dict(NodeId, [WayRelation])): The index of WayRelations by node id of an edge node.
+        way_collection_id (UUID): The id of the Way Collection that created this Route.
+        query_center (Numpy Array): lat, lon] numpy array in radians indicating the center of the data query.
+    """
     self.way_collection_id = way_collection_id
     self._ordered_way_relations = []
     self._nodes_data = None
@@ -33,23 +44,19 @@ class Route():
       # - Append current element to the route list of ordered way relations.
       self._ordered_way_relations.append(last_wr)
 
-      # Get the id of the node at the end of the way.
+      # - Get the id of the node at the end of the way and the fetch the way relations that share the end node id from 
+      # the index.
       last_node_id = last_wr.last_node.id
-
-      # Get the way relations that share the end node id from the index
       way_relations = wr_index[last_node_id]
 
-      # if no more way_relations than last_wr, we got to the end.
+      # - If no more way_relations than last_wr, we got to the end.
       if len(way_relations) == 1:
         break
 
-      # Get the coordinates for the edge node
+      # - Get the coordinates for the edge node and build the array of coordinates for the nodes before the edge node
+      # on each of the common way relations, then get the vectors in cartesian plane for the end sections of each way.
       ref_point = last_wr.last_node_coordinates
-
-      # Get the array of coordinates for the nodes following edge node on each of the common way relations.
       points = np.array(list(map(lambda wr: wr.node_before_edge_coordinates(last_node_id), way_relations)))
-
-      # Get the vectors in cartesian plane for the end sections of each way.
       v = ref_vectors(ref_point, points) * R
 
       # - Calculate the bearing (from true north clockwise) for every end section of each way.
@@ -60,12 +67,13 @@ class Route():
       b_ref = b[last_wr_idx]
       delta = b - b_ref
 
-      # - Update the direction of the possible continuation ways excluding the last_wr
+      # - Update the direction of the possible route continuation ways (excluding the last_wr) as starting
+      # from last_node_id
       for idx, wr in enumerate(way_relations):
         if idx != last_wr_idx:
           wr.update_direction_from_starting_node(last_node_id)
 
-      # - Filter the possible continuation way relations:
+      # - Filter the possible route continuation way relations:
       #   - exclude last_wr
       #   - exclude all way relations that are prohibited due to traffic direction.
       mask = [idx != last_wr_idx and not wr.is_prohibited for idx, wr in enumerate(way_relations)]
@@ -78,7 +86,16 @@ class Route():
 
       # - The section with the best continuation is the one with a bearing delta closest to pi. This is equivalent
       # to taking the one with the smallest cosine of the bearing delta, as cosine is minimum (-1) on both pi and -pi.
-      best_idx = np.argmin(np.cos(delta))
+      cos_delta = np.cos(delta)
+      best_idx = np.argmin(cos_delta)
+
+      # - Make sure to not select as route continuation a way that turns too much if we are close to the border of
+      # map data queried. This is to avoid building a route that takes a sharp turn just because we do not have the
+      # data for the way that actually continues straight.
+      if cos_delta[best_idx] > _MAX_ALLOWED_BEARING_DELTA_COSINE_AT_EDGE:
+        dist_to_center = distance_to_points(query_center, np.array([ref_point]))[0]
+        if dist_to_center > QUERY_RADIUS - _MAP_DATA_EDGE_DISTANCE:
+          break
 
       # - Select next way.
       last_wr = way_relations[best_idx]

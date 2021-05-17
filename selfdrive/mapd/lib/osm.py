@@ -6,9 +6,7 @@ class OSM():
     # self.api = overpy.Overpass()
     self.api = overpy.Overpass(url='http://3.65.170.21/api/interpreter')
 
-  def fetch_road_ways_around_location(self, location, radius):
-      lat, lon = location
-
+  def fetch_road_ways_around_location(self, lat, lon, radius):
       # fetch all ways and nodes on this ways around location
       around_str = f'{str(radius)},{str(lat)},{str(lon)}'
       q = """

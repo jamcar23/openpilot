@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 import threading
+import numpy as np
 from time import strftime, gmtime
 import cereal.messaging as messaging
 from common.realtime import Ratekeeper
 from selfdrive.mapd.lib.osm import OSM
 from selfdrive.mapd.lib.geo import distance
 from selfdrive.mapd.lib.WayCollection import WayCollection
+from .config import QUERY_RADIUS, MIN_DISTANCE_FOR_NEW_QUERY
 
 
-QUERY_RADIUS = 3000  # mts
-MIN_DISTANCE_FOR_NEW_QUERY = 1000  # mts
 FULL_STOP_MAX_SPEED = 1.39  # m/s Max speed for considering car is stopped.
 
 _DEBUG = True
@@ -82,13 +82,15 @@ class MapD():
   def _query_osm_not_blocking(self):
     def query(osm, location, radius):
       _debug(f'Mapd: Start query for OSM map data at {location}')
-      ways = osm.fetch_road_ways_around_location(location, radius)
+      lat, lon = location
+      ways = osm.fetch_road_ways_around_location(lat, lon, radius)
       _debug(f'Mapd: Query to OSM finished with {len(ways)} ways')
 
       # Only issue an update if we received some ways. Otherwise it is most likely a conectivity issue.
       # Will retry on next loop.
       if len(ways) > 0:
-        new_way_collection = WayCollection(ways)
+        location_rad = np.radians(np.array([lat, lon]))
+        new_way_collection = WayCollection(ways, location_rad)
 
         # Use the lock to update the way_collection as it might be being used to update the route.
         self._lock.acquire()

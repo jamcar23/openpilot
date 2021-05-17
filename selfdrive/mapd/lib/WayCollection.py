@@ -9,9 +9,16 @@ _ACCEPTABLE_BEARING_DELTA_IND = 0.7071067811865475  # sin(pi/4) | 45 degrees acc
 class WayCollection():
   """A collection of WayRelations to use for maps data analysis.
   """
-  def __init__(self, ways):
+  def __init__(self, ways, query_center):
+    """Creates a WayCollection with a set of OSM way objects.
+
+    Args:
+        ways (Array): Collection of Way objects fetched from OSM in a radius around `query_center`
+        query_center (Numpy Array): [lat, lon] numpy array in radians indicating the center of the data query.
+    """
     self.id = uuid.uuid4()
     self.way_relations = list(map(lambda way: WayRelation(way), ways))
+    self.query_center = query_center
 
     # Create the index by edge node ids.
     self.wr_index = {}
@@ -60,4 +67,4 @@ class WayCollection():
         wr_acceptable_bearing.sort(key=lambda wr: wr.distance_to_way)
         current = wr_acceptable_bearing[0]
 
-    return Route(current, self.wr_index, self.id)
+    return Route(current, self.wr_index, self.id, self.query_center)
