@@ -36,7 +36,12 @@ def get_git_diff(cmd: List[str], default: Optional[str] = None) -> Optional[str]
   return run_cmd_default(['git', 'diff', ] + cmd, default)
 
 def get_commit_op_version(commit_hash):
-  version = requests.get(f'https://raw.githubusercontent.com/jamcar23/openpilot/{commit_hash}/selfdrive/common/version.h').text
+  req = requests.get(f'https://raw.githubusercontent.com/jamcar23/openpilot/{commit_hash}/selfdrive/common/version.h')
+  version = req.text
+
+  if not req.ok or not version:
+    version = run_cmd_default(['git', 'show', f'{commit_hash}:selfdrive/common/version.h'])
+
   version = version[version.find('"')+1:version.rfind('"')]
 
   # print(f'op_version: {version}')
