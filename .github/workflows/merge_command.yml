@@ -9,6 +9,7 @@ jobs:
     timeout-minutes: 50
     env:
       HEAD_NAME: "${{ github.event.client_payload.pull_request.head.repo.full_name }}"
+      HEAD_REF: "${{ github.event.client_payload.pull_request.head.ref }}"
       PR_NUM: "${{ github.event.client_payload.pull_request.number }}"
     steps:
       - uses: actions/checkout@v2
@@ -26,11 +27,22 @@ jobs:
           git checkout src
       - name: Merge branches
         run: |
-          echo "Merge pull request #$PR_NUM from $HEAD_NAME"
-      # - name: Push changes
-      #   uses: ad-m/github-push-action@master
-      #   with:
-      #     github_token: ${{ secrets.REPO_PAT }}
-      #     branch: ${{ env.BRANCH }}
-      #     directory: ${{ env.TARGET_DIR }}
-      #     force: true
+          git merge -m "Merge pull request #$PR_NUM from $HEAD_NAME" $HEAD_REF
+      - name: Generate changelog
+        run: |
+          python tools/scripts/gen_changelog.py
+      - name: Amend merge
+        run: |
+          git add CHANGELOG.md
+          git commit --amend --no-edit
+      - name: Prepare CI Env Vars
+        run: |
+          chmod +x ./.github/scripts/ci_env_vars.sh
+          source ./.github/scripts/ci_env_vars.sh
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.REPO_PAT }}
+          branch: ${{ env.MAIN_BRANCH }}
+          directory: .
+          force: false
