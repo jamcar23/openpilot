@@ -124,7 +124,7 @@ def conditional_speed_limit_for_osm_tag_limit_string(limit_string):
 class WayRelation():
   """A class that represent the relationship of an OSM way and a given `location` and `bearing` of a driving vehicle.
   """
-  def __init__(self, way, location=None, bearing=None):
+  def __init__(self, way, location_rad=None, bearing=None):
     self.way = way
     self.reset_location_variables()
     self.direction = DIRECTION.NONE
@@ -142,8 +142,8 @@ class WayRelation():
     # Get the edge nodes ids.
     self.edge_nodes_ids = [way.nodes[0].id, way.nodes[-1].id]
 
-    if location is not None and bearing is not None:
-      self.update(location, bearing)
+    if location_rad is not None and bearing is not None:
+      self.update(location_rad, bearing)
 
   def __repr__(self):
     return f'(id: {self.id}, between {self.behind_idx} and {self.ahead_idx}, {self.direction}, active: {self.active})'
@@ -154,7 +154,7 @@ class WayRelation():
     return False
 
   def reset_location_variables(self):
-    self.location = None
+    self.location_rad = None
     self.bearing = None
     self.active = False
     self.ahead_idx = None
@@ -166,18 +166,17 @@ class WayRelation():
   def id(self):
     return self.way.id
 
-  def update(self, location, bearing):
-    """Will update and validate the associated way with a given `location` and `bearing`.
+  def update(self, location_rad, bearing):
+    """Will update and validate the associated way with a given `location_rad` and `bearing`.
        Specifically it will find the nodes behind and ahead of the current location and bearing.
        If no proper fit to the way geometry, the way relation is marked as invalid.
     """
     self.reset_location_variables()
 
     # Ignore if location not in way bounding box
-    if not self.is_location_in_bbox(location):
+    if not self.is_location_in_bbox(location_rad):
       return
 
-    location_rad = np.radians(np.array(location))
     bearing_rad = np.radians(bearing)
 
     # - Get the distance and bearings from location to all nodes. (N)
@@ -246,7 +245,7 @@ class WayRelation():
     self._active_bearing_delta = abs_sin_bw_delta_possible[min_h_possible_idx]
     self.distance_to_node_ahead = distances[self.ahead_idx]
     self.active = True
-    self.location = location
+    self.location_rad = location_rad
     self.bearing = bearing
     self._speed_limit = None
 
@@ -259,13 +258,12 @@ class WayRelation():
     else:
       self.direction = DIRECTION.NONE
 
-  def is_location_in_bbox(self, location):
+  def is_location_in_bbox(self, location_rad):
     """Indicates if a given location is contained in the bounding box surrounding the way.
        self.bbox = [[min_lat, min_lon], [max_lat, max_lon]]
     """
-    radians = np.radians(np.array(location, dtype=float))
-    is_g = np.greater_equal(radians, self.bbox[0, :])
-    is_l = np.less_equal(radians, self.bbox[1, :])
+    is_g = np.greater_equal(location_rad, self.bbox[0, :])
+    is_l = np.less_equal(location_rad, self.bbox[1, :])
 
     return np.all(np.concatenate((is_g, is_l)))
 

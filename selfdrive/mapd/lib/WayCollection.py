@@ -26,15 +26,15 @@ class WayCollection():
       for node_id in wr.edge_nodes_ids:
         self.wr_index[node_id] = self.wr_index.get(node_id, []) + [wr]
 
-  def get_route(self, location, bearing):
-    """Provides the best route found in the way collection based on provided `location` and `bearing`
+  def get_route(self, location_rad, bearing):
+    """Provides the best route found in the way collection based on provided `location_rad` and `bearing`
     """
-    if location is None or bearing is None:
+    if location_rad is None or bearing is None:
       return None
 
     # Update all way relations in collection to the provided location and bearing.
     for wr in self.way_relations:
-      wr.update(location, bearing)
+      wr.update(location_rad, bearing)
 
     # Get the way relations where a match was found. i.e. those now marked as active as long as the direction of
     # travel is valid.
