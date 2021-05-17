@@ -295,7 +295,7 @@ def main():
     #   break
 
     cur_hash = hashs[i]
-    prev_hash = hashs[i - 1].hash if i >= 1 else '2fd6f3ac'
+    prev_hash = hashs[i - 1].hash if i >= 1 else last_written_entry.commit_hash if last_written_entry else '2fd6f3ac'
 
     if last_written_entry and last_written_entry.commit_hash == cur_hash:
       pass
