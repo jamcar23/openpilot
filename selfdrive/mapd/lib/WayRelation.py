@@ -132,6 +132,15 @@ class WayRelation():
     # Create a numpy array with nodes data to support calculations.
     self._nodes_np = np.radians(np.array([[nd.lat, nd.lon] for nd in way.nodes], dtype=float))
 
+    # Get the vectors representation of the segments betwheen consecutive nodes. (N-1, 2)
+    v = vectors(self._nodes_np) * R
+
+    # Calculate the vector magnitudes (or distance) between nodes. (N-1)
+    self._way_distances = np.linalg.norm(v, axis=1)
+
+    # Calculate the bearing (from true north clockwise) for every section of the way (vectors between nodes). (N-1)
+    self._way_bearings = np.arctan2(v[:, 0], v[:, 1])
+
     # Define bounding box to ease the process of locating a node in a way.
     # [[min_lat, min_lon], [max_lat, max_lon]]
     self.bbox = np.row_stack((np.amin(self._nodes_np, 0) - _WAY_BBOX_PADING,
@@ -192,28 +201,19 @@ class WayRelation():
     if len(possible_idxs) == 0:
       return
 
-    # - Get the vectors representation of the segments betwheen consecutive nodes. (N-1, 2)
-    v = vectors(self._nodes_np) * R
-
-    # - Calculate the vector magnitudes (or distance) between nodes. (N-1)
-    d = np.linalg.norm(v, axis=1)
-
     # - Find then angle formed between the vectors from the current location to consecutive nodes. This is the
     # value of the difference in the bearings of the vectors.
     teta = np.diff(bearings)
 
     # - When two consecutive nodes will be ahead and behind, they will form a triangle with the current location.
-    # We find the closest distance to the way by solving the ara of the triangle and finding the height (h).
+    # We find the closest distance to the way by solving the area of the triangle and finding the height (h).
     # We must use the abolute value of the sin of the angle in the formula, which is equivalent to ensure we
     # are considering the smallest of the two angles formed between the two vectors.
     # https://www.mathsisfun.com/algebra/trig-area-triangle-without-right-angle.html
-    h = distances[:-1] * distances[1:] * np.abs(np.sin(teta)) / d
-
-    # - Calculate the bearing (from true north clockwise) for every section of the way (vectors between nodes). (N-1)
-    bw = np.arctan2(v[:, 0], v[:, 1])
+    h = distances[:-1] * distances[1:] * np.abs(np.sin(teta)) / self._way_distances
 
     # - Calculate the delta between driving bearing and way bearings. (N-1)
-    bw_delta = bw - bearing_rad
+    bw_delta = self._way_bearings - bearing_rad
 
     # - The absolut value of the sin of `bw_delta` indicates how close the bearings match independent of direction.
     # We will use this value along the distance to the way to aid on way selection. (N-1)
