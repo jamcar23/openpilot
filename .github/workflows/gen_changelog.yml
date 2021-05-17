@@ -1,11 +1,11 @@
 name: gen changelog
 on:
-  push:
-    branches-ignore:
-      - 'testing-closet*'
-    paths-ignore:
-      - '**.md'
-      - 'README*'
+  # push:
+  #   branches-ignore:
+  #     - 'testing-closet*'
+  #   paths-ignore:
+  #     - '**.md'
+  #     - 'README*'
   workflow_dispatch:
 
 env:
