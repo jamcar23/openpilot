@@ -1,0 +1,36 @@
+name: Merge Command
+on:
+  repository_dispatch:
+    types: [merge-command]
+jobs:
+  merge_pr:
+    name: merge pr
+    runs-on: ubuntu-20.04
+    timeout-minutes: 50
+    env:
+      HEAD_NAME: "${{ github.event.client_payload.pull_request.head.repo.full_name }}"
+      PR_NUM: "${{ github.event.client_payload.pull_request.number }}"
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+          lfs: true
+          ref: ${{ github.event.client_payload.pull_request.head.ref }}
+          fetch-depth: 0
+      - name: Setup git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Checkout src
+        run: |
+          git checkout src
+      - name: Merge branches
+          run: |
+          echo "Merge pull request #$PR_NUM from $HEAD_NAME"
+      # - name: Push changes
+      #   uses: ad-m/github-push-action@master
+      #   with:
+      #     github_token: ${{ secrets.REPO_PAT }}
+      #     branch: ${{ env.BRANCH }}
+      #     directory: ${{ env.TARGET_DIR }}
+      #     force: true
