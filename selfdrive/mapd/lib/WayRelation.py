@@ -155,7 +155,7 @@ class WayRelation():
 
   def reset_location_variables(self):
     self.location_rad = None
-    self.bearing = None
+    self.bearing_rad = None
     self.active = False
     self.ahead_idx = None
     self.behind_idx = None
@@ -166,8 +166,8 @@ class WayRelation():
   def id(self):
     return self.way.id
 
-  def update(self, location_rad, bearing):
-    """Will update and validate the associated way with a given `location_rad` and `bearing`.
+  def update(self, location_rad, bearing_rad):
+    """Will update and validate the associated way with a given `location_rad` and `bearing_rad`.
        Specifically it will find the nodes behind and ahead of the current location and bearing.
        If no proper fit to the way geometry, the way relation is marked as invalid.
     """
@@ -176,8 +176,6 @@ class WayRelation():
     # Ignore if location not in way bounding box
     if not self.is_location_in_bbox(location_rad):
       return
-
-    bearing_rad = np.radians(bearing)
 
     # - Get the distance and bearings from location to all nodes. (N)
     bearings = bearing_to_points(location_rad, self._nodes_np)
@@ -246,7 +244,7 @@ class WayRelation():
     self.distance_to_node_ahead = distances[self.ahead_idx]
     self.active = True
     self.location_rad = location_rad
-    self.bearing = bearing
+    self.bearing_rad = bearing_rad
     self._speed_limit = None
 
   def update_direction_from_starting_node(self, start_node_id):
