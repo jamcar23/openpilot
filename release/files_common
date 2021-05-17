@@ -4,6 +4,7 @@ common/op_params.py
 selfdrive/controls/lib/latcontrol_live.py
 selfdrive/sentryd/__init__.py
 selfdrive/sentryd/sentryd.py
+CHANGELOG.md
 
 .gitignore
 LICENSE

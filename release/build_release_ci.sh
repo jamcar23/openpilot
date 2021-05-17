@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash -e
 
 # TARGET_DIR="$1"
 # BRANCH="$2"
@@ -14,7 +14,7 @@ touch panda/board/obj/.placeholder
 
 echo "!board/obj/.placeholder" >> panda/.gitignore
 
-VERSION="$(date +%y.%m.%d.%H%M)"
+VERSION="$(python ../tools/scripts/gen_changelog.py --export)"
 echo "#define COMMA_VERSION \"$VERSION\"" > selfdrive/common/version.h
 
 git init
@@ -24,7 +24,7 @@ git remote add origin https://github.com/jamcar23/openpilot.git
 git checkout --orphan "$BRANCH"
 git add -A
 
-cp ../.pre-commit-config.yaml .pre-commit-config.yaml
-pre-commit run --all
+# cp ../.pre-commit-config.yaml .pre-commit-config.yaml
+# pre-commit run --all
 
 git commit -am "release: $VERSION"
