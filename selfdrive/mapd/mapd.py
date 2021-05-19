@@ -58,7 +58,7 @@ class MapD():
       return
 
     self.last_gps_fix_timestamp = log.timestamp  # Unix TS. Milliseconds since January 1, 1970.
-    self.location_rad = np.array([log.latitude, log.longitude], dtype=float)
+    self.location_rad = np.radians(np.array([log.latitude, log.longitude], dtype=float))
     self.location_deg = (log.latitude, log.longitude)
     self.bearing_rad = np.radians(log.bearingDeg, dtype=float)
     self.gps_speed = log.speed

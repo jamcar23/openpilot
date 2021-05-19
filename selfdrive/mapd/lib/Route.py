@@ -157,7 +157,7 @@ class Route():
       return
 
     # Skip if no update on location or bearing.
-    if self.current_wr.location_rad == location_rad and self.current_wr.bearing_rad == bearing_rad:
+    if np.array_equal(self.current_wr.location_rad, location_rad) and self.current_wr.bearing_rad == bearing_rad:
       return
 
     # Transverse the way relations on the actual order until we find an active one. From there, rebuild the route
