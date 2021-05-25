@@ -1,5 +1,5 @@
 import numpy as np
-from scipy import interpolate
+from opspline import splev, splprep
 from enum import Enum
 from .geo import DIRECTION, R, vectors
 
@@ -63,15 +63,15 @@ def spline_curvature_calculations(vect, dist_prev):
   vs = np.cumsum(vect, axis=0)
 
   # spline interpolation
-  tck, u = interpolate.splprep([vs[:, 0], vs[:, 1]])
+  tck, u = splprep([vs[:, 0], vs[:, 1]])
 
   # evaluate every _SPLINE_EVAL_STEP mts.
   n = max(int(ds[-1] / _SPLINE_EVAL_STEP), len(u))
   unew = np.arange(0, n + 1) / n
 
   # get derivatives
-  d1 = interpolate.splev(unew, tck, der=1)
-  d2 = interpolate.splev(unew, tck, der=2)
+  d1 = splev(unew, tck, der=1)
+  d2 = splev(unew, tck, der=2)
 
   # calculate curvatures
   num = d1[0] * d2[1] - d1[1] * d2[0]
