@@ -229,14 +229,14 @@ static void dev_ui_draw_desired_steering_angle(UIState *s, Rect *rel_rect, const
     if (s->scene.controls_state.getEnabled()) {
       //show Orange if more than 6 degrees
       //show red if  more than 12 degrees
-      if(((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) < -6) || ((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) > 6)) {
+      if(((int)(s->scene.car_ctrl.getActuators().getSteeringAngleDeg()) < -6) || ((int)(s->scene.car_ctrl.getActuators().getSteeringAngleDeg()) > 6)) {
         val_color = COLOR_YELLOW;
       }
-      if(((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) < -12) || ((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) > 12)) {
+      if(((int)(s->scene.car_ctrl.getActuators().getSteeringAngleDeg()) < -12) || ((int)(s->scene.car_ctrl.getActuators().getSteeringAngleDeg()) > 12)) {
         val_color = COLOR_RED;
       }
       // steering is in degrees
-      snprintf(val_str, sizeof(val_str), "%.0f°",(s->scene.controls_state.getSteeringAngleDesiredDeg()));
+      snprintf(val_str, sizeof(val_str), "%.0f°",(s->scene.car_ctrl.getActuators().getSteeringAngleDeg()));
     } else {
        snprintf(val_str, sizeof(val_str), "-");
     }
