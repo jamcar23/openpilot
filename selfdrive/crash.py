@@ -2,8 +2,9 @@
 import os
 import traceback
 from datetime import datetime
+from common.params import Params
 from selfdrive.swaglog import cloudlog
-from selfdrive.version import version
+from selfdrive.version import branch, commit, dirty, origin, version
 
 import sentry_sdk
 from sentry_sdk.integrations.threading import ThreadingIntegration
@@ -40,3 +41,9 @@ def init() -> None:
   sentry_sdk.init("https://ee3dca66da104ef388e010fcefbd06c6:df79d17e3a0743c387d4cbf05932abde@o484202.ingest.sentry.io/5537090",
                   default_integrations=False, integrations=[ThreadingIntegration(propagate_hub=True)],
                   release=version)
+  dongle_id = Params().get("DongleId", encoding='utf-8')
+  sentry_sdk.set_user({"id": dongle_id})
+  sentry_sdk.set_tag("dirty", dirty)
+  sentry_sdk.set_tag("origin", origin)
+  sentry_sdk.set_tag("branch", branch)
+  sentry_sdk.set_tag("commit", commit)
