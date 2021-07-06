@@ -204,6 +204,7 @@ class CarState(CarStateBase):
       ("STEER_ANGLE_SENSOR", 80),
       ("PCM_CRUISE", 33),
       ("STEER_TORQUE_SENSOR", 50),
+      ("ENGINE_RPM", 1)
     ]
 
     if CP.carFingerprint == CAR.LEXUS_IS:
@@ -258,6 +259,8 @@ class CarState(CarStateBase):
     checks = [
       ("STEERING_LKA", 42),
       ("PRE_COLLISION", 0), # TODO: figure out why freq is inconsistent
+      ("RSA1", 0),
+      ("RSA2", 0)
     ]
 
     return CANParser(DBC[CP.carFingerprint]["pt"], signals, checks, 2)
