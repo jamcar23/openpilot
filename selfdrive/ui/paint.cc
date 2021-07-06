@@ -279,49 +279,6 @@ static void ui_draw_vision_face(UIState *s) {
   ui_draw_circle_image(s, center_x, center_y+border_shifter+35, radius, "driver_face", s->scene.dm_active);
 }
 
-static void ui_draw_driver_view(UIState *s) {
-  s->sidebar_collapsed = true;
-  const bool is_rhd = s->scene.is_rhd;
-  const int width = 4 * s->viz_rect.h / 3;
-  const Rect rect = {s->viz_rect.centerX() - width / 2, s->viz_rect.y, width, s->viz_rect.h};  // x, y, w, h
-  const Rect valid_rect = {is_rhd ? rect.right() - rect.h / 2 : rect.x, rect.y, rect.h / 2, rect.h};
-
-  // blackout
-  const int blackout_x_r = valid_rect.right();
-#ifndef QCOM2
-  const int blackout_w_r = rect.right() - valid_rect.right();
-  const int blackout_x_l = rect.x;
-#else
-  const int blackout_w_r = s->viz_rect.right() - valid_rect.right();
-  const int blackout_x_l = s->viz_rect.x;
-#endif
-  const int blackout_w_l = valid_rect.x - blackout_x_l;
-  ui_fill_rect(s->vg, {blackout_x_l, rect.y, blackout_w_l, rect.h}, COLOR_BLACK_ALPHA(144));
-  ui_fill_rect(s->vg, {blackout_x_r, rect.y, blackout_w_r, rect.h}, COLOR_BLACK_ALPHA(144));
-
-  const bool face_detected = s->scene.driver_state.getFaceProb() > 0.4;
-  if (face_detected) {
-    auto fxy_list = s->scene.driver_state.getFacePosition();
-    float face_x = fxy_list[0];
-    float face_y = fxy_list[1];
-    int fbox_x = valid_rect.centerX() + (is_rhd ? face_x : -face_x) * valid_rect.w;
-    int fbox_y = valid_rect.centerY() + face_y * valid_rect.h;
-
-    float alpha = 0.2;
-    if (face_x = std::abs(face_x), face_y = std::abs(face_y); face_x <= 0.35 && face_y <= 0.4)
-      alpha = 0.8 - (face_x > face_y ? face_x : face_y) * 0.6 / 0.375;
-
-    const int box_size = 0.6 * rect.h / 2;
-    ui_draw_rect(s->vg, {fbox_x - box_size / 2, fbox_y - box_size / 2, box_size, box_size}, nvgRGBAf(1.0, 1.0, 1.0, alpha), 10, 35.);
-  }
-
-  // draw face icon
-  const int face_radius = 80;
-  const int center_x = is_rhd ? rect.right() - face_radius - bdr_s * 2 : rect.x + face_radius + bdr_s * 2;
-  const int center_y = rect.bottom() - face_radius - bdr_s * 2.5;
-  ui_draw_circle_image(s, center_x, center_y, face_radius, "driver_face", face_detected);
-}
-
 static void ui_draw_vision_header(UIState *s) {
   NVGpaint gradient = nvgLinearGradient(s->vg, s->viz_rect.x,
                         s->viz_rect.y+(header_h-(header_h/2.5)),
