@@ -2,6 +2,7 @@ from common.numpy_fast import interp
 from common.op_params import opParams, CAM_OFFSET
 import numpy as np
 from selfdrive.hardware import EON, TICI
+from selfdrive.swaglog import cloudlog
 from cereal import log
 
 TRAJECTORY_SIZE = 33
@@ -19,9 +20,8 @@ else:
 CAMERA_OFFSET = STANDARD_CAMERA_OFFSET
 
 
-
 class LanePlanner:
-  def __init__(self, OP=None):
+  def __init__(self, wide_camera=False, OP=None):
     self.ll_t = np.zeros((TRAJECTORY_SIZE,))
     self.ll_x = np.zeros((TRAJECTORY_SIZE,))
     self.lll_y = np.zeros((TRAJECTORY_SIZE,))
@@ -43,6 +43,9 @@ class LanePlanner:
     if not OP:
       OP = opParams()
     self.op_params = OP
+    self.wide_camera = wide_camera
+    self.camera_offset = -CAMERA_OFFSET if wide_camera else CAMERA_OFFSET
+    self.path_offset = -PATH_OFFSET if wide_camera else PATH_OFFSET
 
   def parse_model(self, md):
     if len(md.laneLines) == 4 and len(md.laneLines[0].t) == TRAJECTORY_SIZE:
@@ -50,9 +53,13 @@ class LanePlanner:
       # left and right ll x is the same
       self.ll_x = md.laneLines[1].x
       # only offset left and right lane lines; offsetting path does not make sense
-      CAMERA_OFFSET = self.op_params.get(CAM_OFFSET)
-      self.lll_y = np.array(md.laneLines[1].y) - CAMERA_OFFSET
-      self.rll_y = np.array(md.laneLines[2].y) - CAMERA_OFFSET
+      self.camera_offset = self.op_params.get(CAM_OFFSET)
+
+      if self.wide_camera:
+        self.camera_offset = -self.camera_offset
+
+      self.lll_y = np.array(md.laneLines[1].y) - self.camera_offset
+      self.rll_y = np.array(md.laneLines[2].y) - self.camera_offset
       self.lll_prob = md.laneLineProbs[1]
       self.rll_prob = md.laneLineProbs[2]
       self.lll_std = md.laneLineStds[1]
@@ -65,7 +72,7 @@ class LanePlanner:
   def get_d_path(self, v_ego, path_t, path_xyz):
     # Reduce reliance on lanelines that are too far apart or
     # will be in a few seconds
-    path_xyz[:,1] -= PATH_OFFSET
+    path_xyz[:, 1] -= self.path_offset
     l_prob, r_prob = self.lll_prob, self.rll_prob
     width_pts = self.rll_y - self.lll_y
     prob_mods = []
@@ -96,6 +103,10 @@ class LanePlanner:
 
     self.d_prob = l_prob + r_prob - l_prob * r_prob
     lane_path_y = (l_prob * path_from_left_lane + r_prob * path_from_right_lane) / (l_prob + r_prob + 0.0001)
-    lane_path_y_interp = np.interp(path_t, self.ll_t, lane_path_y)
-    path_xyz[:,1] = self.d_prob * lane_path_y_interp + (1.0 - self.d_prob) * path_xyz[:,1]
+    safe_idxs = np.isfinite(self.ll_t)
+    if safe_idxs[0]:
+      lane_path_y_interp = np.interp(path_t, self.ll_t[safe_idxs], lane_path_y[safe_idxs])
+      path_xyz[:,1] = self.d_prob * lane_path_y_interp + (1.0 - self.d_prob) * path_xyz[:,1]
+    else:
+      cloudlog.warning("Lateral mpc - NaNs in laneline times, ignoring")
     return path_xyz
