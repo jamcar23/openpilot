@@ -58,7 +58,8 @@ if OP_PARAMS.get(ENABLE_ROAD_SIGNS):
   defines['ENABLE_ROAD_SIGNS'] = 1
 qt_src = ["main.cc", "ui.cc", "paint.cc", "qt/sidebar.cc", "qt/onroad.cc",
           "qt/window.cc", "qt/home.cc", "qt/offroad/settings.cc",
-          "qt/offroad/onboarding.cc", "qt/offroad/driverview.cc", "#phonelibs/nanovg/nanovg.c"]
+          "qt/offroad/onboarding.cc", "qt/offroad/driverview.cc", "#phonelibs/nanovg/nanovg.c",
+          "devui.cc"]
 
 qt_env.Program("_ui", qt_src, LIBS=qt_libs, CPPDEFINES=defines)
 
