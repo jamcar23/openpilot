@@ -54,31 +54,6 @@ static void ui_init_vision(UIState *s) {
   assert(glGetError() == GL_NO_ERROR);
 }
 
-<<<<<<< HEAD
-
-void ui_init(UIState *s) {
-  s->sm = new SubMaster({
-    "modelV2", "controlsState", "liveCalibration", "radarState", "deviceState", "liveLocationKalman",
-    "pandaState", "carParams", "driverState", "driverMonitoringState", "sensorEvents", "carState", "ubloxGnss",
-    "gpsLocationExternal",
-#ifdef QCOM2
-    "roadCameraState",
-#endif
-  });
-
-  s->scene.started = false;
-  s->status = STATUS_OFFROAD;
-
-  ui_nvg_init(s);
-
-  s->last_frame = nullptr;
-  s->vipc_client_rear = new VisionIpcClient("camerad", VISION_STREAM_RGB_BACK, true);
-  s->vipc_client_front = new VisionIpcClient("camerad", VISION_STREAM_RGB_FRONT, true);
-  s->vipc_client = s->vipc_client_rear;
-}
-
-=======
->>>>>>> master
 static int get_path_length_idx(const cereal::ModelDataV2::XYZTData::Reader &line, const float path_height) {
   const auto line_x = line.getX();
   int max_idx = 0;
