@@ -4,10 +4,10 @@
 #include <map>
 #include <cmath>
 #include <iostream>
-#include "common/util.h"
-#include "common/timing.h"
 #include <algorithm>
 
+#include "selfdrive/common/util.h"
+#include "selfdrive/common/timing.h"
 #include "selfdrive/ui/devui.hpp"
 #include "selfdrive/ui/paint.h"
 
