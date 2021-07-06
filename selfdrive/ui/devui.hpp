@@ -1,4 +1,4 @@
 #pragma once
-#include "ui.hpp"
+#include "selfdrive/ui/ui.h"
 
 void dev_ui_draw_ui(UIState *s);

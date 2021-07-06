@@ -4,27 +4,10 @@
 
 #include <algorithm>
 
-<<<<<<< HEAD
-#define NANOVG_GLES3_IMPLEMENTATION
-#include "nanovg_gl.h"
-#include "nanovg_gl_utils.h"
-#include "paint.hpp"
-#include "sidebar.hpp"
-#include "devui.hpp"
-
-const int border_shifter = 20;
-
-// TODO: this is also hardcoded in common/transformations/camera.py
-// TODO: choose based on frame input size
-#ifdef QCOM2
-const float y_offset = 150.0;
-const float zoom = 1.1;
-=======
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #define NANOVG_GL3_IMPLEMENTATION
 #define nvgCreate nvgCreateGL3
->>>>>>> master
 #else
 #include <GLES3/gl3.h>
 #define NANOVG_GLES3_IMPLEMENTATION
@@ -40,6 +23,9 @@ const float zoom = 1.1;
 #include "selfdrive/hardware/hw.h"
 
 #include "selfdrive/ui/ui.h"
+#include "selfdrive/ui/devui.hpp"
+
+const int border_shifter = 20;
 
 static void ui_draw_text(const UIState *s, float x, float y, const char *string, float size, NVGcolor color, const char *font_name) {
   nvgFontFace(s->vg, font_name);
