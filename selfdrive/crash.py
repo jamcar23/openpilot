@@ -1,6 +1,5 @@
 """Install exception handler for process crash."""
 import os
-import sys
 import traceback
 from datetime import datetime
 from selfdrive.swaglog import cloudlog

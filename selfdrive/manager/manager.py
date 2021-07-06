@@ -11,13 +11,9 @@ import selfdrive.crash as crash
 from common.basedir import BASEDIR
 from common.params import Params, ParamKeyType
 from common.text_window import TextWindow
-<<<<<<< HEAD
 from common.op_params import opParams, ENABLE_MANAGER_PARAMS, DISABLED_PROCESSES
-from selfdrive.hardware import HARDWARE
-=======
 from selfdrive.boardd.set_time import set_time
 from selfdrive.hardware import HARDWARE, PC, TICI
->>>>>>> master
 from selfdrive.manager.helpers import unblock_stdout
 from selfdrive.manager.process import ensure_running
 from selfdrive.manager.process_config import managed_processes

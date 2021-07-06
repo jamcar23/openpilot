@@ -3,8 +3,6 @@
 from cereal import car
 from common.op_params import opParams, ENABLE_UNSAFE_STEERING_RATE, ENABLE_UNSAFE_STEERING_RATE_SELFDRIVE
 from selfdrive.car import dbc_dict
-from cereal import car
-from selfdrive.car import dbc_dict
 from selfdrive.config import Conversions as CV
 
 Ecu = car.CarParams.Ecu
