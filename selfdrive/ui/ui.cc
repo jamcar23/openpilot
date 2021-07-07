@@ -74,6 +74,7 @@ static void update_leads(UIState *s, const cereal::RadarState::Reader &radar_sta
       // negative because radarState uses left positive convention
       calib_frame_to_full_frame(s, lead_data.getDRel(), -lead_data.getYRel(), z + 1.22, &s->scene.lead_vertices[i]);
     }
+    s->scene.lead_data[i] = lead_data;
   }
 }
 
@@ -138,6 +139,12 @@ static void update_state(UIState *s) {
     scene.engageable = sm["controlsState"].getControlsState().getEngageable();
     scene.dm_active = sm["driverMonitoringState"].getDriverMonitoringState().getIsActiveMode();
   }
+  if (scene.started && sm.updated("controlsState")) {
+    scene.controls_state = sm["controlsState"].getControlsState();
+  }
+  if (sm.updated("carState")) {
+    scene.car_state = sm["carState"].getCarState();
+  }
   if (sm.updated("radarState")) {
     std::optional<cereal::ModelDataV2::XYZTData::Reader> line;
     if (sm.rcv_frame("modelV2") > 0) {
@@ -164,6 +171,9 @@ static void update_state(UIState *s) {
   }
   if (sm.updated("modelV2")) {
     update_model(s, sm["modelV2"].getModelV2());
+  }
+  if (sm.updated("deviceState")) {
+    scene.deviceState = sm["deviceState"].getDeviceState();
   }
   if (sm.updated("pandaState")) {
     auto pandaState = sm["pandaState"].getPandaState();

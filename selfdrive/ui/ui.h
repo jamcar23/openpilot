@@ -89,8 +89,6 @@ typedef struct UIScene {
   cereal::RadarState::LeadData::Reader lead_data[2];
   cereal::CarState::Reader car_state;
   cereal::ControlsState::Reader controls_state;
-  cereal::DriverState::Reader driver_state;
-  cereal::DriverMonitoringState::Reader dmonitoring_state;
   cereal::GpsLocationData::Reader gps_external;
   cereal::ModelDataV2::Reader model;
 
