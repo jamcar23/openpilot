@@ -18,6 +18,9 @@
 #define BACKLIGHT_TS 2.00
 #define BACKLIGHT_OFFROAD 75
 
+#if ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS
+#include "cereal/gen/cpp/car.capnp.h"
+#endif
 
 // Projects a point in car to space to the corresponding point in full frame
 // image space.
@@ -347,6 +350,19 @@ void Device::setAwake(bool on, bool reset) {
 }
 
 void Device::updateBrightness(const UIState &s) {
+  #ifdef ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS
+  int brightness;
+  auto active_lights = (*s.sm)["carState"].getCarState().getHeadLights().getActive();
+
+  if (active_lights == cereal::CarState::HeadLightsState::HeadLightType::NIGHT_TIME) {
+    brightness = (int) NIGHT_BRIGHTNESS;
+  } else if (active_lights == cereal::CarState::HeadLightsState::HeadLightType::HIGH_BEAMS) {
+    brightness = (int) HIGH_BEAM_BRIGHTNESS;
+  } else {
+    brightness = (int) DAY_BRIGHTNESS;
+  }
+  #else
+
   float brightness_b = 10;
   float brightness_m = 0.1;
   float clipped_brightness = std::min(100.0f, (s.scene.light_sensor * brightness_m) + brightness_b);
@@ -355,6 +371,7 @@ void Device::updateBrightness(const UIState &s) {
   }
 
   int brightness = brightness_filter.update(clipped_brightness);
+  #endif
   if (!awake) {
     brightness = 0;
   }

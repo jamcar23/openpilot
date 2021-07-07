@@ -14,10 +14,6 @@
 
 // HomeWindow: the container for the offroad and onroad UIs
 
-#if ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS
-#include "cereal/gen/cpp/car.capnp.h"
-#endif
-
 #define BACKLIGHT_DT 0.25
 #define BACKLIGHT_TS 2.00
 #define BACKLIGHT_OFFROAD 50
