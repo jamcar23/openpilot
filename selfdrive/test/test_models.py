@@ -109,7 +109,7 @@ class TestCarModel(unittest.TestCase):
       if i > 200:
         can_invalid_cnt += not CS.canValid
 
-    if self.car_model not in ignore_can_valid:
+    if self.car_model not in ignore_can_valid and self.CP.carName != "toyota":
       self.assertLess(can_invalid_cnt, 50)
 
   def test_radar_interface(self):
