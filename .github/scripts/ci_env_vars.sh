@@ -44,7 +44,7 @@ eval_var IS_MAIN $GITHUB_REF "$__ref_prefix$MAIN_BRANCH"
 
 if [[ $GITHUB_EVENT_NAME = 'push' && $IS_DEFAULT = $__eval_true && $IS_MAIN = $__eval_true ]]; then
     MAIN_IMAGE="$FAT_IMAGE"
-    BUILD_CMD="docker build -t $BASE_IMAGE -f Dockerfile.openpilot_base . && docker build -t $CI_IMAGE -f Dockerfile.openpilotci --cache-from $BASE_IMAGE . && docker build -t $FAT_IMAGE -f Dockerfile.openpilot_fat --cache-from $CI_IMAGE ."
+    BUILD_CMD="docker build --pull -t $BASE_IMAGE -f Dockerfile.openpilot_base . && docker build -t $CI_IMAGE -f Dockerfile.openpilotci --cache-from $BASE_IMAGE . && docker build -t $FAT_IMAGE -f Dockerfile.openpilot_fat --cache-from $CI_IMAGE ."
     RUN_CMD="$RUN_CMD_BASE --name $TEMP_IMAGE"
     SHOULD_BUILD_DOCKER='true'
 else
