@@ -190,31 +190,16 @@ class Plant():
     self.cp.update_strings(can_strings, sendcan=True)
 
     # ******** get controlsState messages for plotting ***
-    controls_state_msgs = []
-    for a in messaging.drain_sock(Plant.controls_state, wait_for_one=self.response_seen):
-      controls_state_msgs.append(a.controlsState)
-
-    fcw = None
-    for a in messaging.drain_sock(Plant.plan):
-      if a.longitudinalPlan.fcw:
-        fcw = True
-
-    if self.cp.vl[0x1fa]['COMPUTER_BRAKE_REQUEST']:
-      brake = self.cp.vl[0x1fa]['COMPUTER_BRAKE'] * 0.003906248
-    else:
-      brake = 0.0
-
-    if self.cp.vl[0x200]['GAS_COMMAND'] > 0:
-      gas = self.cp.vl[0x200]['GAS_COMMAND'] / 256.0
-    else:
-      gas = 0.0
-
-    if self.cp.vl[0xe4]['STEER_TORQUE_REQUEST']:
-      steer_torque = self.cp.vl[0xe4]['STEER_TORQUE']*1.0/0xf00
-    else:
-      steer_torque = 0.0
-
-    distance_lead = self.distance_lead_prev + v_lead * self.ts
+    self.sm.update()
+    while True:
+      time.sleep(0.01)
+      if self.sm.updated['longitudinalPlan']:
+        plan = self.sm['longitudinalPlan']
+        self.speed = plan.speeds[5]
+        self.acceleration = plan.accels[5]
+        fcw = plan.fcw
+        break
+    self.distance_lead = self.distance_lead + v_lead * self.ts
 
     # ******** run the car ********
     speed, acceleration = car_plant(self.distance_prev, self.speed_prev, grade, gas, brake)

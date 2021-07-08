@@ -220,8 +220,11 @@ class LateralPlanner():
     heading_pts = np.interp(v_ego * self.t_idxs[:MPC_N + 1], np.linalg.norm(self.path_xyz, axis=1), self.plan_yaw)
     self.y_pts = y_pts
 
-    assert len(y_pts) == MPC_N + 1
-    assert len(heading_pts) == MPC_N + 1
+    assert len(y_pts) == LAT_MPC_N + 1
+    assert len(heading_pts) == LAT_MPC_N + 1
+    # for now CAR_ROTATION_RADIUS is disabled
+    # to use it, enable it in the MPC
+    assert abs(CAR_ROTATION_RADIUS) < 1e-3
     self.libmpc.run_mpc(self.cur_state, self.mpc_solution,
                         float(v_ego),
                         CAR_ROTATION_RADIUS,
