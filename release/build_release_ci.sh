@@ -14,11 +14,16 @@ touch panda/board/obj/.placeholder
 
 echo "!board/obj/.placeholder" >> panda/.gitignore
 
-if ["$IS_MAIN_BRANCH" = "true"]
+chmod +x ../.github/scripts/ci_env_vars.sh
+source ../.github/scripts/ci_env_vars.sh
+
+echo "$IS_MAIN_BRANCH"
+
+if ["$IS_MAIN_BRANCH" = "false"]
 then
-    VERSION="$(python ../tools/scripts/gen_changelog.py)"
-else
     VERSION="$(python ../tools/scripts/gen_changelog.py --export)"
+else
+    VERSION="$(python ../tools/scripts/gen_changelog.py)"
 fi
 
 echo "#define COMMA_VERSION \"$VERSION\"" > selfdrive/common/version.h
