@@ -1,16 +1,15 @@
-#include "ui.hpp"
+#include "selfdrive/ui/ui.h"
 
 #include <assert.h>
 #include <map>
 #include <cmath>
 #include <iostream>
-#include "common/util.h"
-#include "common/timing.h"
 #include <algorithm>
 
-#include "devui.hpp"
-#include "sidebar.hpp"
-#include "paint.hpp"
+#include "selfdrive/common/util.h"
+#include "selfdrive/common/timing.h"
+#include "selfdrive/ui/devui.hpp"
+#include "selfdrive/ui/paint.h"
 
 const int lr_w = 180;
 const int lr_h = 5;

@@ -72,7 +72,6 @@ release/build_release2.sh
 selfdrive/version.py
 
 selfdrive/__init__.py
-selfdrive/registration.py
 selfdrive/config.py
 selfdrive/crash.py
 selfdrive/swaglog.py
@@ -85,6 +84,7 @@ selfdrive/rtshield.py
 selfdrive/athena/__init__.py
 selfdrive/athena/athenad.py
 selfdrive/athena/manage_athenad.py
+selfdrive/athena/registration.py
 
 selfdrive/boardd/.gitignore
 selfdrive/boardd/SConscript
@@ -97,6 +97,7 @@ selfdrive/boardd/panda.cc
 selfdrive/boardd/panda.h
 selfdrive/boardd/pigeon.cc
 selfdrive/boardd/pigeon.h
+selfdrive/boardd/set_time.py
 
 selfdrive/car/__init__.py
 selfdrive/car/car_helpers.py
@@ -289,17 +290,22 @@ selfdrive/locationd/__init__.py
 selfdrive/locationd/.gitignore
 selfdrive/locationd/SConscript
 selfdrive/locationd/ubloxd.cc
-selfdrive/locationd/ubloxd_main.cc
 selfdrive/locationd/ublox_msg.cc
 selfdrive/locationd/ublox_msg.h
+selfdrive/locationd/generated/ubx.cpp
+selfdrive/locationd/generated/ubx.h
+selfdrive/locationd/generated/gps.cpp
+selfdrive/locationd/generated/gps.h
 
-selfdrive/locationd/locationd.py
+selfdrive/locationd/locationd.h
+selfdrive/locationd/locationd.cc
 selfdrive/locationd/paramsd.py
 selfdrive/locationd/models/.gitignore
-selfdrive/locationd/models/SConscript
 selfdrive/locationd/models/live_kf.py
 selfdrive/locationd/models/car_kf.py
 selfdrive/locationd/models/constants.py
+selfdrive/locationd/models/live_kf.h
+selfdrive/locationd/models/live_kf.cc
 
 selfdrive/locationd/calibrationd.py
 
@@ -333,7 +339,7 @@ selfdrive/sensord/libdiag.h
 selfdrive/sensord/sensors_qcom.cc
 selfdrive/sensord/sensors_qcom2.cc
 selfdrive/sensord/sensors/*.cc
-selfdrive/sensord/sensors/*.hpp
+selfdrive/sensord/sensors/*.h
 selfdrive/sensord/sensord
 
 selfdrive/thermald/thermald.py
@@ -343,6 +349,7 @@ selfdrive/test/__init__.py
 selfdrive/test/helpers.py
 selfdrive/test/setup_device_ci.sh
 selfdrive/test/test_fingerprints.py
+selfdrive/test/test_onroad.py
 
 selfdrive/ui/.gitignore
 selfdrive/ui/SConscript
@@ -354,12 +361,12 @@ selfdrive/ui/text
 selfdrive/ui/spinner
 
 selfdrive/ui/qt/*.cc
-selfdrive/ui/qt/*.hpp
+selfdrive/ui/qt/*.h
 selfdrive/ui/qt/offroad/*.cc
-selfdrive/ui/qt/offroad/*.hpp
+selfdrive/ui/qt/offroad/*.h
 selfdrive/ui/qt/offroad/*.qml
 selfdrive/ui/qt/widgets/*.cc
-selfdrive/ui/qt/widgets/*.hpp
+selfdrive/ui/qt/widgets/*.h
 selfdrive/ui/qt/spinner_aarch64
 selfdrive/ui/qt/text_aarch64
 
@@ -435,8 +442,12 @@ selfdrive/modeld/runners/run.h
 selfdrive/monitoring/dmonitoringd.py
 selfdrive/monitoring/driver_monitor.py
 
-selfdrive/assets
+selfdrive/assets/*.png
 selfdrive/assets/fonts/*.ttf
+selfdrive/assets/images/*
+selfdrive/assets/offroad/*
+selfdrive/assets/sounds/*
+selfdrive/assets/training/*
 
 phonelibs/SConscript
 
@@ -457,6 +468,9 @@ phonelibs/qpoases/**
 
 phonelibs/qrcode/*.cc
 phonelibs/qrcode/*.hpp
+
+phonelibs/kaitai/*.h
+phonelibs/kaitai/*.cpp
 
 phonelibs/libyuv/include/**
 phonelibs/libyuv/lib/**
@@ -495,15 +509,15 @@ cereal/messaging/.gitignore
 cereal/messaging/__init__.py
 cereal/messaging/bridge.cc
 cereal/messaging/impl_msgq.cc
-cereal/messaging/impl_msgq.hpp
+cereal/messaging/impl_msgq.h
 cereal/messaging/impl_zmq.cc
-cereal/messaging/impl_zmq.hpp
+cereal/messaging/impl_zmq.h
 cereal/messaging/messaging.cc
-cereal/messaging/messaging.hpp
+cereal/messaging/messaging.h
 cereal/messaging/messaging.pxd
 cereal/messaging/messaging_pyx.pyx
 cereal/messaging/msgq.cc
-cereal/messaging/msgq.hpp
+cereal/messaging/msgq.h
 cereal/messaging/socketmaster.cc
 cereal/visionipc/.gitignore
 cereal/visionipc/__init__.py
@@ -551,8 +565,7 @@ opendbc/gm_global_a_chassis.dbc
 opendbc/ford_fusion_2018_pt.dbc
 opendbc/ford_fusion_2018_adas.dbc
 
-opendbc/honda_accord_s2t_2018_can_generated.dbc
-opendbc/honda_accord_lx15t_2018_can_generated.dbc
+opendbc/honda_accord_2018_can_generated.dbc
 opendbc/acura_ilx_2016_can_generated.dbc
 opendbc/acura_rdx_2018_can_generated.dbc
 opendbc/acura_rdx_2020_can_generated.dbc

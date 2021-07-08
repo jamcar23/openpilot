@@ -11,15 +11,17 @@ import cereal.messaging as messaging
 
 
 def plannerd_thread(sm=None, pm=None):
-
-  config_realtime_process(2, Priority.CTRL_LOW)
+  config_realtime_process(5 if TICI else 2, Priority.CTRL_LOW)
 
   cloudlog.info("plannerd is waiting for CarParams")
   params = Params()
   CP = car.CarParams.from_bytes(params.get("CarParams", block=True))
-  use_lanelines = params.get('EndToEndToggle') != b'1'
-  wide_camera = (params.get('EnableWideCamera') == b'1') if TICI else False
   cloudlog.info("plannerd got CarParams: %s", CP.carName)
+
+  use_lanelines = not params.get_bool('EndToEndToggle')
+  wide_camera = params.get_bool('EnableWideCamera') if TICI else False
+
+  cloudlog.event("e2e mode", on=use_lanelines)
 
   OP = opParams()
   longitudinal_planner = Planner(CP, OP=OP)
@@ -27,7 +29,7 @@ def plannerd_thread(sm=None, pm=None):
 
   if sm is None:
     sm = messaging.SubMaster(['carState', 'controlsState', 'radarState', 'modelV2'],
-                             poll=['radarState', 'modelV2'])
+                             poll=['radarState', 'modelV2'], ignore_avg_freq=['radarState'])
 
   if pm is None:
     pm = messaging.PubMaster(['longitudinalPlan', 'liveLongitudinalMpc', 'lateralPlan', 'liveMpc'])
