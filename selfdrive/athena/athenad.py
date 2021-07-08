@@ -479,8 +479,7 @@ def main():
       ws = create_connection(ws_uri,
                              cookie="jwt=" + api.get_token(),
                              enable_multithread=True,
-                             timeout=1.0)
-      ws.settimeout(1)
+                             timeout=30)
       cloudlog.event("athenad.main.connected_ws", ws_uri=ws_uri)
 
       manage_tokens(api)
