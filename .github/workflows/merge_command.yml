@@ -32,10 +32,10 @@ jobs:
       - name: Generate changelog
         run: |
           python tools/scripts/gen_changelog.py
-      - name: Amend merge
+      - name: Commit changelog
         run: |
           git add CHANGELOG.md
-          git commit --amend --no-edit
+          git commit -m "docs(changelog): auto update changelog from PR #$PR_NUM"
       - name: Prepare CI Env Vars
         run: |
           chmod +x ./.github/scripts/ci_env_vars.sh

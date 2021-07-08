@@ -255,7 +255,7 @@ def main():
   # hashs = get_git_log(['--grep="Merge pull request"', '--grep="from=jamcar23"', '--pretty=format:"%h"'])
   # print(f'hashs: {hashs}')
 
-  pr_hash_pattern = re.compile(r'commit ([\w\d]+)\nMerge: ([\w\d][\w\d][\w\d][\w\d][\w\d][\w\d][\w\d][\w\d]) ([\w\d][\w\d][\w\d][\w\d][\w\d][\w\d][\w\d][\w\d])')
+  pr_hash_pattern = re.compile(r'commit ([\w\d]+)\nMerge: ([\w\d][\w\d][\w\d][\w\d][\w\d][\w\d]+) ([\w\d][\w\d][\w\d][\w\d][\w\d][\w\d]+)')
   prs = pr_hash_pattern.findall(commit_logs)
 
   hashs = []
