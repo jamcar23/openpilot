@@ -327,6 +327,7 @@ def main():
     last_entry.op_version = op_version
     last_entry.commit_hash = cur_hash.hash
 
+  print(last_entry.fp_version)
   if changelog:
     log_lines = []
     with open('CHANGELOG.md', 'r') as f:
