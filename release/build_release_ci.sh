@@ -14,11 +14,14 @@ touch panda/board/obj/.placeholder
 
 echo "!board/obj/.placeholder" >> panda/.gitignore
 
-if ["$IS_MAIN_BRANCH" = "false"]
+if ["$IS_MAIN_BRANCH" = "true"]
 then
     VERSION="$(python ../tools/scripts/gen_changelog.py)"
-    echo "#define COMMA_VERSION \"$VERSION\"" > selfdrive/common/version.h
+else
+    VERSION="$(python ../tools/scripts/gen_changelog.py --export)"
 fi
+
+echo "#define COMMA_VERSION \"$VERSION\"" > selfdrive/common/version.h
 
 git init
 git config user.name "github-actions[bot]"
