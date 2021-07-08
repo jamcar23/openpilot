@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-20.04
     timeout-minutes: 50
     env:
-      HEAD_NAME: "${{ github.event.client_payload.pull_request.head.repo.full_name }}"
+      USER_NAME: "${{ github.event.client_payload.pull_request.head.user.login }}"
       HEAD_REF: "${{ github.event.client_payload.pull_request.head.ref }}"
       PR_NUM: "${{ github.event.client_payload.pull_request.number }}"
     steps:
@@ -28,7 +28,7 @@ jobs:
           git checkout src
       - name: Merge branches
         run: |
-          git merge -m "Merge pull request #$PR_NUM from $HEAD_NAME" $HEAD_REF
+          git merge -m "Merge pull request #$PR_NUM from $USER_NAME/$HEAD_REF" $HEAD_REF
       - name: Generate changelog
         run: |
           python tools/scripts/gen_changelog.py
