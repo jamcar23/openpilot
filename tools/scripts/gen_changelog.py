@@ -79,29 +79,30 @@ def create_new_params_section(cur_hash, prev_hash):
   old_params = []
   new_params = []
 
-  for line in diff.splitlines():
-    if not line:
-      continue
-
-    if line.startswith('-') and 'Param(' in line:
-      old_params.append(strip_param_line(line))
-    if line.startswith('+') and 'Param(' in line:
-      param_line = strip_param_line(line)
-      param_key = param_line[0:param_line.find(':') + 1]
-
-      if param_key in DOCUMENTED_PARAM_KEYS:
+  if diff:
+    for line in diff.splitlines():
+      if not line:
         continue
 
-      found_old_param = False
+      if line.startswith('-') and 'Param(' in line:
+        old_params.append(strip_param_line(line))
+      if line.startswith('+') and 'Param(' in line:
+        param_line = strip_param_line(line)
+        param_key = param_line[0:param_line.find(':') + 1]
 
-      for old_param in old_params:
-        if old_param.startswith(param_key):
-          found_old_param = True
-          break
+        if param_key in DOCUMENTED_PARAM_KEYS:
+          continue
 
-      if not found_old_param:
-        new_params.append(param_line)
-        DOCUMENTED_PARAM_KEYS.append(param_key)
+        found_old_param = False
+
+        for old_param in old_params:
+          if old_param.startswith(param_key):
+            found_old_param = True
+            break
+
+        if not found_old_param:
+          new_params.append(param_line)
+          DOCUMENTED_PARAM_KEYS.append(param_key)
 
   # print(f'new params: {new_params}')
   return Section('New OP Params', new_params)
