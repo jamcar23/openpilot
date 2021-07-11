@@ -463,7 +463,8 @@ class Controls:
     lat_plan = self.sm['lateralPlan']
     long_plan = self.sm['longitudinalPlan']
 
-    lat_plan.curvature = self.prev_desired_curvature
+    if lat_plan:
+      lat_plan.curvature = self.prev_desired_curvature
 
     actuators = car.CarControl.Actuators.new_message()
 
@@ -490,7 +491,7 @@ class Controls:
                                                                              desired_curvature, desired_curvature_rate,
                                                                              lat_plan)
 
-      self.prev_desired_curvature = desired_curvature
+      self.prev_desired_curvature = float(desired_curvature)
     else:
       lac_log = log.ControlsState.LateralDebugState.new_message()
       if self.sm.rcv_frame['testJoystick'] > 0 and self.active:
