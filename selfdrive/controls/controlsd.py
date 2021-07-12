@@ -464,7 +464,7 @@ class Controls:
     long_plan = self.sm['longitudinalPlan']
 
     if lat_plan:
-      lat_plan.curvature = self.prev_desired_curvature
+      lat_plan.curvature = float(self.prev_desired_curvature if self.prev_desired_curvature is not None else 0.)
 
     actuators = car.CarControl.Actuators.new_message()
 
