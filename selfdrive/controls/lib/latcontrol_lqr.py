@@ -73,7 +73,7 @@ class LatControlLQR():
       self.dc_gain = CP.lateralTuning.lqr.dcGain
       self.sat_limit = CP.steerLimitTimer
 
-  def update(self, active, CS, CP, VM, params, desired_curvature, desired_curvature_rate, lat_plan):
+  def update(self, active, CS, CP, VM, params, desired_curvature, desired_curvature_rate, ctrl_state):
     self._update_params(CP)
     lqr_log = log.ControlsState.LateralLQRState.new_message()
 

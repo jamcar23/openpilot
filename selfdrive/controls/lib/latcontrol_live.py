@@ -52,6 +52,6 @@ class LatControlLive():
     self.indi.reset()
     self.lqr.reset()
 
-  def update(self, active, CS, CP, VM, params, desired_curvature, desired_curvature_rate, lat_plan):
+  def update(self, active, CS, CP, VM, params, desired_curvature, desired_curvature_rate, ctrl_state):
     self._update_control()
-    return self.ctrl.update(active, CS, CP, VM, params, desired_curvature, desired_curvature_rate, lat_plan)
+    return self.ctrl.update(active, CS, CP, VM, params, desired_curvature, desired_curvature_rate, ctrl_state)

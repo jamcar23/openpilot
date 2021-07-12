@@ -167,7 +167,7 @@ class Controls:
     self.last_car_speed_at_sign_kph = 0
     self.speed_limit_offset_kph = 0
     self.has_seen_road_sign = False
-    self.prev_desired_curvature = 0
+    self.prev_ctrl_state = log.ControlsState.new_message().as_reader()
 
   def update_events(self, CS):
     """Compute carEvents from carState"""
@@ -478,15 +478,6 @@ class Controls:
       # Gas/Brake PID loop
       actuators.gas, actuators.brake, self.v_target, self.a_target = self.LoC.update(self.active, CS, self.CP, long_plan)
 
-      # TODO: fix this, don't create new messages, rethink passing bp sources to op params
-      if isinstance(lat_plan, log.LateralPlan.Reader):
-        lat_send = lat_plan.as_builder()
-      elif isinstance(lat_plan, log.LateralPlan.Builder):
-        lat_send = lat_plan
-      else:
-        lat_send = log.LateralPlan.new_message()
-
-      lat_send.curvature = float(self.prev_desired_curvature if self.prev_desired_curvature is not None else 0.)
       # Steering PID loop and lateral MPC
       desired_curvature, desired_curvature_rate = get_lag_adjusted_curvature(self.CP, CS.vEgo,
                                                                              lat_plan.psis,
@@ -495,9 +486,7 @@ class Controls:
                                                                              self.opParams, CS, lat_plan)
       actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(self.active, CS, self.CP, self.VM, params,
                                                                              desired_curvature, desired_curvature_rate,
-                                                                             lat_send)
-
-      self.prev_desired_curvature = float(desired_curvature)
+                                                                             self.prev_ctrl_state)
     else:
       lac_log = log.ControlsState.LateralDebugState.new_message()
       if self.sm.rcv_frame['testJoystick'] > 0 and self.active:
@@ -642,6 +631,7 @@ class Controls:
       controlsState.lateralControlState.lqrState = lac_log
     elif self.LaC.ctrl_type == 'indi':
       controlsState.lateralControlState.indiState = lac_log
+    self.prev_ctrl_state = controlsState
     self.pm.send('controlsState', dat)
 
     # carState

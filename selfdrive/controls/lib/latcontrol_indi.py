@@ -66,7 +66,7 @@ class LatControlINDI():
 
     return self.sat_count > self.sat_limit
 
-  def update(self, active, CS, CP, VM, params, curvature, curvature_rate, lat_plan):
+  def update(self, active, CS, CP, VM, params, curvature, curvature_rate, ctrl_state):
     self.speed = CS.vEgo
 
     if self.op_params.get(ENABLE_LAT_PARAMS):
@@ -80,7 +80,7 @@ class LatControlINDI():
 
         if use_multi:
           postfix = '_multi'
-          i = eval_breakpoint_source(self.op_params.get(INDI_MULTI_BREAKPOINT_SOURCE), CS, lat_plan)
+          i = eval_breakpoint_source(self.op_params.get(INDI_MULTI_BREAKPOINT_SOURCE), CS, ctrl_state)
           itrp = interp_multi_bp
         else:
           i = CS.vEgo
