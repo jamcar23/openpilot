@@ -38,7 +38,7 @@ def eval_breakpoint_source(sources, CS, controls_state):
     elif BreakPointSourceKeys.AEGO in src:
       return parse_param_modifiers(src.replace(BreakPointSourceKeys.AEGO, ''), CS.aEgo)
     elif BreakPointSourceKeys.DESIRED_STEER in src:
-      return parse_param_modifiers(src.replace(BreakPointSourceKeys.DESIRED_STEER, ''), math.degrees(controls_state.curvature))
+      return parse_param_modifiers(src.replace(BreakPointSourceKeys.DESIRED_STEER, ''), math.degrees(controls_state.desiredCurvatureDeg))
     else:
       raise ValueError(f'Unknown value option: {src}')
 

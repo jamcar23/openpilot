@@ -228,7 +228,7 @@ static void dev_ui_draw_desired_steering_angle(UIState *s, Rect *rel_rect, const
     char uom_str[6];
     NVGcolor val_color = COLOR_WHITE;
     if (s->scene.controls_state.getEnabled()) {
-      float curvature = RAD2DEG(s->scene.controls_state.getCurvature());
+      float curvature = s->scene.controls_state.getDesiredCurvatureDeg();
       //show Orange if more than 6 degrees
       //show red if  more than 12 degrees
       if(((int)(curvature) < -6) || ((int)(curvature) > 6)) {

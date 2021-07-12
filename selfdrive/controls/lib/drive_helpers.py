@@ -76,7 +76,7 @@ def offset_v_cruise(v_cruise, last_cruise, offset):
 def is_toyota(CP):
   return CP.carName == "toyota"
 
-def get_lag_adjusted_curvature(CP, v_ego, psis, curvatures, curvature_rates, op_params, CS, lat_plan):
+def get_lag_adjusted_curvature(CP, v_ego, psis, curvatures, curvature_rates, op_params, CS, controls_state):
   if len(psis) != CONTROL_N:
     psis = [0.0 for i in range(CONTROL_N)]
     curvatures = [0.0 for i in range(CONTROL_N)]
@@ -85,7 +85,7 @@ def get_lag_adjusted_curvature(CP, v_ego, psis, curvatures, curvature_rates, op_
   # TODO this needs more thought, use .2s extra for now to estimate other delays
   if op_params.get(ENABLE_LAT_PARAMS):
     if op_params.get(ENABLE_ACTUATOR_DELAY_BPS_MULTI):
-      delay = interp_multi_bp(eval_breakpoint_source(op_params.get(STEER_DELAY_MULTI_BP_SOURCE), CS, lat_plan),
+      delay = interp_multi_bp(eval_breakpoint_source(op_params.get(STEER_DELAY_MULTI_BP_SOURCE), CS, controls_state),
                               op_params.get(STEER_ACTUATOR_DELAY_BP_MULTI),
                               op_params.get(STEER_ACTUATOR_DELAY_V_MULTI))
     elif op_params.get(ENABLE_ACTUATOR_DELAY_BPS):

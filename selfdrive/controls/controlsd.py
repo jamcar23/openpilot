@@ -167,6 +167,7 @@ class Controls:
     self.last_car_speed_at_sign_kph = 0
     self.speed_limit_offset_kph = 0
     self.has_seen_road_sign = False
+    self.desired_curvature = 0
     self.prev_ctrl_state = log.ControlsState.new_message().as_reader()
 
   def update_events(self, CS):
@@ -479,13 +480,13 @@ class Controls:
       actuators.gas, actuators.brake, self.v_target, self.a_target = self.LoC.update(self.active, CS, self.CP, long_plan)
 
       # Steering PID loop and lateral MPC
-      desired_curvature, desired_curvature_rate = get_lag_adjusted_curvature(self.CP, CS.vEgo,
+      self.desired_curvature, desired_curvature_rate = get_lag_adjusted_curvature(self.CP, CS.vEgo,
                                                                              lat_plan.psis,
                                                                              lat_plan.curvatures,
                                                                              lat_plan.curvatureRates,
-                                                                             self.opParams, CS, lat_plan)
+                                                                             self.opParams, CS, self.prev_ctrl_state)
       actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(self.active, CS, self.CP, self.VM, params,
-                                                                             desired_curvature, desired_curvature_rate,
+                                                                             self.desired_curvature, desired_curvature_rate,
                                                                              self.prev_ctrl_state)
     else:
       lac_log = log.ControlsState.LateralDebugState.new_message()
@@ -610,6 +611,7 @@ class Controls:
     controlsState.enabled = self.enabled
     controlsState.active = self.active
     controlsState.curvature = curvature
+    controlsState.desiredCurvatureDeg = math.degrees(self.desired_curvature)
     controlsState.state = self.state
     controlsState.engageable = not self.events.any(ET.NO_ENTRY)
     controlsState.longControlState = self.LoC.long_control_state
