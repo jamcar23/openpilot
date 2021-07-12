@@ -594,6 +594,9 @@ class Controls:
     steer_angle_without_offset = math.radians(CS.steeringAngleDeg - params.angleOffsetAverageDeg)
     curvature = -self.VM.calc_curvature(steer_angle_without_offset, CS.vEgo)
 
+    angle_steers_des_no_offset = math.degrees(self.VM.get_steer_from_curvature(-self.desired_curvature, CS.vEgo))
+    angle_steers_des = angle_steers_des_no_offset + params.angleOffsetDeg
+
     # controlsState
     dat = messaging.new_message('controlsState')
     dat.valid = CS.canValid
@@ -611,7 +614,7 @@ class Controls:
     controlsState.enabled = self.enabled
     controlsState.active = self.active
     controlsState.curvature = curvature
-    controlsState.desiredCurvatureDeg = math.degrees(self.desired_curvature)
+    controlsState.desiredSteerDeg = angle_steers_des
     controlsState.state = self.state
     controlsState.engageable = not self.events.any(ET.NO_ENTRY)
     controlsState.longControlState = self.LoC.long_control_state
