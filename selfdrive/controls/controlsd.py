@@ -463,9 +463,6 @@ class Controls:
     lat_plan = self.sm['lateralPlan']
     long_plan = self.sm['longitudinalPlan']
 
-    if lat_plan:
-      lat_plan.curvature = float(self.prev_desired_curvature if self.prev_desired_curvature is not None else 0.)
-
     actuators = car.CarControl.Actuators.new_message()
 
     if CS.leftBlinker or CS.rightBlinker:
@@ -481,6 +478,15 @@ class Controls:
       # Gas/Brake PID loop
       actuators.gas, actuators.brake, self.v_target, self.a_target = self.LoC.update(self.active, CS, self.CP, long_plan)
 
+      # TODO: fix this, don't create new messages, rethink passing bp sources to op params
+      if isinstance(lat_plan, log.LateralPlan.Reader):
+        lat_send = lat_plan.as_builder()
+      elif isinstance(lat_plan, log.LateralPlan.Builder):
+        lat_send = lat_plan
+      else:
+        lat_send = log.LateralPlan.new_message()
+
+      lat_send.curvature = float(self.prev_desired_curvature if self.prev_desired_curvature is not None else 0.)
       # Steering PID loop and lateral MPC
       desired_curvature, desired_curvature_rate = get_lag_adjusted_curvature(self.CP, CS.vEgo,
                                                                              lat_plan.psis,
@@ -489,7 +495,7 @@ class Controls:
                                                                              self.opParams, CS, lat_plan)
       actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(self.active, CS, self.CP, self.VM, params,
                                                                              desired_curvature, desired_curvature_rate,
-                                                                             lat_plan)
+                                                                             lat_send)
 
       self.prev_desired_curvature = float(desired_curvature)
     else:
