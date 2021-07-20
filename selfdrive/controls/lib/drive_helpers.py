@@ -7,7 +7,8 @@ from common.op_params import ENABLE_LAT_PARAMS, ENABLE_ACTUATOR_DELAY_BPS, STEER
                             STEER_ACTUATOR_DELAY_BP, STEER_ACTUATOR_DELAY_V, \
                             ENABLE_ACTUATOR_DELAY_BPS_MULTI, \
                             STEER_ACTUATOR_DELAY_BP_MULTI, STEER_ACTUATOR_DELAY_V_MULTI, STEER_DELAY_MULTI_BP_SOURCE, \
-                            eval_breakpoint_source, interp_multi_bp
+                            eval_breakpoint_source, interp_multi_bp, \
+                            ENABLE_CURVE_RATE_LIMITS, MAX_CURVE_RATE_BP, MAX_CURVE_RATE_V
 
 
 # kph
@@ -82,8 +83,10 @@ def get_lag_adjusted_curvature(CP, v_ego, psis, curvatures, curvature_rates, op_
     curvatures = [0.0 for i in range(CONTROL_N)]
     curvature_rates = [0.0 for i in range(CONTROL_N)]
 
+  enable_lat_params = op_params.get(ENABLE_LAT_PARAMS)
+
   # TODO this needs more thought, use .2s extra for now to estimate other delays
-  if op_params.get(ENABLE_LAT_PARAMS):
+  if enable_lat_params:
     if op_params.get(ENABLE_ACTUATOR_DELAY_BPS_MULTI):
       delay = interp_multi_bp(eval_breakpoint_source(op_params.get(STEER_DELAY_MULTI_BP_SOURCE), CS, controls_state),
                               op_params.get(STEER_ACTUATOR_DELAY_BP_MULTI),
@@ -105,7 +108,14 @@ def get_lag_adjusted_curvature(CP, v_ego, psis, curvatures, curvature_rates, op_
   curvature_diff_from_psi = psi / (max(v_ego, 1e-1) * delay) - current_curvature
   desired_curvature = current_curvature + 2 * curvature_diff_from_psi
 
-  max_curvature_rate = interp(v_ego, MAX_CURVATURE_RATE_SPEEDS, MAX_CURVATURE_RATES)
+  if enable_lat_params and op_params.get(ENABLE_CURVE_RATE_LIMITS):
+    curve_rate_speeds = op_params.get(MAX_CURVE_RATE_BP)
+    curve_rates = op_params.get(MAX_CURVE_RATE_V)
+  else:
+    curve_rate_speeds = MAX_CURVATURE_RATE_SPEEDS
+    curve_rates = MAX_CURVATURE_RATES
+
+  max_curvature_rate = interp(v_ego, curve_rate_speeds, curve_rates)
   safe_desired_curvature_rate = clip(desired_curvature_rate,
                                           -max_curvature_rate,
                                           max_curvature_rate)
