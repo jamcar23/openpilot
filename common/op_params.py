@@ -286,7 +286,8 @@ class opParams:
                         ENABLE_ROAD_SIGNS: Param(False, [bool], live=True, depends_on=SHOW_TOYOTA_OPTS, description='Use Toyota\'s road sign assist to control OP speed.'),
                         ENABLE_CURVE_RATE_LIMITS: Param(False, [bool], live=True, depends_on=ENABLE_LAT_PARAMS, description='Override the default max curvature rates when true.'),
                         MAX_CURVE_RATE_BP: Param([0, 35], VT.number, live=True, depends_on=ENABLE_CURVE_RATE_LIMITS),
-                        MAX_CURVE_RATE_V: Param([0.03762194918267951, 0.003441203371932992], VT.number, live=True, depends_on=ENABLE_CURVE_RATE_LIMITS, description='Default values corresponds to 80deg/s and 20deg/s steering angle in a toyota corolla.')}
+                        MAX_CURVE_RATE_V: Param([0.03762194918267951, 0.003441203371932992], VT.number, live=True, depends_on=ENABLE_CURVE_RATE_LIMITS,
+                                                description='Default values corresponds to 80deg/s and 20deg/s steering angle in a toyota corolla.')}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
