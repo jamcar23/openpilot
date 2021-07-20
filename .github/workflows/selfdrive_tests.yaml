@@ -147,7 +147,7 @@ jobs:
   process_replay:
     name: process replay
     runs-on: ubuntu-20.04
-    timeout-minutes: 50
+    timeout-minutes: 90
     env:
       LOG_FILE_PATH: selfdrive/test/process_replay/diff.txt
     steps:
@@ -231,7 +231,7 @@ jobs:
       if: ${{ env.SHOULD_BUILD_DOCKER }}
       run: |
         mkdir -p ${{ env.LOG_PATH }}
-        docker cp ${{ env.TEMP_IMAGE }}:/tmp/openpilot/${{ env.LOG_PATH }} ${{ env.LOG_PATH }}
+        # docker cp ${{ env.TEMP_IMAGE }}:/tmp/openpilot/${{ env.LOG_PATH }} ${{ env.LOG_PATH }}
     - uses: actions/upload-artifact@v2
       if: always()
       continue-on-error: true
@@ -242,7 +242,7 @@ jobs:
   test_car_models:
     name: car models
     runs-on: ubuntu-20.04
-    timeout-minutes: 50
+    timeout-minutes: 90
     steps:
     - uses: actions/checkout@v2
       with:
@@ -272,7 +272,7 @@ jobs:
   wait_for_selfdrive:
     name: wait for selfdrive
     runs-on: ubuntu-20.04
-    timeout-minutes: 60
+    timeout-minutes: 100
     steps:
     - name: Setup Env Vars
       run: |
