@@ -28,7 +28,7 @@ jobs:
           git checkout src
       - name: Merge branches
         run: |
-          git merge -m "Merge pull request #$PR_NUM from $USER_NAME/$HEAD_REF" $HEAD_REF
+          git merge --no-ff -m "Merge pull request #$PR_NUM from $USER_NAME/$HEAD_REF" $HEAD_REF
       - name: Generate changelog
         run: |
           VERSION="$(python tools/scripts/gen_changelog.py)"
