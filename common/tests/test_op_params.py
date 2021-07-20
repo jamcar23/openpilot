@@ -1,6 +1,5 @@
 import numpy as np
 import unittest
-import math
 
 from cereal import car, log
 from common.numpy_fast import interp, is_multi_iter, find_nearest_index
