@@ -103,6 +103,7 @@ class ParamModifierKeys:
 class ValueTypes:
   number = [float, int]
   none_or_number = [type(None), float, int]
+  list_of_numbers = [list, float, int]
 
 class Param:
   def __init__(self, default, allowed_types, description=None, live=False, hidden=False, depends_on=None):
@@ -285,8 +286,8 @@ class opParams:
                         DISENGAGE_ON_GAS: Param(True, [bool], description='Whether you want openpilot to disengage on gas input or not.', live=True),
                         ENABLE_ROAD_SIGNS: Param(False, [bool], live=True, depends_on=SHOW_TOYOTA_OPTS, description='Use Toyota\'s road sign assist to control OP speed.'),
                         ENABLE_CURVE_RATE_LIMITS: Param(False, [bool], live=True, depends_on=ENABLE_LAT_PARAMS, description='Override the default max curvature rates when true.'),
-                        MAX_CURVE_RATE_BP: Param([0, 35], VT.number, live=True, depends_on=ENABLE_CURVE_RATE_LIMITS),
-                        MAX_CURVE_RATE_V: Param([0.03762194918267951, 0.003441203371932992], VT.number, live=True, depends_on=ENABLE_CURVE_RATE_LIMITS,
+                        MAX_CURVE_RATE_BP: Param([0, 35], VT.list_of_numbers, live=True, depends_on=ENABLE_CURVE_RATE_LIMITS),
+                        MAX_CURVE_RATE_V: Param([0.03762194918267951, 0.003441203371932992], VT.list_of_numbers, live=True, depends_on=ENABLE_CURVE_RATE_LIMITS,
                                                 description='Default values corresponds to 80deg/s and 20deg/s steering angle in a toyota corolla.')}
 
     self._params_file = '/data/op_params.json'
