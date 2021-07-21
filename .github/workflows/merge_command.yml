@@ -31,11 +31,10 @@ jobs:
           git merge --no-ff -m "Merge pull request #$PR_NUM from $USER_NAME/$HEAD_REF" $HEAD_REF
       - name: Generate changelog
         run: |
-          VERSION="$(python tools/scripts/gen_changelog.py)"
-          echo "#define COMMA_VERSION \"$VERSION\"" > selfdrive/common/version.h
+          python tools/scripts/gen_changelog.py
       - name: Commit changelog
         run: |
-          git add CHANGELOG.md selfdrive/common/version.h
+          git add CHANGELOG.md
           git commit -m "docs(changelog): auto update changelog from PR #$PR_NUM"
       - name: Prepare CI Env Vars
         run: |
