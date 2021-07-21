@@ -103,6 +103,7 @@ class ParamModifierKeys:
 class ValueTypes:
   number = [float, int]
   none_or_number = [type(None), float, int]
+  list_of_numbers = [list, float, int]
 
 class Param:
   def __init__(self, default, allowed_types, description=None, live=False, hidden=False, depends_on=None):
@@ -283,7 +284,11 @@ class opParams:
                         NIGHT_BRIGHTNESS: Param(50, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS),
                         HIGH_BEAM_BRIGHTNESS: Param(20, VT.number, depends_on=ENABLE_SCREEN_BRIGHTNESS_HEAD_LIGHTS),
                         DISENGAGE_ON_GAS: Param(True, [bool], description='Whether you want openpilot to disengage on gas input or not.', live=True),
-                        ENABLE_ROAD_SIGNS: Param(False, [bool], live=True, depends_on=SHOW_TOYOTA_OPTS, description='Use Toyota\'s road sign assist to control OP speed.')}
+                        ENABLE_ROAD_SIGNS: Param(False, [bool], live=True, depends_on=SHOW_TOYOTA_OPTS, description='Use Toyota\'s road sign assist to control OP speed.'),
+                        ENABLE_CURVE_RATE_LIMITS: Param(False, [bool], live=True, depends_on=ENABLE_LAT_PARAMS, description='Override the default max curvature rates when true.'),
+                        MAX_CURVE_RATE_BP: Param([0, 35], VT.list_of_numbers, live=True, depends_on=ENABLE_CURVE_RATE_LIMITS),
+                        MAX_CURVE_RATE_V: Param([0.03762194918267951, 0.003441203371932992], VT.list_of_numbers, live=True, depends_on=ENABLE_CURVE_RATE_LIMITS,
+                                                description='Default values corresponds to 80deg/s and 20deg/s steering angle in a toyota corolla.')}
 
     self._params_file = '/data/op_params.json'
     self._backup_file = '/data/op_params_corrupt.json'
@@ -546,3 +551,7 @@ HIGH_BEAM_BRIGHTNESS = 'high_beam_brightness'
 DISENGAGE_ON_GAS = 'disengage_on_gas'
 
 ENABLE_ROAD_SIGNS = 'enable_road_sign_assist'
+
+ENABLE_CURVE_RATE_LIMITS = 'enable_curvature_rate_limits'
+MAX_CURVE_RATE_BP = 'max_curvature_rate_bp'
+MAX_CURVE_RATE_V = 'max_curvature_rate_v'
