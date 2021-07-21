@@ -6,6 +6,7 @@
 #include <iostream>
 #include <algorithm>
 
+#include "common/transformations/coordinates.hpp"
 #include "selfdrive/common/util.h"
 #include "selfdrive/common/timing.h"
 #include "selfdrive/ui/devui.hpp"
@@ -227,16 +228,17 @@ static void dev_ui_draw_desired_steering_angle(UIState *s, Rect *rel_rect, const
     char uom_str[6];
     NVGcolor val_color = COLOR_WHITE;
     if (s->scene.controls_state.getEnabled()) {
+      float curvature = s->scene.controls_state.getDesiredSteerDeg();
       //show Orange if more than 6 degrees
       //show red if  more than 12 degrees
-      if(((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) < -6) || ((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) > 6)) {
+      if(((int)(curvature) < -6) || ((int)(curvature) > 6)) {
         val_color = COLOR_YELLOW;
       }
-      if(((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) < -12) || ((int)(s->scene.controls_state.getSteeringAngleDesiredDeg()) > 12)) {
+      if(((int)(curvature) < -12) || ((int)(curvature) > 12)) {
         val_color = COLOR_RED;
       }
       // steering is in degrees
-      snprintf(val_str, sizeof(val_str), "%.0f°",(s->scene.controls_state.getSteeringAngleDesiredDeg()));
+      snprintf(val_str, sizeof(val_str), "%.0f°",(curvature));
     } else {
        snprintf(val_str, sizeof(val_str), "-");
     }

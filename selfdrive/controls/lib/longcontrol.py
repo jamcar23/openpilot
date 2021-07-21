@@ -6,6 +6,8 @@ from common.op_params import opParams, ENABLE_COASTING, EVAL_COAST_LONG, ENABLE_
                               ENABLE_LONG_PID_PARAMS, LONG_PID_KP_BP, LONG_PID_KP_V, LONG_PID_KI_BP, LONG_PID_KI_V, \
                               ENABLE_LONG_DEADZONE_PARAMS, LONG_DEADZONE_BP, LONG_DEADZONE_V, LONG_PID_KF, LONG_PID_SAT_LIMIT, \
                               ENABLE_START_STOP_PARAMS, STOP_BRAKE_RATE_BP, STOP_BRAKE_RATE_V, START_BRAKE_RATE_BP, START_BRAKE_RATE_V
+from selfdrive.controls.lib.drive_helpers import CONTROL_N
+from selfdrive.modeld.constants import T_IDXS
 
 LongCtrlState = log.ControlsState.LongControlState
 Source = log.LongitudinalPlan.LongitudinalPlanSource
@@ -18,6 +20,7 @@ BRAKE_THRESHOLD_TO_PID = 0.2
 BRAKE_STOPPING_TARGET = 0.5  # apply at least this amount of brake to maintain the vehicle stationary
 
 RATE = 100.0
+DEFAULT_LONG_LAG = 0.15
 
 def long_control_state_trans(active, long_control_state, v_ego, v_target, v_pid,
                              output_gb, brake_pressed, cruise_standstill, min_speed_can):
@@ -84,8 +87,20 @@ class LongControl():
     self.pid.reset()
     self.v_pid = v_pid
 
-  def update(self, active, CS, v_target, v_target_future, a_target, CP, source):
+  def update(self, active, CS, CP, long_plan):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
+    # Interp control trajectory
+    # TODO estimate car specific lag, use .5s for now
+    if len(long_plan.speeds) == CONTROL_N:
+      v_target = interp(DEFAULT_LONG_LAG, T_IDXS[:CONTROL_N], long_plan.speeds)
+      v_target_future = long_plan.speeds[-1]
+      a_target = interp(DEFAULT_LONG_LAG, T_IDXS[:CONTROL_N], long_plan.accels)
+    else:
+      v_target = 0.0
+      v_target_future = 0.0
+      a_target = 0.0
+
+
     # Actuation limits
     gm_bp = CP.gasMaxBP
     gm_v = CP.gasMaxV
@@ -132,8 +147,8 @@ class LongControl():
       self.pid.neg_limit = - brake_max
 
       if self.op_params.get(ENABLE_COASTING) and self.op_params.get(EVAL_COAST_LONG):
-        no_gas = source in [Source.cruiseBrake, Source.cruiseCoast]
-        no_brake = source in [Source.cruiseGas, Source.cruiseCoast]
+        no_gas = long_plan.longitudinalPlanSource in [Source.cruiseBrake, Source.cruiseCoast]
+        no_brake = long_plan.longitudinalPlanSource in [Source.cruiseGas, Source.cruiseCoast]
 
         if no_gas:
           self.pid.pos_limit = 0.
@@ -171,4 +186,4 @@ class LongControl():
     final_gas = clip(output_gb, 0., gas_max)
     final_brake = -clip(output_gb, -brake_max, 0.)
 
-    return final_gas, final_brake
+    return final_gas, final_brake, v_target, a_target

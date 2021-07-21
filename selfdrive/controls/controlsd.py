@@ -13,13 +13,13 @@ from selfdrive.swaglog import cloudlog
 from selfdrive.boardd.boardd import can_list_to_can_capnp
 from selfdrive.car.car_helpers import get_car, get_startup_event, get_one_can
 from selfdrive.controls.lib.lane_planner import CAMERA_OFFSET
-from selfdrive.controls.lib.drive_helpers import update_v_cruise, initialize_v_cruise, offset_v_cruise, is_toyota
+from selfdrive.controls.lib.drive_helpers import update_v_cruise, initialize_v_cruise, offset_v_cruise, is_toyota, \
+                                          get_lag_adjusted_curvature
 from selfdrive.controls.lib.longcontrol import LongControl, STARTING_TARGET_SPEED
 from selfdrive.controls.lib.latcontrol_live import LatControlLive
 from selfdrive.controls.lib.events import Events, ET
 from selfdrive.controls.lib.alertmanager import AlertManager
 from selfdrive.controls.lib.vehicle_model import VehicleModel
-from selfdrive.controls.lib.longitudinal_planner import LON_MPC_STEP
 from selfdrive.locationd.calibrationd import Calibration
 from selfdrive.hardware import HARDWARE, TICI
 
@@ -58,6 +58,9 @@ class Controls:
     self.camera_packets = ["roadCameraState", "driverCameraState"]
     if TICI:
       self.camera_packets.append("wideRoadCameraState")
+
+    # TODO: replace this with comma's code when merging 0.8.6 full
+    self.joystick_mode = False
 
     self.sm = sm
     if self.sm is None:
@@ -136,6 +139,8 @@ class Controls:
     self.events_prev = []
     self.current_alert_types = [ET.PERMANENT]
     self.logged_comm_issue = False
+    self.v_target = 0.0
+    self.a_target = 0.0
 
     # TODO: no longer necessary, aside from process replay
     self.sm['liveParameters'].valid = True
@@ -162,6 +167,8 @@ class Controls:
     self.last_car_speed_at_sign_kph = 0
     self.speed_limit_offset_kph = 0
     self.has_seen_road_sign = False
+    self.desired_curvature = 0
+    self.prev_ctrl_state = log.ControlsState.new_message().as_reader()
 
   def update_events(self, CS):
     """Compute carEvents from carState"""
@@ -300,7 +307,12 @@ class Controls:
         self.events.add(EventName.processNotRunning)
 
     # Only allow engagement with brake pressed when stopped behind another stopped car
-    if CS.brakePressed and self.sm['longitudinalPlan'].vTargetFuture >= STARTING_TARGET_SPEED \
+    speeds = self.sm['longitudinalPlan'].speeds
+    if len(speeds) > 1:
+      v_future = speeds[-1]
+    else:
+      v_future = 100.0
+    if CS.brakePressed and v_future >= STARTING_TARGET_SPEED \
       and self.CP.openpilotLongitudinalControl and CS.vEgo < 0.3:
       self.events.add(EventName.noTarget)
 
@@ -463,17 +475,33 @@ class Controls:
       self.LaC.reset()
       self.LoC.reset(v_pid=CS.vEgo)
 
-    long_plan_age = DT_CTRL * (self.sm.frame - self.sm.rcv_frame['longitudinalPlan'])
-    # no greater than dt mpc + dt, to prevent too high extraps
-    dt = min(long_plan_age, LON_MPC_STEP + DT_CTRL) + DT_CTRL
+    if not self.joystick_mode:
+      # Gas/Brake PID loop
+      actuators.gas, actuators.brake, self.v_target, self.a_target = self.LoC.update(self.active, CS, self.CP, long_plan)
 
-    a_acc_sol = long_plan.aStart + (dt / LON_MPC_STEP) * (long_plan.aTarget - long_plan.aStart)
-    v_acc_sol = long_plan.vStart + dt * (a_acc_sol + long_plan.aStart) / 2.0
+      # Steering PID loop and lateral MPC
+      self.desired_curvature, desired_curvature_rate = get_lag_adjusted_curvature(self.CP, CS.vEgo,
+                                                                             lat_plan.psis,
+                                                                             lat_plan.curvatures,
+                                                                             lat_plan.curvatureRates,
+                                                                             self.opParams, CS, self.prev_ctrl_state)
+      actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(self.active, CS, self.CP, self.VM, params,
+                                                                             self.desired_curvature, desired_curvature_rate,
+                                                                             self.prev_ctrl_state)
+    else:
+      lac_log = log.ControlsState.LateralDebugState.new_message()
+      if self.sm.rcv_frame['testJoystick'] > 0 and self.active:
+        gb = clip(self.sm['testJoystick'].axes[0], -1, 1)
+        actuators.gas, actuators.brake = max(gb, 0), max(-gb, 0)
 
-    # Gas/Brake PID loop
-    actuators.gas, actuators.brake = self.LoC.update(self.active, CS, v_acc_sol, long_plan.vTargetFuture, a_acc_sol, self.CP, long_plan.longitudinalPlanSource)
-    # Steering PID loop and lateral MPC
-    actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(self.active, CS, self.CP, self.VM, params, lat_plan)
+        steer = clip(self.sm['testJoystick'].axes[1], -1, 1)
+        # max angle is 45 for angle-based cars
+        actuators.steer, actuators.steeringAngleDeg = steer, steer * 45.
+
+        lac_log.active = True
+        lac_log.steeringAngleDeg = CS.steeringAngleDeg
+        lac_log.output = steer
+        lac_log.saturated = abs(steer) >= 0.9
 
     # Check for difference between desired angle and angle for angle based control
     angle_control_saturated = self.CP.steerControlType == car.CarParams.SteerControlType.angle and \
@@ -496,9 +524,9 @@ class Controls:
         if left_deviation or right_deviation:
           self.events.add(EventName.steerSaturated)
 
-    return actuators, v_acc_sol, a_acc_sol, lac_log
+    return actuators, lac_log
 
-  def publish_logs(self, CS, start_time, actuators, v_acc, a_acc, lac_log):
+  def publish_logs(self, CS, start_time, actuators, lac_log):
     """Send actuators and hud commands to the car, send controlsstate and MPC logging"""
 
     CC = car.CarControl.new_message()
@@ -507,13 +535,18 @@ class Controls:
 
     CC.cruiseControl.override = True
     CC.cruiseControl.cancel = not self.CP.enableCruise or (not self.enabled and CS.cruiseState.enabled)
+    # TODO: add below back during full 0.8.6 merge
+    # if self.joystick_mode and self.sm.rcv_frame['testJoystick'] > 0 and self.sm['testJoystick'].buttons[0]:
+    #   CC.cruiseControl.cancel = True
 
+    # TODO remove car specific stuff in controls
     # Some override values for Honda
     # brake discount removes a sharp nonlinearity
     brake_discount = (1.0 - clip(actuators.brake * 3., 0.0, 1.0))
     speed_override = max(0.0, (self.LoC.v_pid + CS.cruiseState.speedOffset) * brake_discount)
     CC.cruiseControl.speedOverride = float(speed_override if self.CP.enableCruise else 0.0)
-    CC.cruiseControl.accelOverride = self.CI.calc_accel_override(CS.aEgo, self.sm['longitudinalPlan'].aTarget, CS.vEgo, self.sm['longitudinalPlan'].vTarget)
+    CC.cruiseControl.accelOverride = float(self.CI.calc_accel_override(CS.aEgo, self.a_target,
+                                                                       CS.vEgo, self.v_target))
 
     CC.hudControl.setSpeed = float(self.v_cruise_kph * CV.KPH_TO_MS)
     CC.hudControl.speedVisible = self.enabled
@@ -558,12 +591,11 @@ class Controls:
 
     # Curvature & Steering angle
     params = self.sm['liveParameters']
-    lat_plan = self.sm['lateralPlan']
-
     steer_angle_without_offset = math.radians(CS.steeringAngleDeg - params.angleOffsetAverageDeg)
     curvature = -self.VM.calc_curvature(steer_angle_without_offset, CS.vEgo)
-    angle_steers_des = math.degrees(self.VM.get_steer_from_curvature(-lat_plan.curvature, CS.vEgo))
-    angle_steers_des += params.angleOffsetDeg
+
+    angle_steers_des_no_offset = math.degrees(self.VM.get_steer_from_curvature(-self.desired_curvature, CS.vEgo))
+    angle_steers_des = angle_steers_des_no_offset + params.angleOffsetDeg
 
     # controlsState
     dat = messaging.new_message('controlsState')
@@ -582,7 +614,7 @@ class Controls:
     controlsState.enabled = self.enabled
     controlsState.active = self.active
     controlsState.curvature = curvature
-    controlsState.steeringAngleDesiredDeg = angle_steers_des
+    controlsState.desiredSteerDeg = angle_steers_des
     controlsState.state = self.state
     controlsState.engageable = not self.events.any(ET.NO_ENTRY)
     controlsState.longControlState = self.LoC.long_control_state
@@ -591,8 +623,6 @@ class Controls:
     controlsState.upAccelCmd = float(self.LoC.pid.p)
     controlsState.uiAccelCmd = float(self.LoC.pid.i)
     controlsState.ufAccelCmd = float(self.LoC.pid.f)
-    controlsState.vTargetLead = float(v_acc)
-    controlsState.aTarget = float(a_acc)
     controlsState.cumLagMs = -self.rk.remaining * 1000.
     controlsState.startMonoTime = int(start_time * 1e9)
     controlsState.forceDecel = bool(force_decel)
@@ -606,6 +636,7 @@ class Controls:
       controlsState.lateralControlState.lqrState = lac_log
     elif self.LaC.ctrl_type == 'indi':
       controlsState.lateralControlState.indiState = lac_log
+    self.prev_ctrl_state = controlsState
     self.pm.send('controlsState', dat)
 
     # carState
@@ -654,12 +685,12 @@ class Controls:
       self.prof.checkpoint("State transition")
 
     # Compute actuators (runs PID loops and lateral MPC)
-    actuators, v_acc, a_acc, lac_log = self.state_control(CS)
+    actuators, lac_log = self.state_control(CS)
 
     self.prof.checkpoint("State Control")
 
     # Publish data
-    self.publish_logs(CS, start_time, actuators, v_acc, a_acc, lac_log)
+    self.publish_logs(CS, start_time, actuators, lac_log)
     self.prof.checkpoint("Sent")
 
   def controlsd_thread(self):

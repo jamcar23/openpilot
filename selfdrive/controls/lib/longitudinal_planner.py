@@ -1,34 +1,26 @@
 #!/usr/bin/env python3
 import math
 import numpy as np
-from common.params import Params
-from common.numpy_fast import interp, incremental_avg
+from common.numpy_fast import interp
 
 import cereal.messaging as messaging
 from cereal import log
+from common.realtime import DT_MDL
 from common.realtime import sec_since_boot
-from common.op_params import opParams, ENABLE_COASTING, COAST_SPEED, DOWNHILL_INCLINE, ALWAYS_EVAL_COAST, ENABLE_PLANNER_PARAMS, ENABLE_PLNR_ACCEL_LIMITS
-from selfdrive.swaglog import cloudlog
+from common.op_params import opParams, ENABLE_PLANNER_PARAMS, ENABLE_PLNR_ACCEL_LIMITS
+from selfdrive.modeld.constants import T_IDXS
 from selfdrive.config import Conversions as CV
-from selfdrive.controls.lib.speed_smoother import speed_smoother
-from selfdrive.controls.lib.longcontrol import LongCtrlState
 from selfdrive.controls.lib.fcw import FCWChecker
+from selfdrive.controls.lib.longcontrol import LongCtrlState
+from selfdrive.controls.lib.lead_mpc import LeadMpc
 from selfdrive.controls.lib.long_mpc import LongitudinalMpc
-from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX
+from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX, CONTROL_N
+from selfdrive.swaglog import cloudlog
 
 LON_MPC_STEP = 0.2  # first step is 0.2s
 AWARENESS_DECEL = -0.2     # car smoothly decel at .2m/s^2 when user is distracted
-
-# lookup tables VS speed to determine min and max accels in cruise
-# make sure these accelerations are smaller than mpc limits
-_A_CRUISE_MIN_V = [-1.0, -.8, -.67, -.5, -.30]
-_A_CRUISE_MIN_BP = [  0.,  5.,  10., 20.,  40.]
-
-# need fast accel at very low speed for stop and go
-# make sure these accelerations are smaller than mpc limits
-_A_CRUISE_MAX_V = [1.2, 1.2, 0.65, .4]
-_A_CRUISE_MAX_V_FOLLOWING = [1.6, 1.6, 0.65, .4]
-_A_CRUISE_MAX_BP = [0.,  6.4, 22.5, 40.]
+A_CRUISE_MIN = -1.2
+A_CRUISE_MAX = 1.2
 
 # Lookup table for turns
 _A_TOTAL_MAX_V = [1.7, 3.2]
@@ -50,13 +42,10 @@ def calc_cruise_accel_limits(v_ego, following, op_params):
     min_v = op_params.get(min_key)
     max_bp = op_params.get('a_cruise_max_bp')
     max_v = op_params.get(max_key)
-  else:
-    min_bp = _A_CRUISE_MIN_BP
-    min_v = _A_CRUISE_MIN_V
-    max_bp = _A_CRUISE_MAX_BP
-    max_v = _A_CRUISE_MAX_V_FOLLOWING if following else _A_CRUISE_MAX_V
 
-  return np.vstack([interp(v_ego, min_bp, min_v), interp(v_ego, max_bp, max_v)])
+    return [interp(v_ego, min_bp, min_v), interp(v_ego, max_bp, max_v)]
+  else:
+    return [A_CRUISE_MIN, A_CRUISE_MAX]
 
 
 def limit_accel_in_turns(v_ego, angle_steers, a_target, CP):
@@ -75,31 +64,24 @@ def limit_accel_in_turns(v_ego, angle_steers, a_target, CP):
 class Planner():
   def __init__(self, CP, OP = None):
     self.CP = CP
-
-    self.mpc1 = LongitudinalMpc(1)
-    self.mpc2 = LongitudinalMpc(2)
-
-    self.v_acc_start = 0.0
-    self.a_acc_start = 0.0
-    self.v_acc_next = 0.0
-    self.a_acc_next = 0.0
-
-    self.v_acc = 0.0
-    self.v_acc_future = 0.0
-    self.a_acc = 0.0
-    self.v_cruise = 0.0
-    self.a_cruise = 0.0
-
-    self.longitudinalPlanSource = Source.cruiseGas
-    self.cruise_plan = Source.cruiseGas
-
-    self.fcw_checker = FCWChecker()
-    self.path_x = np.arange(192)
+    self.mpcs = {}
+    self.mpcs['lead0'] = LeadMpc(0)
+    self.mpcs['lead1'] = LeadMpc(1)
+    self.mpcs['cruise'] = LongitudinalMpc()
 
     self.fcw = False
+    self.fcw_checker = FCWChecker()
 
-    self.params = Params()
-    self.first_loop = True
+    self.v_desired = 0.0
+    self.a_desired = 0.0
+    self.longitudinalPlanSource = Source.cruiseGas
+    self.cruise_plan = Source.cruiseGas
+    self.alpha = np.exp(-DT_MDL/2.0)
+    self.lead_0 = log.ModelDataV2.LeadDataV3.new_message()
+    self.lead_1 = log.ModelDataV2.LeadDataV3.new_message()
+
+    self.v_desired_trajectory = np.zeros(CONTROL_N)
+    self.a_desired_trajectory = np.zeros(CONTROL_N)
 
     if OP is None:
       OP = opParams()
@@ -113,232 +95,173 @@ class Planner():
     self.last_incline = 0.0 # Last incline of the road in radians
     self.was_downhill = False
 
-  def choose_solution(self, v_cruise_setpoint, enabled):
-    if enabled:
-      solutions = {self.cruise_plan: self.v_cruise}
-      if self.mpc1.prev_lead_status:
-        solutions[Source.mpc1] = self.mpc1.v_mpc
-      if self.mpc2.prev_lead_status:
-        solutions[Source.mpc2] = self.mpc2.v_mpc
-
-      slowest = min(solutions, key=solutions.get)
-
-      self.longitudinalPlanSource = slowest
-      # Choose lowest of MPC and cruise
-      if slowest == Source.mpc1:
-        self.v_acc = self.mpc1.v_mpc
-        self.a_acc = self.mpc1.a_mpc
-      elif slowest == Source.mpc2:
-        self.v_acc = self.mpc2.v_mpc
-        self.a_acc = self.mpc2.a_mpc
-      elif slowest == self.cruise_plan:
-        self.v_acc = self.v_cruise
-        self.a_acc = self.a_cruise
-
-    self.v_acc_future = min([self.mpc1.v_mpc_future, self.mpc2.v_mpc_future, v_cruise_setpoint])
 
   def update(self, sm, CP):
-    """Gets called when new radarState is available"""
     cur_time = sec_since_boot()
     v_ego = sm['carState'].vEgo
     a_ego = sm['carState'].aEgo
 
-    long_control_state = sm['controlsState'].longControlState
     v_cruise_kph = sm['controlsState'].vCruise
+    v_cruise_kph = min(v_cruise_kph, V_CRUISE_MAX)
+    v_cruise = v_cruise_kph * CV.KPH_TO_MS
+
+    long_control_state = sm['controlsState'].longControlState
     force_slow_decel = sm['controlsState'].forceDecel
 
-    v_cruise_kph = min(v_cruise_kph, V_CRUISE_MAX)
-    v_cruise_setpoint = v_cruise_kph * CV.KPH_TO_MS
-
-    lead_1 = sm['radarState'].leadOne
-    lead_2 = sm['radarState'].leadTwo
+    self.lead_0 = sm['radarState'].leadOne
+    self.lead_1 = sm['radarState'].leadTwo
 
     enabled = (long_control_state == LongCtrlState.pid) or (long_control_state == LongCtrlState.stopping)
-    following = lead_1.status and lead_1.dRel < 45.0 and lead_1.vLeadK > v_ego and lead_1.aLeadK > 0.0
+    following = self.lead_1.status and self.lead_1.dRel < 45.0 and self.lead_1.vLeadK > v_ego and self.lead_1.aLeadK > 0.0
 
-    self.v_acc_start = self.v_acc_next
-    self.a_acc_start = self.a_acc_next
+    if not enabled or sm['carState'].gasPressed:
+      self.v_desired = v_ego
+      self.a_desired = a_ego
 
-    # Calculate speed for normal cruise control
-    if enabled and not self.first_loop and not sm['carState'].gasPressed:
-      accel_limits = [float(x) for x in calc_cruise_accel_limits(v_ego, following, self.op_params)]
-      jerk_limits = [min(-0.1, accel_limits[0]), max(0.1, accel_limits[1])]  # TODO: make a separate lookup for jerk tuning
-      accel_limits_turns = limit_accel_in_turns(v_ego, sm['carState'].steeringAngleDeg, accel_limits, self.CP)
+    # Prevent divergence, smooth in current v_ego
+    self.v_desired = self.alpha * self.v_desired + (1 - self.alpha) * v_ego
+    self.v_desired = max(0.0, self.v_desired)
 
-      if force_slow_decel:
-        # if required so, force a smooth deceleration
-        accel_limits_turns[1] = min(accel_limits_turns[1], AWARENESS_DECEL)
-        accel_limits_turns[0] = min(accel_limits_turns[0], accel_limits_turns[1])
+    accel_limits = calc_cruise_accel_limits(v_ego, following, self.op_params)
+    accel_limits_turns = limit_accel_in_turns(v_ego, sm['carState'].steeringAngleDeg, accel_limits, self.CP)
+    if force_slow_decel:
+      # if required so, force a smooth deceleration
+      accel_limits_turns[1] = min(accel_limits_turns[1], AWARENESS_DECEL)
+      accel_limits_turns[0] = min(accel_limits_turns[0], accel_limits_turns[1])
+    # clip limits, cannot init MPC outside of bounds
+    accel_limits_turns[0] = min(accel_limits_turns[0], self.a_desired)
+    accel_limits_turns[1] = max(accel_limits_turns[1], self.a_desired)
+    self.mpcs['cruise'].set_accel_limits(accel_limits_turns[0], accel_limits_turns[1])
 
-      if self.op_params.get(ENABLE_COASTING):
-        self.coast_speed = self.op_params.get(COAST_SPEED) * CV.MPH_TO_MS
-        self.v_cruise, self.a_cruise = self.choose_cruise(sm,
-                                                          v_ego,
-                                                          a_ego,
-                                                          v_cruise_setpoint,
-                                                          accel_limits_turns,
-                                                          jerk_limits)
-      else:
-        self.v_cruise, self.a_cruise = speed_smoother(self.v_acc_start, self.a_acc_start,
-                                                    v_cruise_setpoint,
-                                                    accel_limits_turns[1], accel_limits_turns[0],
-                                                    jerk_limits[1], jerk_limits[0],
-                                                    LON_MPC_STEP)
-
-      # cruise speed can't be negative even is user is distracted
-      self.v_cruise = max(self.v_cruise, 0.)
-    else:
-      starting = long_control_state == LongCtrlState.starting
-      a_ego = min(a_ego, 0.0)
-      reset_speed = self.CP.minSpeedCan if starting else v_ego
-      reset_accel = self.CP.startAccel if starting else a_ego
-      self.v_acc = reset_speed
-      self.a_acc = reset_accel
-      self.v_acc_start = reset_speed
-      self.a_acc_start = reset_accel
-      self.v_cruise = reset_speed
-      self.a_cruise = reset_accel
-      self.cruise_plan = Source.cruiseGas
-
-    self.mpc1.set_cur_state(self.v_acc_start, self.a_acc_start)
-    self.mpc2.set_cur_state(self.v_acc_start, self.a_acc_start)
-
-    self.mpc1.update(sm['carState'], lead_1)
-    self.mpc2.update(sm['carState'], lead_2)
-
-    self.choose_solution(v_cruise_setpoint, enabled)
+    next_a = np.inf
+    for key in self.mpcs:
+      self.mpcs[key].set_cur_state(self.v_desired, self.a_desired)
+      self.mpcs[key].update(sm['carState'], sm['radarState'], v_cruise)
+      if self.mpcs[key].status and self.mpcs[key].a_solution[5] < next_a:
+        self.longitudinalPlanSource = key
+        self.v_desired_trajectory = self.mpcs[key].v_solution[:CONTROL_N]
+        self.a_desired_trajectory = self.mpcs[key].a_solution[:CONTROL_N]
+        next_a = self.mpcs[key].a_solution[5]
 
     # determine fcw
-    if self.mpc1.new_lead:
+    if self.mpcs['lead0'].new_lead:
       self.fcw_checker.reset_lead(cur_time)
-
     blinkers = sm['carState'].leftBlinker or sm['carState'].rightBlinker
-    self.fcw = self.fcw_checker.update(self.mpc1.mpc_solution, cur_time,
+    self.fcw = self.fcw_checker.update(self.mpcs['lead0'].mpc_solution, cur_time,
                                        sm['controlsState'].active,
                                        v_ego, sm['carState'].aEgo,
-                                       lead_1.dRel, lead_1.vLead, lead_1.aLeadK,
-                                       lead_1.yRel, lead_1.vLat,
-                                       lead_1.fcw, blinkers) and not sm['carState'].brakePressed
+                                       self.lead_1.dRel, self.lead_1.vLead, self.lead_1.aLeadK,
+                                       self.lead_1.yRel, self.lead_1.vLat,
+                                       self.lead_1.fcw, blinkers) and not sm['carState'].brakePressed
     if self.fcw:
       cloudlog.info("FCW triggered %s", self.fcw_checker.counters)
 
     # Interpolate 0.05 seconds and save as starting point for next iteration
-    a_acc_sol = self.a_acc_start + (CP.radarTimeStep / LON_MPC_STEP) * (self.a_acc - self.a_acc_start)
-    v_acc_sol = self.v_acc_start + CP.radarTimeStep * (a_acc_sol + self.a_acc_start) / 2.0
-    self.v_acc_next = v_acc_sol
-    self.a_acc_next = a_acc_sol
-
-    self.first_loop = False
+    a_prev = self.a_desired
+    self.a_desired = np.interp(DT_MDL, T_IDXS[:CONTROL_N], self.a_desired_trajectory)
+    self.v_desired = self.v_desired + DT_MDL * (self.a_desired + a_prev)/2.0
 
   def publish(self, sm, pm):
-    self.mpc1.publish(pm)
-    self.mpc2.publish(pm)
-
     plan_send = messaging.new_message('longitudinalPlan')
 
-    plan_send.valid = sm.all_alive_and_valid(service_list=['carState', 'controlsState', 'radarState'])
+    plan_send.valid = sm.all_alive_and_valid(service_list=['carState', 'controlsState'])
 
     longitudinalPlan = plan_send.longitudinalPlan
-    longitudinalPlan.mdMonoTime = sm.logMonoTime['modelV2']
-    longitudinalPlan.radarStateMonoTime = sm.logMonoTime['radarState']
+    longitudinalPlan.modelMonoTime = sm.logMonoTime['modelV2']
+    longitudinalPlan.processingDelay = (plan_send.logMonoTime / 1e9) - sm.logMonoTime['modelV2']
 
-    longitudinalPlan.vCruise = float(self.v_cruise)
-    longitudinalPlan.aCruise = float(self.a_cruise)
-    longitudinalPlan.vStart = float(self.v_acc_start)
-    longitudinalPlan.aStart = float(self.a_acc_start)
-    longitudinalPlan.vTarget = float(self.v_acc)
-    longitudinalPlan.aTarget = float(self.a_acc)
-    longitudinalPlan.vTargetFuture = float(self.v_acc_future)
-    longitudinalPlan.hasLead = self.mpc1.prev_lead_status
+    longitudinalPlan.speeds = [float(x) for x in self.v_desired_trajectory]
+    longitudinalPlan.accels = [float(x) for x in self.a_desired_trajectory]
+
+    longitudinalPlan.hasLead = self.mpcs['lead0'].status
     longitudinalPlan.longitudinalPlanSource = self.longitudinalPlanSource
     longitudinalPlan.fcw = self.fcw
 
-    longitudinalPlan.processingDelay = (plan_send.logMonoTime / 1e9) - sm.rcv_time['radarState']
-
     pm.send('longitudinalPlan', plan_send)
 
-  def choose_cruise(self, sm, v_ego, a_ego, v_cruise_setpoint, accel_limits_turns, jerk_limits):
-    delta_h = self.last_delta_height
-    incline = self.last_incline
+  # This needs to be rethought so I'm not gonna bother updating it for current OP changes
+  # def choose_cruise(self, sm, v_ego, a_ego, v_cruise_setpoint, accel_limits_turns, jerk_limits):
+  #   delta_h = self.last_delta_height
+  #   incline = self.last_incline
 
-    # Use the new depth net to calculate the incline of the road
-    if sm.updated['modelV2']:
-      md = sm['modelV2']
+  #   # Use the new depth net to calculate the incline of the road
+  #   if sm.updated['modelV2']:
+  #     md = sm['modelV2']
 
-      if len(md.laneLines):
-        # Get the hights of the camera at each time step from each lane line
-        heights = np.array([ll.z for ll in md.laneLines])
-        # Collapse heights into a 1D array containing the average height at each time step
-        # weighted by the model's confidence in its lane predicitions
-        heights = np.average(heights, axis=0, weights=md.laneLineProbs)
+  #     if len(md.laneLines):
+  #       # Get the hights of the camera at each time step from each lane line
+  #       heights = np.array([ll.z for ll in md.laneLines])
+  #       # Collapse heights into a 1D array containing the average height at each time step
+  #       # weighted by the model's confidence in its lane predicitions
+  #       heights = np.average(heights, axis=0, weights=md.laneLineProbs)
 
-        # x and t are always the same for all lanes so just grab the first one
-        steps = md.laneLines[0].t
+  #       # x and t are always the same for all lanes so just grab the first one
+  #       steps = md.laneLines[0].t
 
-        # Get the average forward and heights changes
-        # weighted by time since we're planning for the future
-        delta_x = np.average(md.laneLines[0].x, weights=steps)
-        delta_h = np.average(heights, weights=steps)
+  #       # Get the average forward and heights changes
+  #       # weighted by time since we're planning for the future
+  #       delta_x = np.average(md.laneLines[0].x, weights=steps)
+  #       delta_h = np.average(heights, weights=steps)
 
-        # Get the average distance from the camera to the road throughout the drive
-        self.height_samples +=1
-        self.avg_height = incremental_avg(self.avg_height, heights[0], self.height_samples)
+  #       # Get the average distance from the camera to the road throughout the drive
+  #       self.height_samples +=1
+  #       self.avg_height = incremental_avg(self.avg_height, heights[0], self.height_samples)
 
-        # Get the angle, in radians, between the average and future height of the camera
-        # Negate because a positive angle means we're going downhill
-        incline = -math.atan2(delta_h - self.avg_height, delta_x)
+  #       # Get the angle, in radians, between the average and future height of the camera
+  #       # Negate because a positive angle means we're going downhill
+  #       incline = -math.atan2(delta_h - self.avg_height, delta_x)
 
-    # When coasting, reset plans
-    if self.longitudinalPlanSource == Source.cruiseCoast:
-      self.v_acc_start = v_ego
-      self.a_acc_start = a_ego
+  #   # When coasting, reset plans
+  #   if self.longitudinalPlanSource == Source.cruiseCoast:
+  #     self.v_acc_start = v_ego
+  #     self.a_acc_start = a_ego
 
-    # When following return to cruiseGas
-    if self.longitudinalPlanSource in [Source.mpc1, Source.mpc2]:
-      self.cruise_plan = Source.cruiseGas
+  #   # When following return to cruiseGas
+  #   if self.longitudinalPlanSource in [Source.mpc1, Source.mpc2]:
+  #     self.cruise_plan = Source.cruiseGas
 
-    # Coast continues current state
-    v_coast, a_coast = v_ego + a_ego * LON_MPC_STEP, a_ego
-    cruise = {Source.cruiseCoast: (v_coast, a_coast)}
+  #   # Coast continues current state
+  #   v_coast, a_coast = v_ego + a_ego * LON_MPC_STEP, a_ego
+  #   cruise = {Source.cruiseCoast: (v_coast, a_coast)}
 
-    # Gas to v_cruise_setpoint
-    v_gas, a_gas = speed_smoother(self.v_acc_start, self.a_acc_start,
-                                  v_cruise_setpoint,
-                                  accel_limits_turns[1], accel_limits_turns[0],
-                                  jerk_limits[1], jerk_limits[0],
-                                  LON_MPC_STEP)
+  #   # Gas to v_cruise_setpoint
+  #   v_gas, a_gas = speed_smoother(self.v_acc_start, self.a_acc_start,
+  #                                 v_cruise_setpoint,
+  #                                 accel_limits_turns[1], accel_limits_turns[0],
+  #                                 jerk_limits[1], jerk_limits[0],
+  #                                 LON_MPC_STEP)
 
-    cruise[Source.cruiseGas] = (v_gas, a_gas)
+  #   cruise[Source.cruiseGas] = (v_gas, a_gas)
 
-    coast_setpoint = v_cruise_setpoint + self.coast_speed
-    # Brake to (v_cruise_setpoint + COAST_SPEED)
-    # TODO: rethink this for toyota? v_cruise_setpoint has to be lower than
-    # the car's setpoint or the car will engine brake on its own.
-    # In other words the max speed (with coasting) is the car's setpoint.
-    v_brake, a_brake = speed_smoother(self.v_acc_start, self.a_acc_start,
-                                      coast_setpoint,
-                                      accel_limits_turns[1], accel_limits_turns[0],
-                                      jerk_limits[1], jerk_limits[0],
-                                      LON_MPC_STEP)
+  #   coast_setpoint = v_cruise_setpoint + self.coast_speed
+  #   # Brake to (v_cruise_setpoint + COAST_SPEED)
+  #   # TODO: rethink this for toyota? v_cruise_setpoint has to be lower than
+  #   # the car's setpoint or the car will engine brake on its own.
+  #   # In other words the max speed (with coasting) is the car's setpoint.
+  #   v_brake, a_brake = speed_smoother(self.v_acc_start, self.a_acc_start,
+  #                                     coast_setpoint,
+  #                                     accel_limits_turns[1], accel_limits_turns[0],
+  #                                     jerk_limits[1], jerk_limits[0],
+  #                                     LON_MPC_STEP)
 
-    cruise[Source.cruiseBrake] = (v_brake, a_brake)
+  #   cruise[Source.cruiseBrake] = (v_brake, a_brake)
 
-    dh_incline = math.radians(self.op_params.get(DOWNHILL_INCLINE))
-    is_downhill = incline < dh_incline or v_ego > v_cruise_setpoint
+  #   dh_incline = math.radians(self.op_params.get(DOWNHILL_INCLINE))
+  #   is_downhill = incline < dh_incline or v_ego > v_cruise_setpoint
 
-    # Entry conditions
-    if self.op_params.get(ALWAYS_EVAL_COAST) or is_downhill or is_downhill != self.was_downhill:
-      if is_downhill:
-        self.cruise_plan = Source.cruiseCoast if v_ego < coast_setpoint else Source.cruiseBrake
-      else:
-        self.cruise_plan = Source.cruiseGas
+  #   # Entry conditions
+  #   if self.op_params.get(ALWAYS_EVAL_COAST) or is_downhill or is_downhill != self.was_downhill:
+  #     if is_downhill:
+  #       self.cruise_plan = Source.cruiseCoast if v_ego < coast_setpoint else Source.cruiseBrake
+  #     else:
+  #       self.cruise_plan = Source.cruiseGas
 
-    cloudlog.info("Cruise Plan %s: ego(%f,%f) gas(%f,%f) coast(%f,%f) brake(%f,%f) delta_h(%f) incline(%f) is_downhill(%s) was_downhill(%s)",
-                  self.cruise_plan, v_ego, a_ego, v_gas, a_gas, v_coast, a_coast,
-                  v_brake, a_brake, delta_h, incline, is_downhill, self.was_downhill)
+  #   cloudlog.info("Cruise Plan %s: ego(%f,%f) gas(%f,%f) coast(%f,%f) brake(%f,%f) delta_h(%f) incline(%f) is_downhill(%s) was_downhill(%s)",
+  #                 self.cruise_plan, v_ego, a_ego, v_gas, a_gas, v_coast, a_coast,
+  #                 v_brake, a_brake, delta_h, incline, is_downhill, self.was_downhill)
 
-    self.last_delta_height = delta_h
-    self.last_incline = incline
-    self.was_downhill = is_downhill
+  #   self.last_delta_height = delta_h
+  #   self.last_incline = incline
+  #   self.was_downhill = is_downhill
 
-    return cruise[self.cruise_plan]
+  #   return cruise[self.cruise_plan]

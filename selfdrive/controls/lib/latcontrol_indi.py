@@ -66,7 +66,7 @@ class LatControlINDI():
 
     return self.sat_count > self.sat_limit
 
-  def update(self, active, CS, CP, VM, params, lat_plan):
+  def update(self, active, CS, CP, VM, params, curvature, curvature_rate, ctrl_state):
     self.speed = CS.vEgo
 
     if self.op_params.get(ENABLE_LAT_PARAMS):
@@ -80,7 +80,7 @@ class LatControlINDI():
 
         if use_multi:
           postfix = '_multi'
-          i = eval_breakpoint_source(self.op_params.get(INDI_MULTI_BREAKPOINT_SOURCE), CS, lat_plan)
+          i = eval_breakpoint_source(self.op_params.get(INDI_MULTI_BREAKPOINT_SOURCE), CS, ctrl_state)
           itrp = interp_multi_bp
         else:
           i = CS.vEgo
@@ -113,15 +113,15 @@ class LatControlINDI():
     indi_log.steeringRateDeg = math.degrees(self.x[1])
     indi_log.steeringAccelDeg = math.degrees(self.x[2])
 
+    steers_des = VM.get_steer_from_curvature(-curvature, CS.vEgo)
+    steers_des += math.radians(params.angleOffsetDeg)
     if CS.vEgo < 0.3 or not active:
       indi_log.active = False
       self.output_steer = 0.0
       self.delayed_output = 0.0
     else:
-      steers_des = VM.get_steer_from_curvature(-lat_plan.curvature, CS.vEgo)
-      steers_des += math.radians(params.angleOffsetDeg)
 
-      rate_des = VM.get_steer_from_curvature(-lat_plan.curvatureRate, CS.vEgo)
+      rate_des = VM.get_steer_from_curvature(-curvature_rate, CS.vEgo)
 
       # Expected actuator value
       alpha = 1. - DT_CTRL / (self.RC + DT_CTRL)
@@ -164,4 +164,4 @@ class LatControlINDI():
       check_saturation = (CS.vEgo > 10.) and not CS.steeringRateLimited and not CS.steeringPressed
       indi_log.saturated = self._check_saturation(self.output_steer, check_saturation, steers_max)
 
-    return float(self.output_steer), 0, indi_log
+    return float(self.output_steer), float(steers_des), indi_log
