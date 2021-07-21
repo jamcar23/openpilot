@@ -1,3 +1,16 @@
+Version 7.2.0 (openpilot v0.8.5)
+========================
+  Source commit: d1164ea1
+  * New OP Params:
+    * ENABLE_CURVE_RATE_LIMITS: Param(False, [bool], live=True, depends_on=ENABLE_LAT_PARAMS, description='Override the default max curvature rates when true.')
+    * MAX_CURVE_RATE_BP: Param([0, 35], VT.list_of_numbers, live=True, depends_on=ENABLE_CURVE_RATE_LIMITS)
+    * MAX_CURVE_RATE_V: Param([0.03762194918267951, 0.003441203371932992], VT.list_of_numbers, live=True, depends_on=ENABLE_CURVE_RATE_LIMITS,
+  * Commits:
+    * feat(params): add new op params for overriding max curvature rate
+    * feat(controls): override max curvature rate limits
+    * fix(params): make sure MAX_CURVE_RATE_V is below line limit
+    * fix(params): include lists in allowed types for max curve rate bp & v
+
 Version 7.1.0 (openpilot v0.8.5)
 ========================
   Source commit: 751753eb
