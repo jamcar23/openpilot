@@ -237,7 +237,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Be ready to take over at any time",
       "Always keep hands on wheel and eyes on road",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 5.),
   },
 
   EventName.startupMaster: {
@@ -245,7 +245,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "WARNING: This branch is not tested",
       "Always keep hands on wheel and eyes on road",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 5.),
   },
 
   EventName.startupNoControl: {
@@ -253,7 +253,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Dashcam mode",
       "Always keep hands on wheel and eyes on road",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 10.),
   },
 
   EventName.startupNoCar: {
@@ -548,7 +548,16 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
 
   EventName.steerTempUnavailable: {
-    ET.SOFT_DISABLE: SoftDisableAlert("Steering Temporarily Unavailable"),
+    ET.WARNING: Alert(
+      "TAKE CONTROL",
+      "Steering Temporarily Unavailable",
+      AlertStatus.userPrompt, AlertSize.mid,
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 1., 1.),
+    ET.SOFT_DISABLE: Alert(
+      "TAKE CONTROL",
+      "Steering Temporarily Unavailable",
+      AlertStatus.userPrompt, AlertSize.mid,
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 1., 1.),
     ET.NO_ENTRY: NoEntryAlert("Steering Temporarily Unavailable",
                               duration_hud_alert=0.),
   },
@@ -782,7 +791,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Speed Too High",
       "Model uncertain at this speed",
       AlertStatus.normal, AlertSize.mid,
-      Priority.HIGH, VisualAlert.steerRequired, AudibleAlert.chimeWarningRepeat, 2.2, 3., 4.),
+      Priority.HIGH, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 2.2, 3., 4.),
     ET.NO_ENTRY: Alert(
       "Speed Too High",
       "Slow down to engage",
