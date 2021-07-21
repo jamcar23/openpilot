@@ -1,3 +1,24 @@
+Version 7.1.0 (openpilot v0.8.5)
+========================
+  Source commit: 751753eb
+  * Commits:
+    * Refactor lateral lag compensation (#21334)
+    * Refactor long (#21433)
+    * New desire model (#21458)
+    * fix(controls): make sure lat plan has been set
+    * fix(controls): make sure curvature is float
+    * fix(controls): check if lat_plan is reader
+    * fix(controls): desired curvature now comes from controls state
+    * fix(ui): convert curvature to degrees in dev ui
+    * fix(controls): send desired curvature degrees
+    * fix(controls): calc desired steer from curve using vehicle model
+    * tests(processes): update process replay refs for port-model-0.8.6
+    * tests(opParams): update opParams unit test with desired steer changes
+    * tests(long): add longitudinal tests for new long mpc
+    * fix(py): remove unused imports
+    * fix(tools): update tools & sim for long refactor
+    * fix(params): make sure multi bp has consistent behavior from past releases
+
 Version 7.0.0 (openpilot v0.8.5)
 ========================
   Source commit: a3412b60
