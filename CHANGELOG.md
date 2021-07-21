@@ -1,3 +1,10 @@
+Version 7.3.0 (openpilot v0.8.5)
+========================
+  Source commit: 663da703
+  * Commits:
+    * feat(events): made events quieter like past op versions
+    * tests(processes): update process replay refs for event-tweaks
+
 Version 7.2.0 (openpilot v0.8.5)
 ========================
   Source commit: d1164ea1
